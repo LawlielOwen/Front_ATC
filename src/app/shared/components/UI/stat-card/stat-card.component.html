@@ -1,0 +1,17 @@
+<div 
+  class="bg-white rounded-xl shadow-sm border border-slate-200 flex flex-col p-2 transition-all hover:shadow-md w-full"
+  [style.border-top]="'4px solid ' + accentColor">
+  
+  <span class="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1.5">
+    {{ label }}
+  </span>
+  
+  <span class="text-[20px] font-extrabold text-[#0d1f38] leading-tight mb-1">
+    {{ count }}
+  </span>
+  
+  <span class="text-[11px] font-medium" [ngClass]="subtextClass">
+    {{ subtext }}
+  </span>
+  
+</div>

@@ -1,0 +1,22 @@
+<div class="top-header">
+  <div class="header-left">
+   <ion-button fill="clear" class="hamburger-btn" (click)="abrirMenu()">
+    <ion-icon slot="icon-only" name="menu-outline" ></ion-icon>
+  </ion-button>
+
+    <div class="breadcrumbs">
+      <a routerLink="rutaInicio" class="text-muted home-link">
+        <ion-icon name="home-outline"></ion-icon>
+      </a>
+      <ng-container *ngFor="let crumb of breadcrumbs; let isLast = last">
+        <span class="separator">/</span>
+        <a *ngIf="!isLast" [routerLink]="crumb.url" class="text-muted">{{ crumb.label }}</a>
+        <span *ngIf="isLast" class="text-active">{{ crumb.label }}</span>
+      </ng-container>
+    </div>
+  </div>
+  <div class="header-right">
+    <app-notifications></app-notifications>
+    <app-option-user></app-option-user>
+  </div>
+</div>

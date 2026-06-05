@@ -1,0 +1,165 @@
+<div class="bg-[#f1f5f9] rounded-[10px] overflow-hidden shadow-2xl w-full max-w-5xl mx-auto max-h-[90vh] flex flex-col border border-gray-100">
+  
+  <app-header-modal [label]="'Detalles de Vale ' + (vale?.folio_vale || '')"></app-header-modal>
+
+  <div class="p-6 overflow-y-auto flex-1 bg-white m-4 rounded-xl shadow-sm border border-slate-100">
+    <div class="flex flex-col gap-8 animate-fade-in" *ngIf="vale">
+
+      <!-- SECCIÓN 1: Información -->
+      <div>
+        <h3 class="text-sm font-bold text-[#0d1f38] border-b border-slate-200 pb-2 mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+          </svg>
+          Información del asesor y almacén
+        </h3>
+        
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="flex flex-col">
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Empresa / Cliente Destino</span>
+            <p class="text-sm font-bold text-[#003B8A]">{{ vale.nombre_cliente }}</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">OC: {{ vale.orden_compra || 'N/A' }}</p>
+          </div>
+
+          <div class="flex flex-col">
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Asesor Solicitante</span>
+            <p class="text-sm font-bold text-[#0d1f38]">{{ vale.nombre_asesor }}</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">Asesor de ventas</p>
+          </div>
+
+          <div class="flex flex-col">
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fecha de Solicitud</span>
+            <p class="text-sm font-bold text-[#0d1f38]">{{ vale.fecha | date:'hh:mm a' }}</p>
+            <p class="text-[11px] text-slate-500 mt-0.5">{{ vale.fecha | date:'dd MMMM yyyy':'':'es-MX' }}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 2: Material -->
+      <div>
+        <div class="flex justify-between items-end border-b border-slate-200 pb-2 mb-4">
+          <h3 class="text-sm font-bold text-[#0d1f38] flex items-center gap-2">
+            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+            Material solicitado
+          </h3>
+          <span class="text-[11px] text-slate-400 font-medium">{{ vale.productos?.length || 0 }} productos · {{ getTotalPiezas() }} piezas</span>
+        </div>
+
+        <div class="rounded-lg border border-slate-200 overflow-hidden">
+          <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2.5 px-4">
+            <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+            <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest">Cód. Interno</span>
+            <span class="col-span-3 text-[9px] font-bold text-white uppercase tracking-widest">Código Japón</span>
+            <span class="col-span-5 text-[9px] font-bold text-white uppercase tracking-widest">Descripción</span>
+            <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">Pzas</span>
+          </div>
+
+          <div *ngFor="let prod of vale.productos; let i = index" class="grid grid-cols-12 gap-3 py-2 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center">
+            <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
+            <div class="col-span-2 text-xs font-medium text-slate-500">{{ prod.Codigo_numeral || '-' }}</div>
+            <div class="col-span-3 text-xs font-medium text-slate-500">{{ prod.Codigo_japon || '-' }}</div>
+            <div class="col-span-5 text-xs font-bold text-[#0d1f38] truncate" [title]="prod.nombre_producto">{{ prod.nombre_producto }}</div>
+            <div class="col-span-1 text-sm font-black text-[#003B8A] text-center">{{ prod.piezas }}</div>
+          </div>
+
+          <div class="bg-slate-50 py-2.5 px-6 flex justify-end items-center gap-4 border-t border-slate-200">
+            <span class="text-xs font-bold text-[#0d1f38]">Total de piezas:</span>
+            <span class="text-lg font-black text-[#003B8A] w-12 text-center">{{ getTotalPiezas() }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: Firmas y Resolución -->
+      <div>
+        <h3 class="text-sm font-bold text-[#0d1f38] border-b border-slate-200 pb-2 mb-4 flex items-center gap-2">
+          <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+          </svg>
+          Autorización.
+        </h3>
+
+        <!-- CAJA DE COMENTARIOS PARA ESTATUS 0 -->
+        <div  *ngIf="vale.estatus === 0 && (rolUsuario === 'Administrador' || rolUsuario === 'Almacen')"  class="mb-6" >
+          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">
+            Observaciones o Motivo de rechazo (Opcional)
+          </label>
+          <textarea 
+            [(ngModel)]="comentarioResolucion"
+            placeholder="Escribe aquí las observaciones" 
+            class="w-full bg-slate-50 border border-slate-200 focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-lg text-sm text-[#414a53] p-3 outline-none transition-all resize-none min-h-[80px]">
+          </textarea>
+        </div>
+
+        <!-- Alertas de Estatus 1 y 2 -->
+        <div *ngIf="vale.estatus === 2" class="bg-red-50 border border-red-200 rounded-lg p-3.5 mb-6">
+          <h4 class="text-xs font-bold text-red-800 mb-0.5">Motivo de rechazo</h4>
+          <p class="text-xs text-red-600">{{ vale.comentario || 'Sin observaciones registradas.' }}</p>
+        </div>
+
+        <div *ngIf="vale.estatus === 1 && vale.comentario" class="bg-emerald-50 border border-emerald-200 rounded-lg p-3.5 mb-6">
+          <h4 class="text-xs font-bold text-emerald-800 mb-0.5">Observaciones de entrega</h4>
+          <p class="text-xs text-emerald-600">{{ vale.comentario }}</p>
+        </div>
+
+        <!-- Tarjetas de Firmas -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          
+          <div class="border border-slate-200 rounded-xl p-4 shadow-sm">
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Recibe Material · Asesor</span>
+            <p class="text-sm font-bold text-[#0d1f38] mt-1">{{ vale.nombre_asesor }}</p>
+            <p class="text-[11px] text-slate-500 mb-3">Solicitante Autorizado</p>
+
+            <div class="border-2 border-dashed border-emerald-300 bg-emerald-50/30 rounded-lg p-3 flex flex-col items-center justify-center h-24">
+              <svg class="w-8 h-8 text-emerald-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+              </svg>
+              <span class="text-xs font-bold text-emerald-700">Solicitud registrada</span>
+              <span class="text-[9px] text-emerald-600/70 mt-1">Autenticado por sistema · {{ vale.fecha | date:'dd MMM yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="border border-slate-200 rounded-xl p-4 shadow-sm">
+            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Entrega Material · Almacén</span>
+            <p class="text-sm font-bold text-[#0d1f38] mt-1">Autorización Central</p>
+            <p class="text-[11px] text-slate-500 mb-3">Supervisor de sucursal o almacén</p>
+
+            <div *ngIf="vale.estatus === 0" class="border-2 border-dashed border-slate-300 bg-slate-50 rounded-lg p-3 flex flex-col items-center justify-center h-24">
+              <svg class="w-8 h-8 text-slate-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-xs font-bold text-slate-500">Pendiente de revisión</span>
+              <span class="text-[9px] text-slate-400 mt-1">Esperando revision</span>
+            </div>
+
+            <div *ngIf="vale.estatus === 1" class="border-2 border-dashed border-emerald-300 bg-emerald-50/30 rounded-lg p-3 flex flex-col items-center justify-center h-24">
+              <svg class="w-8 h-8 text-emerald-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-xs font-bold text-emerald-700">Entrega Autorizada</span>
+              <span class="text-[9px] text-emerald-600/70 mt-1">Validado por sistema</span>
+            </div>
+
+            <div *ngIf="vale.estatus === 2" class="border-2 border-dashed border-red-300 bg-red-50/30 rounded-lg p-3 flex flex-col items-center justify-center h-24">
+              <svg class="w-8 h-8 text-red-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span class="text-xs font-bold text-red-700">Solicitud rechazada</span>
+              <span class="text-[9px] text-red-600/70 mt-1">Acción bloqueada por almacén</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <app-footer-modal [paddingClass]="'p-4 px-6 bg-white border-t border-slate-200'">
+    <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+    <div class="flex gap-2.5" *ngIf="vale?.estatus === 0">
+      <app-button-action [label]="'Rechazar'" [claseCss]="'btn-eliminar'" (click)="rechazarVale()" *ngIf="rolUsuario === 'Administrador' || rolUsuario === 'Almacen'"></app-button-action>
+      <app-button-action [label]="'Aceptar'" [claseCss]="'btn-activar'" (click)="aceptarVale()" *ngIf="rolUsuario === 'Administrador' || rolUsuario === 'Almacen'"></app-button-action>
+    </div>
+  </app-footer-modal>
+</div>

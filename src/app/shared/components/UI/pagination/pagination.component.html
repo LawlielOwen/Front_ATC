@@ -1,0 +1,39 @@
+<div class="layout flex flex-col md:flex-row items-center justify-center md:justify-between w-full mt-8 mb-8 px-2 gap-4 md:gap-0">
+  
+  <div class="text-sm text-[#94a3b8] text-center md:text-left">
+    Mostrando página <span class="font-bold text-[#414a53]">{{ paginaActual }}</span> de <span class="font-bold text-[#414a53]">{{ totalPaginas }}</span>
+  </div>
+
+  <div class="flex items-center justify-center flex-wrap gap-1.5">
+    
+    <button
+      [disabled]="paginaActual === 1"
+      (click)="cambiarPagina(paginaActual - 1)"
+      class="bg-transparent flex items-center justify-center w-9 h-9 rounded-[10px] border border-[#94a3b8] text-[#414a53] hover:border-[#00997d] hover:text-[#00997d] disabled:opacity-40 disabled:hover:border-[#94a3b8] disabled:hover:text-[#414a53] disabled:cursor-not-allowed transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path></svg>
+    </button>
+
+    <ng-container *ngFor="let pagina of paginas">
+      
+      <button *ngIf="pagina !== paginaActual"
+        (click)="cambiarPagina(pagina)"
+        class="bg-transparent flex items-center justify-center w-9 h-9 rounded-[10px] border border-transparent text-sm font-medium text-[#414a53] hover:bg-[#f3f4f6] hover:text-[#00997d] transition-colors">
+        {{ pagina }}
+      </button>
+
+      <button *ngIf="pagina === paginaActual"
+        class="flex items-center justify-center w-9 h-9 rounded-[10px] bg-[#00997d] text-white text-sm font-bold shadow-sm">
+        {{ pagina }}
+      </button>
+      
+    </ng-container>
+
+    <button
+      [disabled]="paginaActual === totalPaginas"
+      (click)="cambiarPagina(paginaActual + 1)"
+      class="bg-transparent flex items-center justify-center w-9 h-9 rounded-[10px] border border-[#94a3b8] text-[#414a53] hover:border-[#00997d] hover:text-[#00997d] disabled:opacity-40 disabled:hover:border-[#94a3b8] disabled:hover:text-[#414a53] disabled:cursor-not-allowed transition-colors">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg>
+    </button>
+
+  </div>
+</div>

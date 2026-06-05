@@ -1,0 +1,68 @@
+<div class="mobile-backdrop" [class.show-backdrop]="isMobileMenuOpen" (click)="toggleMenu()"></div>
+<ion-tabs>
+  <ion-tab-bar slot="start" class="erp-sidebar" [class.show-mobile-menu]="isMobileMenuOpen">
+
+    <div class="sidebar-header">
+      <div class="logo-box"><img src="../../../../../assets/img/logo_atc.png" alt="ATC Logo"></div>
+
+    </div>
+
+    <ion-tab-button tab="dashboard" layout="icon-start" routerLink="/dashboard" routerLinkActive="tab-selected"
+      *ngIf="tieneAcceso(['Administrador'])">
+      <ion-icon name="grid-outline"></ion-icon>
+      <ion-label>Dashboard</ion-label>
+    </ion-tab-button>
+
+    <div class="nav-category" *ngIf="tieneAcceso(['Administrador', 'Almacen','Asesor','Cotizador'])">Gestion</div>
+
+    <ion-tab-button tab="productos" layout="icon-start" routerLink="/productos" routerLinkActive="tab-selected"
+      *ngIf="tieneAcceso(['Administrador', 'Almacen','Asesor','Cotizador'])">
+      <ion-icon name="cube-outline"></ion-icon>
+      <ion-label>Productos</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="clientes" layout="icon-start" routerLink="/clientes" routerLinkActive="tab-selected"
+      *ngIf="tieneAcceso(['Administrador','Asesor','Cotizador'])">
+      <ion-icon name="people-outline"></ion-icon>
+      <ion-label>Clientes</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="cotizaciones" layout="icon-start" routerLink="/cotizaciones" routerLinkActive="tab-selected"
+      *ngIf="tieneAcceso(['Administrador', 'Cotizador'])">
+      <ion-icon name="document-text-outline"></ion-icon>
+      <ion-label>Cotizaciones</ion-label>
+    </ion-tab-button>
+
+    <ion-tab-button tab="pedidos" layout="icon-start" routerLink="/pedidos" routerLinkActive="tab-selected"
+      *ngIf="tieneAcceso(['Administrador', 'Cotizador','Asesor','Almacen'])">
+      <ion-icon name="cart-outline"></ion-icon>
+      <ion-label>Pedidos</ion-label>
+    </ion-tab-button>
+
+    <div class="nav-category" *ngIf="tieneAcceso(['Administrador', 'Almacen','Asesor'])">Control</div>
+
+    <ion-tab-button tab="historial" layout="icon-start" routerLink="/historial-es" routerLinkActive="tab-selected"
+      *ngIf="tieneAcceso(['Administrador', 'Almacen','Asesor'])">
+      <ion-icon name="swap-vertical-outline"></ion-icon>
+      <ion-label>Historial E/S</ion-label>
+    </ion-tab-button>
+    <ion-tab-button tab="vales" layout="icon-start" routerLink="/vales" routerLinkActive="tab-selected"
+      *ngIf="tieneAcceso(['Administrador', 'Almacen','Asesor'])">
+      <ion-icon name="receipt-outline"></ion-icon>
+      <ion-label>Vales salida</ion-label>
+    </ion-tab-button>
+   <ion-tab-button tab="recepciones" layout="icon-start" routerLink="/recepciones" routerLinkActive="tab-selected"
+      *ngIf="tieneAcceso(['Administrador', 'Almacen'])">
+      <ion-icon name="archive-outline"></ion-icon>
+      <ion-label>Recepción</ion-label>
+    </ion-tab-button>
+    <div class="nav-category" *ngIf="tieneAcceso(['Administrador'])">Admin</div>
+
+    <ion-tab-button tab="asesores" layout="icon-start" routerLink="/asesores" routerLinkActive="tab-selected"
+      *ngIf="tieneAcceso(['Administrador'])">
+      <ion-icon name="id-card-outline"></ion-icon>
+      <ion-label>Asesores</ion-label>
+    </ion-tab-button>
+
+  </ion-tab-bar>
+</ion-tabs>

@@ -1,0 +1,41 @@
+<div [ngClass]="[borderClass, cardBgClass]" class="flex items-center justify-between rounded-xl border 
+border-slate-200 border-l-[4px] px-5 py-4 mb-3 mx-4 
+lg:mx-6 shadow-sm transition-all hover:shadow-md cursor-pointer">
+  
+  <div class="flex items-center gap-4">
+    
+    <div *ngIf="mostrarCuadro" [ngClass]="bgIconClass" class="w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 shadow-sm border border-white/50">
+      <svg class="w-6 h-6" [ngClass]="textIconClass" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    </div>
+
+    <div class="flex flex-col">
+      <div class="flex items-center gap-2 mb-0.5">
+        <span class="text-[14px] font-bold text-[#0d1f38]">{{ titulo }}</span>
+        
+       <span *ngIf="badge" [ngClass]="badgeClass" class="text-[10px] font-bold px-2 py-0.5 rounded-md border shadow-sm">
+  {{ badge }}
+</span>
+      </div>
+      
+      <span class="text-xs text-slate-500 font-medium">{{ subtitulo }}</span>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    
+  <ng-container *ngIf="mostrarBotones">
+      <button (click)="$event.stopPropagation(); aprobar.emit()" class="bg-[#0f6e56] hover:bg-[#0b5341] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-sm">
+        Aprobar
+      </button>
+      
+      <button (click)="$event.stopPropagation(); rechazar.emit()" class="bg-[#dc2626] hover:bg-[#b91c1c] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-sm">
+        Rechazar
+      </button>
+    </ng-container>
+
+    <ng-content *ngIf="!mostrarBotones"></ng-content>
+    
+  </div>
+</div>

@@ -1,0 +1,15 @@
+/* Permite que el diseño de Tailwind del Modal se vea exactamente como lo programaste */
+.modal-flotante-custom {
+  --background: transparent !important;
+  --box-shadow: none !important;
+}
+
+/* Opcional: Esto asegura que el modal en escritorio se adapte al tamaño de tu contenido (máximo 3xl de Tailwind) y no se estire de más */
+@media (min-width: 768px) {
+  .modal-flotante-custom {
+    --width: fit-content;
+    --min-width: 700px;
+    --height: fit-content;
+    --border-radius: 10px;
+  }
+}

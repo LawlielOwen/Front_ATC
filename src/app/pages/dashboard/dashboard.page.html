@@ -1,0 +1,20 @@
+<ion-app style="background-color: #ffffff;">
+  <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
+  <div style="display:flex; height:100vh; width: 100vw; overflow: hidden; background-color: #f1f5f9;">
+    
+    <div class="sidebar-wrapper">
+      <app-siderbar></app-siderbar>
+    </div>
+
+    <div style="flex: 1 1 auto; display: flex; flex-direction: column; min-width: 0; position: relative;">
+      <app-header (toggleMenu)="mostrarSidebarMobile()"></app-header>
+
+      <ion-content class="ion-padding" style="--background: #f5f5f5;">
+        <div style="padding: 2rem;">
+          <p>Aquí irá el contenido principal de la vista.</p>
+        </div>
+      </ion-content>
+    </div>
+
+  </div>
+</ion-app>

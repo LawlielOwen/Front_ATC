@@ -1,0 +1,47 @@
+ <div *ngIf="uploadMode" class="flex flex-col items-center justify-center py-10 animate-fade-in">
+      <div class="relative w-full max-w-lg min-h-[220px] 
+        border-2 border-dashed rounded-xl 
+        p-6 flex flex-col items-center 
+        justify-center transition-colors cursor-pointer"
+       [ngClass]="isDragging ? 'border-[#1D9E75] bg-[#e8f5f0]' : 'border-[#94a3b8] bg-[#f8fafc] hover:border-[#003B8A] hover:bg-[#f1f5f9]'"
+        (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)"
+        (click)="!archivoActual && fileInput.click()">
+        <input type="file" #fileInput class="hidden" accept=".pdf" (change)="onFileSelected($event)">
+
+        <div [class.hidden]="archivoActual" class="flex flex-col items-center pointer-events-none">
+          <div
+            class="w-12 h-12 rounded-full bg-white shadow-sm border border-slate-100 flex items-center justify-center mb-1.5">
+            <svg class="w-6 h-6 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+            </svg>
+          </div>
+          <p class="text-sm font-bold text-[#0d1f38] mb-0.5">{{ label }}</p>
+          <p class="text-[12px] text-slate-400 leading-none">Formato aceptado: PDF Maximo 5MB</p>
+          <button  class="mt-2 px-4 py-2 bg-[#003B8A] text-white text-xs font-medium rounded-md hover:bg-[#1A7F63] transition-colors">
+            Seleccionar archivo PDF
+          </button>
+        </div>
+        <div [class.hidden]="!archivoActual"
+          class="flex items-center gap-3 w-full bg-white border border-slate-200 rounded-lg p-3 shadow-sm"
+          (click)="$event.stopPropagation()">
+          <div
+            class="w-10 h-10 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <div class="flex flex-col flex-1 min-w-0">
+            <p class="text-xs font-bold text-[#0d1f38] truncate">{{ archivoActual?.name }}</p>
+            <p class="text-[10px] text-[#1D9E75] font-medium mt-0.5">Listo para guardar</p>
+          </div>
+          <button (click)="eliminarArchivo()" class="p-1.5 hover:bg-slate-100 rounded-md transition-colors">
+            <svg class="w-4 h-4 text-slate-400 hover:text-red-500" fill="none" viewBox="0 0 24 24"
+              stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>

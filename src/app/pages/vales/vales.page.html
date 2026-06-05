@@ -1,0 +1,57 @@
+<div class="container-sidebar">
+  <div class="sidebar-wrapper">
+    <app-siderbar></app-siderbar>
+  </div>
+  <div class="container-header">
+    <app-header (toggleMenu)="mostrarSidebarMobile()"></app-header>
+    <ion-content style="--background :#f1f5f9;">
+      <app-button-layout>
+        <app-count [label]="'Vales durante el mes'" [count]="Totalmensual" accentColor="#1D9E75" iconBg="#E1F5EE"
+          *ngIf="rolUsuario === 'Administrador' || rolUsuario === 'Almacen'">
+          <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </app-count>
+        <div class="flex flex-wrap items-center gap-3">
+          <app-button-new label="Solicitar vale" variante="btn-azul" (click)="abrirModalVale()"></app-button-new>
+        </div>
+      </app-button-layout>
+      <div class="px-5 mt-4 mb-4">
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <app-stat-card label="VALES ACEPTADOS" [count]="Totalaceptados" [accentColor]="'#10b981'">
+          </app-stat-card>
+
+          <app-stat-card label="VALES RECHAZADOS" [count]="Totalrechazados" [accentColor]="'#ef4444'">
+          </app-stat-card>
+
+          <app-stat-card label="VALES PENDIENTES" [count]="Totalpendientes" [accentColor]="'#8b5cf6'">
+          </app-stat-card>
+        </div>
+      </div>
+      <app-container-table>
+        <div header>
+          <app-search-layout>
+            <app-search-bar
+              [placeholder]="rolUsuario === 'Asesor' ? 'Buscar por cliente, folio u orden' : 'Buscar por asesor, cliente, folio u orden'"
+              (onSearch)="busquedaTexto($event)"></app-search-bar>
+            <app-estatus [opciones]="estatusVales" (onFilterChange)="filtroEstatus($event)"></app-estatus>
+            <app-filtro-fecha (onFilterChange)="filtroFecha($event)"></app-filtro-fecha>
+          </app-search-layout>
+        </div>
+        <div body>
+          <app-etiqueta *ngFor="let vale of vales" [titulo]="vale.folio_vale + ' — ' + vale.nombre_cliente"
+            [subtitulo]="'Solicita: ' + vale.nombre_asesor + ' · OC-' + vale.orden_compra + ' · ' + formatearFecha(vale.fecha)"
+            [badge]="getBadgeText(vale.estatus)" [tipoBorde]="getTipoBorde(vale.estatus)" [mostrarCuadro]="true"
+            [mostrarBotones]="vale.estatus === 0 && (rolUsuario === 'Administrador' || rolUsuario === 'Almacen')"
+            (click)="abrirDetalles(vale)" (aprobar)="aceptarValeDirecto(vale)" (rechazar)="rechazarValeDirecto(vale)">
+          </app-etiqueta>
+        </div>
+        <div footer>
+          <app-pagination [paginaActual]="currentPage" [totalPaginas]="totalPages"
+            (onPageChange)="cambiarPaginaPadre($event)"></app-pagination>
+        </div>
+      </app-container-table>
+    </ion-content>
+  </div>
+</div>

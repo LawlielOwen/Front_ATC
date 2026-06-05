@@ -1,0 +1,31 @@
+<div class="relative inline-block text-left w-full">
+  
+  <button 
+    (click)="toggleDropdown()" 
+    class="inline-flex items-center justify-between w-full h-[40px] px-4 text-sm font-medium text-[#414a53] bg-white border-2 border-[#94a3b8] rounded-[10px] focus:outline-none transition-colors duration-200" 
+    type="button">
+    
+    <!-- Mostramos la selección actual, o el placeholder si no hay nada seleccionado -->
+    {{ opcionSeleccionada || placeholder }}
+    
+    <svg [class.rotate-180]="isDropdownOpen" class="w-4 h-4 ms-2 transition-transform duration-200" fill="none" viewBox="0 0 24 24">
+      <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m19 9-7 7-7-7"/>
+    </svg>
+  </button>
+
+ <div 
+    [class.hidden]="!isDropdownOpen" 
+    class="absolute left-0 z-20 w-full mt-2 bg-white border border-[#94a3b8] rounded-[10px] shadow-lg max-h-[240px] overflow-y-auto">
+      
+      <ul class="py-2 text-sm text-[#414a53] list-none p-0 m-0">
+        
+        <li class="p-0 m-0" *ngFor="let item of options">
+          <a (click)="seleccionarOpcion(item)" class="cursor-pointer block px-4 py-2.5 hover:bg-[#f3f4f6] hover:text-[#1f2937] transition-colors duration-150">
+            {{ item.label }}
+          </a>
+        </li>
+
+      </ul>
+  </div>
+
+</div>

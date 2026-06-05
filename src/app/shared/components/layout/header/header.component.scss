@@ -1,0 +1,76 @@
+.top-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  height: 64px;
+  padding: 0 2rem;
+  background: #ffffff;
+   box-shadow: 0 0 4px 0 rgba(0, 0, 0, 0.2);
+  width: 100%;
+  flex-shrink: 0;
+  z-index: 100; // ← Súbelo
+  position: relative; // ← Agrega esto
+  overflow: visible;
+  @media (max-width: 768px) {
+    padding: 0 1rem;
+  }
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    .hamburger-btn {
+    display: none; 
+    margin: 0;
+    --padding-start: 0;
+    --padding-end: 8px;
+    --color: #0f172a !important;
+   
+    @media (max-width: 768px) {
+      display: block; 
+    }
+  }
+    .breadcrumbs {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: 'Inter', sans-serif;
+     @media (max-width: 768px) {
+        display: none !important;
+      }
+      .text-muted {
+        color: #94a3b8;
+        font-size: 0.9rem;
+        font-weight: 500;
+
+        &:hover {
+          color: #003B8A;
+        }
+
+      
+      }
+
+      .separator {
+        color: #cbd5e1;
+        font-size: 0.9rem;
+
+        @media (max-width: 768px) {
+          display: none;
+        }
+      }
+
+      .text-active {
+        color: #003B8A;
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: -0.3px;
+      }
+    }
+  }
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    position: relative;
+  }
+}

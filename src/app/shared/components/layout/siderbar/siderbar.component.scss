@@ -1,0 +1,226 @@
+$sidebar-bg: #FFFFFF;
+$sidebar-bg-dark: #F8FAFC;
+$accent-green: #0052CC; // Azul corporativo para el indicador y los iconos activos
+$text-inactive: #64748B; // Gris pizarra para elementos inactivos (buen contraste sin ser agresivo)
+$text-active: #0F172A; // Un tono casi negro para el texto del módulo activo
+$hover-bg: rgba(0, 0, 0, 0.04); // Fondo gris muy sutil al pasar el cursor
+$active-bg: rgba(0, 82, 204, 0.08); // Fondo azul muy translúcido para el botón seleccionado
+$separator: rgba(0, 0, 0, 0.08);
+ 
+ion-tab-bar.erp-sidebar {
+  position: relative;
+  --background: #{$sidebar-bg} !important;
+  --border: none;
+  width: 200px;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: stretch;
+  padding: 0;
+  box-shadow: 1px 0 0 rgba(0, 0, 0, 0.2);
+  transition: transform 0.3s cubic-bezier(0.4, 0.0, 0.2, 1);
+  flex-shrink: 0;
+  z-index: auto;
+  overflow-y: auto;
+  overflow-x: hidden;
+ 
+  // Scrollbar sutil
+  &::-webkit-scrollbar {
+    width: 4px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,0.1);
+    border-radius: 4px;
+  }
+ 
+  @media (max-width: 768px) {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 160px;
+    height: 100vh;
+    transform: translateX(-100%);
+    box-shadow: 4px 0 20px rgba(0, 0, 0, 0.35);
+    z-index: 1010;
+ 
+    &.show-mobile-menu {
+      transform: translateX(0);
+    }
+  }
+}
+ 
+// ── Encabezado (Logo ATC) ──
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  padding: 1.25rem 1.25rem 1rem;
+  margin-bottom: 0.75rem;
+  flex-shrink: 0;
+ 
+  img, .logo {
+    max-width: 55%;
+    height: auto;
+    object-fit: contain;
+  }
+ 
+  @media (max-width: 768px) {
+    padding: 1rem;
+ 
+    img, .logo {
+      max-width: 75%;
+    }
+  }
+}
+ 
+// ── Títulos de Categorías (GESTIÓN, CONTROL, ADMIN) ──
+.nav-category {
+  color: black;
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  padding: 1rem 1.25rem 0.35rem;
+  width: 100%;
+  text-align: left;
+ 
+  // Línea separadora encima de la categoría (excepto la primera)
+  & + ion-tab-button {
+    margin-top: 0;
+  }
+}
+ 
+@media (max-width: 768px) {
+  .nav-category {
+    display: none;
+  }
+}
+ 
+// ── Botones del Menú (Tabs) ──
+ion-tab-button {
+  --color: #{$text-inactive};
+  --color-selected: #{$text-active};
+  --background-focused: #{$hover-bg};
+flex: none;
+  height: 40px;
+  min-height: 40px;
+  max-width: 100%;
+  padding: 0 0.75rem;
+  margin: 1px 0.625rem;
+  border-radius: 8px;
+  justify-content: flex-start;
+  transition: background 0.15s ease, color 0.15s ease;
+
+  ion-label {
+    font-size: 0.8rem;
+    font-weight: 500;
+    margin-left: 10px;
+    letter-spacing: 0.01em;
+  }
+
+  ion-icon {
+    font-size: 1.05rem;
+    flex-shrink: 0;
+  }
+
+  &:hover:not(.tab-selected) {
+    --color: #{$text-active};
+    background: $hover-bg;
+  }
+
+  &.tab-selected {
+    background: $active-bg;
+    --color: #{$text-active};
+    position: relative;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: -0.625rem;
+      top: 50%;
+      transform: translateY(-50%);
+      height: 60%;
+      width: 3px;
+      background: $accent-green;
+      border-radius: 0 3px 3px 0;
+    }
+
+    ion-label {
+      font-weight: 600;
+      color: $text-active;
+    }
+
+    ion-icon {
+      color: $accent-green;
+    }
+  }
+
+  // ───────── RESPONSIVE ─────────
+@media (max-width: 768px) {
+  ion-tab-button {
+    width: calc(100% - 0.5rem);
+    align-self: center;
+
+    height: 32px;
+    min-height: 32px;
+
+    padding: 0 0.4rem;
+    margin: 2px 0;
+
+    ion-label {
+      font-size: 0.72rem;
+      margin-left: 5px;
+    }
+
+    ion-icon {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+  // EXTRA compacto para móviles pequeños
+  @media (max-width: 480px) {
+    justify-content: center;
+
+    padding: 0 0.35rem;
+
+    ion-label {
+      display: none;
+    }
+
+    ion-icon {
+      font-size: 1rem;
+    }
+  }
+}
+ 
+// ── Backdrop móvil ──
+.mobile-backdrop {
+  display: none;
+ 
+  @media (max-width: 768px) {
+    display: block;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+ 
+    &.show-backdrop {
+      opacity: 1;
+      pointer-events: auto;
+    }
+  }
+}
+ion-tabs {
+  @media (max-width: 768px) {
+    z-index: 10001 !important;
+  }
+}

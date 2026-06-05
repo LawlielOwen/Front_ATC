@@ -1,0 +1,40 @@
+<div class="container-sidebar">
+    <div class="sidebar-wrapper">
+      <app-siderbar></app-siderbar>
+    </div>
+    <div class="container-header">
+      <app-header (toggleMenu)="mostrarSidebarMobile()"></app-header>
+      <ion-content style="--background :#f1f5f9;">
+        <div>
+          <app-button-layout>
+            <app-count [label]="'Clientes Activos'" [count]="totalActivos" accentColor="#1D9E75" iconBg="#E1F5EE">
+              <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+              </svg>
+            </app-count>
+            <div class="flex gap-3">
+              <app-button-new label="Nuevo Cliente" variante="btn-azul" (click)="nuevoCliente()"></app-button-new>
+            </div>
+          </app-button-layout>
+          <app-search-layout>
+            <app-search-bar placeholder="Buscar por nombre o RFC" (onSearch)="busquedaTexto($event)">
+            </app-search-bar>
+            <app-estatus (onFilterChange)="filtroEstatus($event)">
+            </app-estatus>
+          </app-search-layout>
+          <app-card-layout>
+            <ng-container *ngIf="cargando">
+              <app-card-skeleton *ngFor="let i of [1,2,3,4,5,6]"></app-card-skeleton>
+            </ng-container>
+            <ng-container *ngIf="!cargando">
+              <app-card (click)="detallesCliente(item.id)" *ngFor="let item of clientes" [cliente]="item"></app-card>
+            </ng-container>
+          </app-card-layout>
+          <app-pagination [paginaActual]="currentPage" [totalPaginas]="totalPages"
+            (onPageChange)="cambiarPaginaPadre($event)">
+          </app-pagination>
+        </div>
+      </ion-content>
+    </div>
+  </div>

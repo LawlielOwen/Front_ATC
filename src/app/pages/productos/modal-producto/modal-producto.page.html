@@ -1,0 +1,105 @@
+<div class="bg-[#f1f5f9] rounded-[10px] overflow-hidden shadow-2xl w-full mx-auto max-h-[90vh] flex flex-col border border-gray-100">
+  <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
+
+  <app-header-modal [label]="isEditMode ? 'Editar Producto' : 'Agregar Producto'"></app-header-modal>
+
+  <div class="p-6 overflow-y-auto flex-1">
+    <div class="flex flex-col gap-5 animate-fade-in">
+
+      <app-card-form title="Información Principal">
+        <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+
+        <div class="flex flex-col gap-4 md:col-span-2">
+          <app-input tipo="text" placeholder="Ej. Sensor Fotoeléctrico Compacto" label="Nombre del Producto"
+            [(value)]="productoNuevo.Nombre"></app-input>
+
+          <app-input tipo="text" placeholder="Descripción breve del componente" label="Descripción"
+            [(value)]="productoNuevo.Descripcion"></app-input>
+
+          <div class="flex gap-4">
+            <div class="w-1/2">
+              <app-input tipo="text" placeholder="Ej. E3Z-D62" label="Modelo"
+                [(value)]="productoNuevo.Modelo"></app-input>
+            </div>
+            <div class="w-1/2">
+              <app-input tipo="number" placeholder="0.00" label="Precio" [(value)]="productoNuevo.Precio"></app-input>
+            </div>
+          </div>
+        </div>
+      </app-card-form>
+
+      <app-card-form title="Códigos e Inventario">
+        <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+
+        <div class="flex flex-col gap-4 md:col-span-2">
+          <div class="flex gap-4">
+            <div class="w-1/2 flex flex-col gap-1.5">
+              <app-input tipo="text" placeholder="Ej. 100560" label="Código Numeral"
+                [(value)]="productoNuevo.Codigo_numeral"></app-input>
+            </div>
+            <div class="w-1/2 flex flex-col gap-1.5">
+              <app-input tipo="text" placeholder="Ej. JPN-99001" label="Código Japón"
+                [(value)]="productoNuevo.Codigo_japon"></app-input>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="w-1/2 flex flex-col gap-y-1">
+              <app-select label="Marca" [(value)]="productoNuevo.id_marca">
+                <option value="">Seleccione marca...</option>
+                <option *ngIf="opcionesMarcas" value="1">Ejemplo Marca</option>
+                <option *ngFor="let marca of opcionesMarcas" [value]="marca.value">
+                  {{ marca.label }}
+                </option>
+              </app-select>
+            </div>
+            <div class="w-1/2 flex flex-col gap-y-1">
+              <app-select label="Estantería" [(value)]="productoNuevo.Estanteria">
+                <option value="">Ubicación...</option>
+                <option value="01">01</option>
+                <option value="02">02</option>
+                <option value="03">03</option>
+                <option value="04">04</option>
+                <option value="05">05</option>
+                <option value="06">06</option>
+                <option value="07">07</option>
+                <option value="08">08</option>
+              </app-select>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <div class="w-1/2 flex flex-col gap-1.5">
+              <app-input tipo="number" placeholder="0" label="Stock Inicial"
+                [(value)]="productoNuevo.Stock"></app-input>
+            </div>
+            <div class="w-1/2 flex flex-col gap-y-1">
+              <app-select label="Caja" [(value)]="productoNuevo.Caja">
+                <option value="">Seleccione caja...</option>
+                <option value="A">A</option>
+                <option value="B">B</option>
+                <option value="C">C</option>
+                <option value="D">D</option>
+              </app-select>
+            </div>
+          </div>
+          
+        </div>
+      </app-card-form>
+
+    </div>
+  </div>
+
+  <app-footer-modal [paddingClass]="'p-4 px-6'">
+    <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+    <app-button-action [label]="isEditMode ? 'Guardar Cambios' : 'Guardar Producto'" [claseCss]="'btn-agregar'"
+      (click)="procesarAccion()">
+    </app-button-action>
+  </app-footer-modal>
+</div>

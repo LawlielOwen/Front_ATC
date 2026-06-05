@@ -1,0 +1,55 @@
+:host {
+    display: block;
+    width: 100%;
+}
+
+.container-layout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 16px;
+    padding: 10px 20px 20px 20px;
+    width: 100%;
+}
+
+/* =========================================
+   📱 COMPORTAMIENTO MÓVIL
+   ========================================= */
+:host ::ng-deep app-search-bar {
+    flex: 1 1 100%; 
+    display: block;
+}
+
+/* Tus dropdowns dinámicos toman mitad y mitad en móvil */
+:host ::ng-deep app-filtro-dinamico { 
+    flex: 1 1 calc(50% - 16px); 
+    min-width: 130px; 
+    display: block;
+}
+
+/* El filtro de fecha baja a su propia línea completa en móvil */
+:host ::ng-deep app-filtro-fecha {
+    flex: 1 1 100%;
+    display: block;
+}
+
+/* =========================================
+   💻 COMPORTAMIENTO PC / TABLET 
+   ========================================= */
+@media (min-width: 768px) {
+    .container-layout {
+        flex-wrap: nowrap; 
+    }
+
+    :host ::ng-deep app-search-bar {
+        flex: 1; 
+    }
+
+    :host ::ng-deep app-filtro-dinamico {
+        flex: 0 0 140px; 
+    }
+
+    :host ::ng-deep app-filtro-fecha {
+        flex: 0 0 auto; 
+    }
+}

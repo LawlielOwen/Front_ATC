@@ -1,0 +1,31 @@
+<div class="card bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
+  <div class="flex justify-between items-center mb-3">
+    <div class="flex items-center gap-2.5 min-w-0">
+      <div class="w-9 h-9 rounded-full bg-blue-50 text-[#003366] flex items-center justify-center font-bold text-sm uppercase shrink-0">
+        {{ cliente.Nombre.substring(0, 2) }}
+      </div>
+      <div class="min-w-0 pr-2">
+        <h3 class="font-bold text-[#003366] text-sm leading-tight truncate">{{ cliente.Nombre }}</h3>
+        <span class="text-xs text-gray-500">{{ cliente.RFC }}</span>
+      </div>
+    </div>
+    <app-estatus [estatus]="cliente.Estatus" class="shrink-0"></app-estatus>
+  </div>
+  <div class="flex flex-col gap-1.5 text-xs mt-3 border-t border-gray-100 pt-3">
+    
+    <div class="flex justify-between">
+      <span class="text-[#94a3b8]">Asesor</span>
+      <span class="text-[#414a53] font-medium">{{ cliente.Nombre_asesor }}</span>
+    </div>
+    
+    <div class="flex justify-between">
+      <span class="text-[#94a3b8]">Razon Social</span>
+      <span class="text-[#414a53] font-medium">{{ cliente.Razon_social}}</span>
+    </div>
+    
+    <div class="flex justify-between">
+      <span class="text-[#94a3b8]">Registro</span>
+<span class="text-[#414a53] font-medium">{{ cliente.fecha_registro | date:'dd MMM yyyy' }}</span>    </div>
+    
+  </div>
+</div>

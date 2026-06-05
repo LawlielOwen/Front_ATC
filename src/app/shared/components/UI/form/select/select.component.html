@@ -1,0 +1,15 @@
+<div class="flex flex-col gap-1.5 w-full">
+  <label *ngIf="label" class="text-[10px] font-bold text-[#94a3b8] uppercase tracking-wider ml-1">
+    {{ label }}
+  </label>
+  
+  <select 
+    [disabled]="disabled"
+    [value]="value" 
+    (change)="actualizarValor($event)" 
+    class="bg-white border border-gray-200 rounded-[8px] px-3 py-2 text-xs text-[#414a53] focus:outline-none focus:border-[#00997d] appearance-none w-full">
+    
+    <ng-content></ng-content>
+    
+  </select>
+</div>

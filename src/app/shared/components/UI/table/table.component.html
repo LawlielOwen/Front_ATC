@@ -1,0 +1,103 @@
+<div class="mx-6 mb-6 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+  <div class="w-full overflow-x-auto">
+    <table class="w-full text-left border-collapse whitespace-nowrap">
+      <thead class="bg-slate-50/80 border-b border-slate-500">
+        <tr>
+          <th *ngFor="let col of columns"
+            class="py-3.5 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest"
+            [ngClass]="{'text-right': col.align === 'right', 'text-center': col.align === 'center'}">
+            {{ col.header }}
+          </th>
+        </tr>
+      </thead>
+      <tbody class="bg-white divide-y divide-slate-100">
+
+        <tr *ngFor="let row of data" (click)="rowClick.emit(row)"
+          class="hover:bg-slate-50/80 transition-colors duration-200 group relative cursor-pointer">
+
+          <td *ngFor="let col of columns" class="py-4 px-4 relative"
+            [ngClass]="{'text-right': col.align === 'right', 'text-center': col.align === 'center'}">
+
+            <!-- Barra lateral azul (solo se muestra en la primera columna) -->
+            <div *ngIf="col === columns[0]"
+              class="absolute left-0 top-0 bottom-0 w-[3px] bg-[#003B8A] opacity-0 group-hover:opacity-100 transition-opacity">
+            </div>
+            <!-- EVALUAMOS QUÉ TIPO DE CELDA ES -->
+           <ng-container [ngSwitch]="col.type">
+
+              <div *ngSwitchCase="'avatar-text'" class="flex items-center gap-4 pl-4">
+                <div class="w-9 h-9 rounded-xl bg-slate-100 flex items-center justify-center text-[#0d1f38] font-extrabold text-[11px] flex-shrink-0 border border-slate-200 shadow-sm">
+                  {{ (row[col.key] + '') | slice:0:2 | uppercase }}
+                </div>
+                <div class="flex flex-col gap-0.5 text-left">
+                  <span class="text-[13px] font-bold text-[#0d1f38] group-hover:text-[#003B8A] transition-colors">{{ row[col.key] }}</span>
+                  <span *ngIf="col.subKey" class="text-[11px] text-slate-400">{{ row[col.subKey] }}</span>
+                </div>
+              </div>
+              
+              <span *ngSwitchCase="'cantidad-movimiento'" 
+                class="text-[13px] font-bold tracking-wide"
+                [ngClass]="{
+                  'text-[#0f6e56]': row.Tipo === 'Entrada',
+                  'text-[#b91c1c]': row.Tipo === 'Salida'
+                }">
+                {{ row.Tipo === 'Entrada' ? '+' : (row.Tipo === 'Salida' ? '-' : '') }} {{ row[col.key] }}
+              </span>
+              <div *ngSwitchCase="'text-light'" class="flex flex-col gap-0.5">
+                <span class="text-[13px] font-medium text-[#414a53]">{{ row[col.key] }}</span>
+                <span *ngIf="col.subKey" class="text-[11px] text-slate-400">{{ row[col.subKey] }}</span>
+              </div>
+
+              <span *ngSwitchCase="'currency'" class="text-[13px] font-bold text-[#0d1f38]">
+                {{ row[col.key] | currency:'MXN':'symbol' }}
+              </span>
+
+              <span *ngSwitchCase="'stock'" class="text-[13px] font-bold" [ngClass]="getStockColor(row[col.key])">
+                {{ row[col.key] }} pz
+              </span>
+
+              <span *ngSwitchCase="'status'"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm"
+                [ngClass]="getStatusColors(row[col.key])">
+                <span class="w-1.5 h-1.5 rounded-full inline-block" [ngClass]="getStatusDot(row[col.key])"></span>
+                {{ row[col.key] }}
+              </span>
+
+              <span *ngSwitchCase="'pill-tipo'" 
+                class="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-[11.5px] font-bold tracking-wide"
+                [ngClass]="{
+                  'bg-[#e8f5f0] text-[#0f6e56]': row[col.key] === 'Entrada',
+                  'bg-[#fde8e8] text-[#b91c1c]': row[col.key] === 'Salida'
+                }">
+                {{ row[col.key] }}
+              </span>
+
+              <span *ngSwitchCase="'pill-destino'" 
+                class="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-[11.5px] font-bold tracking-wide"
+                [ngClass]="{
+                  'bg-[#e0f2fe] text-[#0369a1]': row[col.key] === 'Almacen' || row[col.key] === 'Almacén',
+                  'bg-[#ecfdf5] text-[#047857]': row[col.key] === 'Cliente',
+                  'bg-[#f3e8ff] text-[#6d28d9]': row[col.key] === 'Pedido'
+                }">
+                {{ row[col.key] }}
+              </span>
+
+              <div *ngSwitchCase="'actions'" class="flex justify-center" (click)="$event.stopPropagation()">
+                <app-options [opcionesExtra]="col.menuOptions || []"
+                  (accionSeleccionada)="manejarAccionMenu($event, row)">
+                </app-options>
+              </div>
+
+              <div *ngSwitchDefault class="flex flex-col gap-0.5">
+                <span class="text-[13px] font-semibold text-[#0d1f38]">{{ row[col.key] }}</span>
+                <span *ngIf="col.subKey" class="text-[11px] text-slate-400">{{ row[col.subKey] }}</span>
+              </div>
+
+            </ng-container>
+          </td>
+        </tr>
+
+      </tbody>
+    </table>
+  </div>
+</div>

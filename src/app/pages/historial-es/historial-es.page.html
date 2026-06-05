@@ -1,0 +1,66 @@
+<div class="container-sidebar">
+    <div class="sidebar-wrapper">
+        <app-siderbar></app-siderbar>
+    </div>
+    <div class="container-header">
+        <app-header (toggleMenu)="mostrarSidebarMobile()"></app-header>
+        <ion-content style="--background :#f1f5f9;">
+            <app-button-layout>
+                <app-count [label]="'Registros durante el mes'" [count]="Totalmes" accentColor="#1D9E75"
+                    iconBg="#E1F5EE">
+                    <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                </app-count>
+                <div class="flex flex-wrap items-center gap-3">
+                    <app-button-new label="Registrar entrada" variante="btn-azul"
+                        (click)="abrirModalEntrada()"></app-button-new>
+                    <app-button-new label="Registrar salida" variante="btn-azul"
+                        (click)="abrirModalSalida()"></app-button-new>
+                </div>
+            </app-button-layout>
+            <div class="px-5 mt-4 mb-4">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <app-stat-card label="ENTRADAS DEL MES" [count]="Totalentradas" subtext="+22 vs mes anterior"
+                        [accentColor]="'#10b981'" [subtextClass]="'text-emerald-600'">
+                    </app-stat-card>
+
+                    <app-stat-card label="SALIDAS DEL MES" [count]="Totalsalidas" subtext="-5 vs mes anterior"
+                        [accentColor]="'#ef4444'" [subtextClass]="'text-red-500'">
+                    </app-stat-card>
+
+                    <app-stat-card label="VALES EMITIDOS" [count]="Totalvales" subtext="27 PDFs generados"
+                        [accentColor]="'#8b5cf6'" [subtextClass]="'text-purple-500'">
+                    </app-stat-card>
+                </div>
+            </div>
+            <app-container-table>
+                <div header>
+                    <app-search-layout>
+                        <app-search-bar placeholder="Buscar por asesor,producto,codigo"
+                            (onSearch)="busquedaTexto($event)"></app-search-bar>
+                        <app-filtro-dinamico [placeholder]="'Todas'" [options]="opcionesEntrada"
+                            (onFilterChange)="filtroTipo($event)">
+                        </app-filtro-dinamico>
+
+                        <app-filtro-dinamico [placeholder]="'Todas'" [options]="opcionesTipo"
+                            (onFilterChange)="filtroDestino($event)">
+                        </app-filtro-dinamico>
+                        <app-filtro-fecha (onFilterChange)="filtroFecha($event)"></app-filtro-fecha>
+                    </app-search-layout>
+                </div>
+                <div body>
+                    <app-table-skeleton *ngIf="cargando" [rows]="6"></app-table-skeleton>
+
+                    <app-table [columns]="columnasMov" *ngIf="!cargando" [data]="movimientosLista"
+                        (rowClick)="detallesMov($event)"></app-table>
+                </div>
+                <div footer>
+                    <app-pagination [paginaActual]="currentPage" [totalPaginas]="totalPages"
+                        (onPageChange)="cambiarPaginaPadre($event)"></app-pagination>
+                </div>
+            </app-container-table>
+        </ion-content>
+    </div>
+</div>

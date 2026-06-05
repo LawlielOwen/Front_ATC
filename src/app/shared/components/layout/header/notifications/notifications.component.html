@@ -1,0 +1,55 @@
+<div class="notification-wrapper relative overflow-visible" [id]="Notification_id" (click)="marcarComoLeidas()">
+  <ion-icon name="notifications-outline" class="bell-icon text-2xl"></ion-icon>
+
+  <span *ngIf="contadorNoLeidas > 0"
+    class="notification-dot absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 bg-red-500 rounded-full text-white text-[10px] font-bold z-10">
+    {{ contadorNoLeidas }}
+  </span>
+</div>
+
+<ion-popover [trigger]="Notification_id" triggerAction="click" class="notifications-popover" #popover>
+  <ng-template>
+    <div class="block px-4 py-3 font-semibold text-center text-gray-700 bg-gray-50 border-b border-gray-200">
+      Notificaciones
+    </div>
+
+    <div class="divide-y divide-gray-200 bg-white max-h-80 overflow-y-auto">
+
+      <div *ngIf="notificaciones.length === 0" class="p-4 text-center text-gray-500 text-sm">
+        No tienes notificaciones pendientes.
+      </div>
+
+      <a *ngFor="let notif of notificaciones" (click)="irAModulo(notif)"
+        class="no-underline flex px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer" [class.bg-blue-50]="notif.leida === 0">
+       <div class="shrink-0">
+          <div class="flex items-center justify-center w-11 h-11 rounded-full" 
+               [ngClass]="getEstiloNotificacion(notif).bg">
+            <ion-icon [name]="getEstiloNotificacion(notif).icono" 
+                      class="text-xl" 
+                      [ngClass]="getEstiloNotificacion(notif).color"></ion-icon>
+          </div>
+        </div>
+
+        <div class="w-full ps-3">
+          <div class="text-gray-600 text-sm mb-1.5">
+            <span class="font-semibold text-gray-900">{{ notif.tipo_notificacion || notif.titulo }}:</span>
+            {{ notif.mensaje }}
+          </div>
+          <div class="text-xs text-gray-400 font-medium flex items-center gap-1">
+            <ion-icon name="time-outline"></ion-icon>
+            {{ (notif.fecha | date:'short') || 'Justo ahora' }}
+          </div>
+        </div>
+      </a>
+
+    </div>
+
+    <a href="#"
+      class="no-underline block py-2.5 font-medium text-center text-sm text-gray-900 bg-gray-50 hover:bg-gray-300 transition-colors">
+      <div class="inline-flex items-center">
+        <ion-icon name="eye-outline" class="me-2 text-lg"></ion-icon>
+        Ver todas
+      </div>
+    </a>
+  </ng-template>
+</ion-popover>

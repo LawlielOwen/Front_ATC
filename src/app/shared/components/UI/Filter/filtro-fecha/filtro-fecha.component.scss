@@ -1,0 +1,65 @@
+// ── CAMPO DE FECHA ─────────────────────────────────────────────────
+.date-filter-field {
+  width: 160px;
+
+  // Borde igual a tus otros filtros
+  .mdc-notched-outline__leading,
+  .mdc-notched-outline__notch,
+  .mdc-notched-outline__trailing {
+    border-color: #e2e8f0 !important; // slate-200
+    border-width: 1px !important;
+  }
+
+  // Borde redondeado igual al resto
+  .mdc-notched-outline__leading  { border-radius: 12px 0 0 12px !important; }
+  .mdc-notched-outline__trailing { border-radius: 0 12px 12px 0 !important; }
+
+  // Hover
+  &:hover .mdc-notched-outline__leading,
+  &:hover .mdc-notched-outline__notch,
+  &:hover .mdc-notched-outline__trailing {
+    border-color: #cbd5e1 !important; // slate-300
+  }
+
+  // Focus → color de tu marca
+  &.mat-focused .mdc-notched-outline__leading,
+  &.mat-focused .mdc-notched-outline__notch,
+  &.mat-focused .mdc-notched-outline__trailing {
+    border-color: #1D9E75 !important;
+    border-width: 1.5px !important;
+  }
+
+  // Texto del input
+  input.mat-mdc-input-element {
+    font-size: 13px !important;
+    font-weight: 500 !important;
+    color: #475569 !important; // slate-600
+    caret-color: #1D9E75;
+  }
+
+  // Altura consistente con tus dropdowns (~42px)
+  .mat-mdc-form-field-infix {
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    min-height: unset !important;
+  }
+
+  // Icono del toggle
+  .mat-datepicker-toggle button {
+    color: #94a3b8 !important; // slate-400
+    width: 32px !important;
+    height: 32px !important;
+
+    &:hover { color: #1D9E75 !important; }
+  }
+
+  // Sin ripple
+  .mat-mdc-button-ripple,
+  .mat-ripple { display: none !important; }
+}
+
+// ── CALENDARIO POPUP ────────────────────────────────────────────────
+// Va en global.scss o styles.scss (fuera del componente)
+/* ==========================================================================
+   ESTILOS DEL CALENDARIO (DATEPICKER)
+   ========================================================================== */

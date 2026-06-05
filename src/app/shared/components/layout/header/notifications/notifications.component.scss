@@ -1,0 +1,25 @@
+.notification-wrapper {
+  position: relative;
+  cursor: pointer !important;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 5px;
+
+  .bell-icon {
+    font-size: 1.4rem;
+    color: #334155; // Gris oscuro
+    transition: color 0.2s;
+
+    &:hover {
+      color: #003B8A;
+    }
+  }
+
+}
+
+ion-popover.notifications-popover {
+  --width: 380px; 
+
+  --max-width: 95vw; 
+}

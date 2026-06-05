@@ -1,0 +1,72 @@
+//variables para los botones
+$background-white: #ffffff; 
+$background-hover-green: #00997d;
+$border-green: #00997d;
+$text-green: #00997d;
+$text-white: #ffffff;
+$background-hover-blue: #1d4ed8; 
+$border-blue: #1d4ed8;
+$text-blue: #1d4ed8;
+.btn-verde {
+  --background: #{$background-white}; 
+  --color: #{$text-green}; 
+  --border-color: #{$border-green};
+  --border-width: 2px;
+  --border-style: solid;
+  --box-shadow: none; 
+  --border-radius: 10px; 
+  width: 140px;
+  height: 40px;
+  font-size: 14px;
+  text-transform: none;
+  font-weight: 400;
+  transition: all 0.6s ease-in-out;
+  letter-spacing: 0.1px;
+  &:hover {
+  
+    --background: #{$background-hover-green};
+    --color: #{$text-white};
+    &::part(native) {
+      color: #{$text-white};
+    }
+  }
+}
+
+.btn-azul {
+  --background: #{$background-hover-blue}; 
+  --color: #{$text-white}; 
+--border-color: transparent;
+  --border-width: 2px;
+  --border-style: solid;
+  --box-shadow: none; 
+  --border-radius: 10px; 
+  width: 180px;
+  height: 40px;
+  font-size: 14px;
+  text-transform: none;
+  font-weight: 400;
+  transition: all 0.6s ease-in-out;
+  letter-spacing: 0.1px;
+
+ &::part(native) {
+    transition: color 0.3s ease-in-out;
+  }
+
+  &:hover {
+    --background: #{$background-white};
+    --color: #{$text-blue};
+    --border-color: #{$border-blue};
+    // Mejora visual: Una sombra sutil azul claro para darle un efecto de elevación al pasar el mouse
+    --box-shadow: 0 4px 12px rgba(29, 78, 216, 0.2); 
+    
+    // CORRECCIÓN: El texto debe ser azul sobre el fondo blanco para que se lea
+    &::part(native) {
+      color: #{$text-blue};
+    }
+  }
+
+  // Mejora de interacción: Efecto de "presionado" al hacer clic
+  &:active {
+    transform: scale(0.97);
+  }
+}

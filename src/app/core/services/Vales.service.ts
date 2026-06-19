@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Observable } from 'rxjs';
+import { Observable, Subject } from 'rxjs';
 import { ValeSalida } from '../../shared/model/vales.model';
 
 export interface RespuestaPaginada {
@@ -15,17 +15,21 @@ export interface RespuestaPaginada {
 })
 export class ValeService {
     private apiUrl = environment.apiurl;
-    constructor(private http: HttpClient) { }
+
+    constructor(private http: HttpClient) {
+
+    }
+
     getVal(pagina: number = 1, limite: number = 10): Observable<RespuestaPaginada> {
         const params = new HttpParams()
             .set('pagina', pagina.toString())
             .set('limite', limite.toString());
         return this.http.get<RespuestaPaginada>(`${this.apiUrl}/vales`, { params });
     }
-   obtenerStatsVales(id: number, rol: string): Observable<any> {
-    return this.http.get(`${this.apiUrl}/vales/count?id=${id}&rol=${rol}`);
-  }
-    buscarVal(id_asesor: number | null = null ,busqueda: string = '', estatus: number | null = null, fechaInicio: string = '',
+    obtenerStatsVales(id: number, rol: string): Observable<any> {
+        return this.http.get(`${this.apiUrl}/vales/count?id=${id}&rol=${rol}`);
+    }
+    buscarVal(id_asesor: number | null = null, busqueda: string = '', estatus: number | null = null, fechaInicio: string = '',
         fechaFin: string = '', pagina: number = 1, limite: number = 10): Observable<RespuestaPaginada> {
         let params = new HttpParams()
             .set('pagina', pagina.toString())
@@ -47,20 +51,24 @@ export class ValeService {
         }
         return this.http.get<RespuestaPaginada>(`${this.apiUrl}/vales/buscar`, { params });
     }
-   aceptarVal(id: number, comentarios: string, id_asesor: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/vales/aceptar`, { id, comentarios, id_asesor });
-  }
+    aceptarVal(id: number, comentarios: string, id_asesor: number): Observable<any> {
+        return this.http.put(`${this.apiUrl}/vales/aceptar`, { id, comentarios, id_asesor });
+    }
 
-  rechazarVal(id: number, comentarios: string, id_asesor: number): Observable<any> {
-    return this.http.put(`${this.apiUrl}/vales/rechazar`, { id, comentarios, id_asesor });
-  }
-    buscarProductos(codigo: string) {
-        return this.http.get<any>(`${this.apiUrl}/vales/producto?codigo=${codigo}`);
+    rechazarVal(id: number, comentarios: string, id_asesor: number): Observable<any> {
+        return this.http.put(`${this.apiUrl}/vales/rechazar`, { id, comentarios, id_asesor });
+    }
+    buscarProductos(codigo: string, id_proveedor?: number) {
+        let url = `${this.apiUrl}/vales/producto?codigo=${codigo}`;
+        if (id_proveedor) {
+            url += `&proveedor=${id_proveedor}`;
+        }
+        return this.http.get<any>(url);
     }
     crearVale(payload: any) {
         return this.http.post(`${this.apiUrl}/vales`, payload);
     }
-     getValId(id: number) {
+    getValId(id: number) {
         return this.http.get<ValeSalida>(`${this.apiUrl}/vales/${id}`);
     }
 }

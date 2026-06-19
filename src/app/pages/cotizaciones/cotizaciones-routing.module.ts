@@ -7,7 +7,15 @@ const routes: Routes = [
   {
     path: '',
     component: CotizacionesPage
+  },  {
+    path: 'detalles-cotizacion',
+    loadChildren: () => import('./detalles-cotizacion/detalles-cotizacion.module').then( m => m.DetallesCotizacionPageModule)
+  },
+  {
+    path: 'pos',
+    loadChildren: () => import('./pos/pos.module').then( m => m.POSPageModule)
   }
+
 ];
 
 @NgModule({

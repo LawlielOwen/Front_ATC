@@ -14,12 +14,21 @@
         </svg>
 
         <div class="flex flex-col gap-4 md:col-span-2">
+          <div class="w-full flex flex-col gap-2 mb-4">
+            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+              Empresa / Cliente Destino
+            </label>
 
-          <app-select label="Empresa / Cliente Destino" [(value)]="solicitud.id_cliente">
-            <option value="">Seleccione el cliente...</option>
-            <option *ngFor="let c of clientes" [value]="c.id">{{ c.nombre }}</option>
-          </app-select>
+           <input type="text" [formControl]="clienteControl" [matAutocomplete]="auto"
+  placeholder="Ingresa nombre del cliente..."
+  class="w-full border border-gray-300 rounded-md px-3 py-[9px] text-sm text-gray-700 bg-white placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
 
+          <mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente">
+  <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
+    {{ c.nombre || c.Nombre }}
+  </mat-option>
+</mat-autocomplete>
+          </div>
           <div class="flex gap-4">
             <div class="w-1/2">
               <app-input tipo="text" placeholder="Ej. OC-2026-045" label="Orden de Compra"
@@ -70,8 +79,7 @@
             </div>
 
             <div class="col-span-1 flex justify-center">
-              <button (click)="eliminarFila(i)"
-                class="bg-transparent border-none outline-none text-slate-400 hover:text-red-600 hover:bg-red-50
+              <button (click)="eliminarFila(i)" class="bg-transparent border-none outline-none text-slate-400 hover:text-red-600 hover:bg-red-50
                  transition-all duration-200 opacity-0 group-hover:opacity-100 focus:opacity-100 p-2 mt-4
                  rounded-lg flex items-center justify-center">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">

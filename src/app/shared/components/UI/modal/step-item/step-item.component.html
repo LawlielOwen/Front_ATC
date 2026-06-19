@@ -1,0 +1,31 @@
+<div class="flex items-center justify-between w-full max-w-md mx-auto relative mb-2">
+  
+  <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-100 z-0 rounded-full"></div>
+  
+  <div class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-[#1D9E75] z-0 transition-all duration-500 ease-in-out rounded-full"
+       [style.width]="progreso">
+  </div>
+
+  <div *ngFor="let step of pasos" class="relative z-10 flex flex-col items-center">
+    
+    <div class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 shadow-sm"
+         [ngClass]="{
+           'bg-[#1D9E75] text-white': pasoActual > step.numero,
+           'bg-[#003B8A] text-white': pasoActual === step.numero,
+           'bg-white border-2 border-slate-200 text-slate-400': pasoActual < step.numero
+         }">
+      
+      <svg *ngIf="pasoActual > step.numero" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+      </svg>
+      
+      <span *ngIf="pasoActual <= step.numero">{{ step.numero }}</span>
+    </div>
+    
+    <span class="absolute -bottom-6 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap"
+          [ngClass]="pasoActual >= step.numero ? 'text-[#0d1f38]' : 'text-slate-400'">
+      {{ step.etiqueta }}
+    </span>
+
+  </div>
+</div>

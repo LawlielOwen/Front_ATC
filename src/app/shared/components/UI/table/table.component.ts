@@ -8,6 +8,7 @@ export interface TableColumn {
   type: 'text' | 'currency' | 'status' | 'avatar-text' | 'actions' | 'stock' | 'pill-tipo' | 'pill-destino' | 'text-light' | 'cantidad-movimiento';
   align?: 'left' | 'center' | 'right';
   menuOptions?: MenuOption[];
+  omitirBase?: boolean;
 }
 @Component({
   selector: 'app-table',
@@ -24,16 +25,45 @@ export class TableComponent implements OnInit {
   constructor() { }
 
   ngOnInit() { }
-  getStatusColors(status: string) {
+ getStatusColors(status: string) {
     const s = status.toLowerCase();
+    
+    // --- Productos ---
     if (s === 'activo') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
     if (s === 'sin stock') return 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse';
+
+    // --- Almacén ---
+    if (s === 'recibido') return 'bg-[#e8f5f0] text-[#0f6e56] border-[#bce3d4]'; // Verde corporativo claro
+    if (s === 'con incidencia') return 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse'; // Rojo alerta
+
+    // --- Cotizaciones ---
+    if (s === 'aceptada' || s === 'aceptado') return 'bg-blue-50 text-blue-700 border-blue-200'; // Azul profesional
+    if (s === 'cancelada' || s === 'cancelado') return 'bg-red-50 text-red-700 border-red-200'; // Rojo estándar
+
+    // --- Compartido (Por defecto o Pendiente) ---
+    if (s === 'pendiente') return 'bg-slate-50 text-slate-600 border-slate-200'; // Gris
+    
     return 'bg-slate-50 text-slate-600 border-slate-200'; // Inactivo o por defecto
   }
+
   getStatusDot(status: string) {
     const s = status.toLowerCase();
+    
+    // --- Productos ---
     if (s === 'activo') return 'bg-emerald-500';
     if (s === 'sin stock') return 'bg-rose-500';
+
+    // --- Almacén ---
+    if (s === 'recibido') return 'bg-[#1D9E75]'; // Verde
+    if (s === 'con incidencia') return 'bg-rose-600'; // Rojo
+    
+    // --- Cotizaciones ---
+    if (s === 'aceptada' || s === 'aceptado') return 'bg-blue-500';
+    if (s === 'cancelada' || s === 'cancelado') return 'bg-red-500';
+
+    // --- Compartido (Por defecto o Pendiente) ---
+    if (s === 'pendiente') return 'bg-slate-400'; // Gris
+
     return 'bg-slate-400';
   }
   getStockColor(cantidad: number): string {

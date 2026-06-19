@@ -111,3 +111,70 @@
         }
     }
 }
+// ... tus otros botones (btn-cerrar, btn-agregar, etc.) ...
+
+.btn-pdf {
+    --background: #f1f5f9;       /* slate-100 */
+    --color: #334155;            /* slate-700 */
+    --border-color: #cbd5e1;     /* slate-300 */
+    --border-width: 1px;
+    --border-style: solid;
+    --border-radius: 10px;
+    --box-shadow: none;
+    transition: all 0.3s ease-in-out;
+    text-transform: none;
+    font-size: 12px;
+    width: 100px;
+    height: 35px;
+    font-weight: 600;
+    &:hover {
+        --background: #e2e8f0;   /* slate-200 */
+        --color: #0f172a;        /* slate-900 */
+        &::part(native) {
+            color: #0f172a;
+        }
+    }
+}
+
+.btn-cancelar {
+    --background: #fef2f2;       /* red-50 */
+    --color: #dc2626;            /* red-600 */
+    --border-color: #fca5a5;     /* red-300 */
+    --border-width: 1px;
+    --border-style: solid;
+    --border-radius: 10px;
+    --box-shadow: none;
+    transition: all 0.3s ease-in-out;
+    text-transform: none;
+    font-size: 12px;
+    width: 100px;
+    height: 35px;
+    font-weight: 600;
+    &:hover {
+        --background: #fee2e2;   /* red-100 */
+        --color: #b91c1c;        /* red-700 */
+        &::part(native) {
+            color: #b91c1c;
+        }
+    }
+}
+
+.btn-aceptar {
+    --background: #2563eb;       /* blue-600 */
+    --color: #ffffff;
+    --border-width: 0;
+    --border-radius: 10px;
+    --box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2); 
+    transition: all 0.3s ease-in-out;
+    text-transform: none;
+    font-size: 12px;
+    width: 100px;
+    height: 35px;
+    font-weight: 600;
+    &:hover {
+        --background: #1d4ed8;   /* blue-700 */
+        &::part(native) {
+            color: #ffffff;
+        }
+    }
+}

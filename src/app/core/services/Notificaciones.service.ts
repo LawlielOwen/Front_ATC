@@ -12,6 +12,7 @@ export class notificacionService {
     private apiUrl = environment.apiurl;
     private socket: Socket;
     private notificacionSubject = new Subject<any>();
+    private actualizarTablaSubject = new Subject<void>();
   constructor(private http: HttpClient) {
         const serverUrl = this.apiUrl.replace('/api', '');
         this.socket = io(serverUrl);
@@ -27,12 +28,18 @@ export class notificacionService {
                 description: datos.mensaje
             });
         });
+        this.socket.on('actualizar_tabla_vales', () => {
+            this.actualizarTablaSubject.next(); 
+        });
     }
     conectarUsuario(id: number, rol: string) {
         this.socket.emit('unirse_a_sala', { id, rol });
     }
     escucharNuevasNotificaciones(): Observable<any> {
         return this.notificacionSubject.asObservable();
+    }
+    escucharActualizacionTabla(): Observable<void> {
+        return this.actualizarTablaSubject.asObservable();
     }
     obtenerHistorialNotificaciones(idAsesor: number): Observable<any> {
         return this.http.get(`${this.apiUrl}/notificaciones/${idAsesor}`);

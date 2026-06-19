@@ -83,10 +83,11 @@
               </span>
 
               <div *ngSwitchCase="'actions'" class="flex justify-center" (click)="$event.stopPropagation()">
-                <app-options [opcionesExtra]="col.menuOptions || []"
-                  (accionSeleccionada)="manejarAccionMenu($event, row)">
-                </app-options>
-              </div>
+  <app-options 
+    [opcionesExtra]="col.menuOptions || []"
+    [omitirBase]="col.omitirBase || false"  (accionSeleccionada)="manejarAccionMenu($event, row)">
+  </app-options>
+</div>
 
               <div *ngSwitchDefault class="flex flex-col gap-0.5">
                 <span class="text-[13px] font-semibold text-[#0d1f38]">{{ row[col.key] }}</span>

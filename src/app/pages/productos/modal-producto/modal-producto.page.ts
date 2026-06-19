@@ -56,6 +56,7 @@ export class ModalProductoPage implements OnInit {
     { label: 'Mighty Seven (m7)', value: 8 },
     { label: 'Fuji Electric', value: 9 }
   ];
+
   constructor(
     private ps: ProductoService,
     private dialogRef: MatDialogRef<ModalProductoPage>,

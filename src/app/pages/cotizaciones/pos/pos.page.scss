@@ -1,0 +1,24 @@
+.container-sidebar{
+    display:flex;
+     height:100vh; 
+     width: 100vw; 
+     overflow: hidden;
+}
+.container-header{
+    flex: 1 1 auto; 
+    display: flex; 
+    flex-direction: column; 
+    min-width: 0; 
+    position: relative;
+}
+
+input[type=number]::-webkit-inner-spin-button, 
+input[type=number]::-webkit-outer-spin-button { 
+  -webkit-appearance: none; 
+  margin: 0; 
+}
+
+/* Ocultar flechas en Firefox */
+input[type=number] {
+  -moz-appearance: textfield;
+}

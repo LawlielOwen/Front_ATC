@@ -3,52 +3,14 @@
   <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
   <app-header-modal [label]="tituloModal"></app-header-modal>
   <div class="p-6 pt-8 overflow-y-auto bg-white flex-1 flex flex-col gap-8">
-    <div class="flex items-center justify-between w-full max-w-md mx-auto relative mb-2">
-      <!-- Línea de fondo (gris) -->
-      <div class="absolute left-0 top-1/2 -translate-y-1/2 w-full h-1 bg-slate-100 z-0 rounded-full"></div>
-      <div
-        class="absolute left-0 top-1/2 -translate-y-1/2 h-1 bg-[#1D9E75] z-0 transition-all duration-500 ease-in-out rounded-full"
-        [style.width]="paso === 1 ? '0%' : (paso === 2 ? '50%' : '100%')"></div>
-
-      <!-- Paso 1 -->
-      <div class="relative z-10 flex flex-col items-center">
-        <div
-          class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 shadow-sm"
-          [ngClass]="paso > 1 ? 'bg-[#1D9E75] text-white' : 'bg-[#003B8A] text-white'">
-          <svg *ngIf="paso > 1" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-          </svg>
-          <span *ngIf="paso === 1">1</span>
-        </div>
-        <span class="absolute -bottom-6 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap"
-          [ngClass]="paso >= 1 ? 'text-[#0d1f38]' : 'text-slate-400'">Código Japón</span>
-      </div>
-
-      <!-- Paso 2 -->
-      <div class="relative z-10 flex flex-col items-center">
-        <div
-          class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 shadow-sm"
-          [ngClass]="paso > 2 ? 'bg-[#1D9E75] text-white' : (paso === 2 ? 'bg-[#003B8A] text-white' : 'bg-white border-2 border-slate-200 text-slate-400')">
-          <svg *ngIf="paso > 2" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
-          </svg>
-          <span *ngIf="paso <= 2">2</span>
-        </div>
-        <span class="absolute -bottom-6 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap"
-          [ngClass]="paso >= 2 ? 'text-[#0d1f38]' : 'text-slate-400'">Cantidad</span>
-      </div>
-
-      <!-- Paso 3 -->
-      <div class="relative z-10 flex flex-col items-center">
-        <div
-          class="w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm transition-colors duration-300 shadow-sm"
-          [ngClass]="paso === 3 ? 'bg-[#003B8A] text-white' : 'bg-white border-2 border-slate-200 text-slate-400'">
-          3
-        </div>
-        <span class="absolute -bottom-6 text-[10px] font-bold uppercase tracking-widest whitespace-nowrap"
-          [ngClass]="paso === 3 ? 'text-[#0d1f38]' : 'text-slate-400'">Confirmar</span>
-      </div>
-    </div>
+    <app-step-item 
+      [pasoActual]="paso" 
+      [pasos]="[
+        { numero: 1, etiqueta: 'Código del producto' }, 
+        { numero: 2, etiqueta: 'Cantidad' }, 
+        { numero: 3, etiqueta: 'Confirmar' }
+      ]">
+    </app-step-item>
     <ng-container *ngIf="paso === 1">
       <!-- Alerta Info -->
       <div class="bg-[#eff6ff] text-[#1e40af] text-[13px] px-4 py-3.5 rounded-lg border border-[#bfdbfe]">
@@ -145,35 +107,11 @@
         </div>
       </div>
 
-      <div class="flex flex-col gap-1.5 mt-2 relative">
-        <div class="flex items-center gap-2 mb-0.5">
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white pr-2 z-10">Destino del
-            material</span>
-          <div class="absolute left-0 w-full h-[1px] bg-slate-200 top-2.5"></div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-4">
-          <div *ngIf="esEntrada" (click)="destino = 'almacen'"
-            class="rounded-xl py-2.5 px-4 flex flex-col items-center justify-center cursor-pointer border-2 transition-all"
-            [ngClass]="destino === 'almacen' ? 'border-[#003B8A] bg-[#eff6ff]' : 'border-slate-200 hover:bg-slate-50'">
-            <span class="font-bold text-[13px]"
-              [ngClass]="destino === 'almacen' ? 'text-[#003B8A]' : 'text-slate-600'">Para almacén</span>
-            <span class="text-[11px]"
-              [ngClass]="destino === 'almacen' ? 'text-[#003B8A] opacity-80' : 'text-slate-400'">Se suma al stock
-              general</span>
-          </div>
-
-          <div (click)="destino = 'pedido'"
-            class="rounded-xl py-2.5 px-4 flex flex-col items-center justify-center cursor-pointer border-2 transition-all"
-            [ngClass]="destino === 'pedido' ? 'border-[#003B8A] bg-[#eff6ff]' : 'border-slate-200 hover:bg-slate-50'">
-            <span class="font-bold text-[13px]"
-              [ngClass]="destino === 'pedido' ? 'text-[#003B8A]' : 'text-slate-600'">Para pedido</span>
-            <span class="text-[11px]"
-              [ngClass]="destino === 'pedido' ? 'text-[#003B8A] opacity-80' : 'text-slate-400'">Suministra un
-              pedido</span>
-          </div>
-        </div>
-      </div>
+     <app-card-option 
+  label="Destino del material"
+  [opciones]="opcionesDestino"
+  [(value)]="destino">
+</app-card-option>
 
       <div class="bg-[#fffbeb] border border-[#fde68a] text-[#92400e] text-[13px] px-4 py-2 rounded-lg mt-2">
         Al confirmar, el stock pasará de <strong>{{ productoEncontrado.Stock }}</strong> a

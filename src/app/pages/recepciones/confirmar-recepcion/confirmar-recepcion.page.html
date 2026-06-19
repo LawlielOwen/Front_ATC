@@ -1,0 +1,165 @@
+<div class="bg-white rounded-2xl overflow-hidden w-full max-w-5xl mx-auto max-h-[90vh] grid grid-rows-[auto_1fr_auto] border border-slate-200 shadow-2xl">
+  <app-header-modal [label]="'Confirmar pedido'"></app-header-modal> 
+  <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
+
+  <div class="p-6 pt-8 overflow-y-auto bg-[#f8fafc] flex-1 flex flex-col gap-6">   
+    <app-step-item [pasoActual]="paso" [pasos]="pasosStepper"></app-step-item>
+    <ng-container *ngIf="paso === 1">
+      <div class="bg-white p-5 rounded-xl border border-slate-200 shadow-sm animate-fade-in">
+        <h3 class="text-sm font-bold text-[#0d1f38] mb-1">¿En qué estado llegó el pedido?</h3>
+        <p class="text-xs text-slate-500 mb-4">Selecciona si el material ingresará directo a stock o requiere revisión.</p>
+        
+        <app-card-option
+          label="Condición del Material"
+          [opciones]="opcionesEstado"
+          [(value)]="estadoRecepcion">
+        </app-card-option>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="paso === 2 && estadoRecepcion === 'completo'">
+      <div class="bg-[#eff6ff] text-[#1e40af] text-[13px] px-4 py-3.5 rounded-lg border border-[#bfdbfe] animate-fade-in flex-shrink-0">
+        Se sumarán las siguientes piezas al inventario general. Verifica que las cantidades coincidan con el físico.
+      </div>
+
+      <div class="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm mt-2 animate-fade-in flex-shrink-0">
+        
+        <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2.5 px-4 items-center">
+          <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+          <span class="col-span-3 text-[9px] font-bold text-white uppercase tracking-widest">Código</span>
+          <span class="col-span-6 text-[9px] font-bold text-white uppercase tracking-widest">Nombre y Modelo</span>
+          <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center">Pzas</span>
+        </div>
+
+        <div *ngFor="let item of productosDetalle; let i = index"
+             class="grid grid-cols-12 gap-3 py-3 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center">
+          
+          <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center min-w-0">{{ i + 1 }}</div>
+          
+          <div class="col-span-3 min-w-0">
+            <span class="text-[12.5px] font-bold text-[#0d1f38] block truncate">{{ item.Codigo_numeral || item.Codigo_japon }}</span>
+          </div>
+          
+          <div class="col-span-6 flex flex-col min-w-0 pr-2">
+            <span class="text-[12.5px] font-bold text-[#0d1f38] leading-tight truncate w-full" [title]="item.nombre_producto">{{ item.nombre_producto }}</span>
+            <span class="text-[10px] text-slate-400 mt-0.5 font-mono truncate w-full">{{ item.modelo_producto }}</span>
+          </div>
+          
+          <div class="col-span-2 flex justify-center min-w-0">
+            <span class="text-[15px] font-black text-[#003B8A]">{{ item.cantidad }}</span>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 py-3 px-6 flex justify-end items-center gap-4 border-t border-slate-200">
+          <span class="text-[13px] font-bold text-[#0d1f38]">Total de piezas:</span>
+          <span class="text-xl font-black text-[#003B8A] w-12 text-center">{{ getTotalPiezas() }}</span>
+        </div>
+      </div>
+    </ng-container>
+<ng-container *ngIf="paso === 2 && estadoRecepcion === 'incidencia'">
+      
+      <div class="bg-[#fff1f2] text-[#be123c] text-[13px] px-4 py-3.5 rounded-lg border border-[#fecdd3] animate-fade-in mb-2 flex-shrink-0">
+        Ingresa la cantidad de piezas <strong>"Afectadas"</strong>. El sistema calculará las piezas buenas automáticamente.
+      </div>
+
+      <div class="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm animate-fade-in w-full flex-shrink-0">
+        
+        <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2.5 px-4 items-center">
+          <span class="col-span-5 text-[9px] font-bold text-white uppercase tracking-widest min-w-0">Producto y Modelo</span>
+          <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center min-w-0">Pedidas</span>
+          <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center flex items-center justify-center gap-1 min-w-0"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" /></svg> Buenas</span>
+          <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center flex items-center justify-center gap-1 min-w-0"><svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" /></svg> Afect.</span>
+          <span class="col-span-3 text-[9px] font-bold text-white uppercase tracking-widest text-center min-w-0">Tipo Incidencia</span>
+        </div>
+
+        <div *ngFor="let item of productosDetalle"
+             class="grid grid-cols-12 gap-3 py-3 px-4 border-b border-slate-100 last:border-0 transition-colors items-center"
+             [ngClass]="item.afectadas > 0 ? 'bg-[#fff1f2]/40' : 'bg-white hover:bg-slate-50'">
+          
+          <div class="col-span-5 flex flex-col min-w-0 pr-2">
+            <span class="text-[12.5px] font-bold text-[#0d1f38] leading-tight truncate w-full" [title]="item.nombre_producto">{{ item.nombre_producto }}</span>
+            <span class="text-[10px] text-slate-400 mt-0.5 font-mono truncate w-full">{{ item.Codigo_numeral || item.Codigo_japon }}</span>
+          </div>
+          
+          <div class="col-span-1 flex justify-center min-w-0">
+            <span class="text-[14px] font-bold text-slate-500">{{ item.cantidad }}</span>
+          </div>
+
+          <div class="col-span-1 flex justify-center min-w-0">
+            <span class="text-[15px] font-black transition-colors duration-300" [ngClass]="item.buenas === item.cantidad ? 'text-[#1D9E75]' : 'text-amber-500'">
+              {{ item.buenas }}
+            </span>
+          </div>
+
+          <div class="col-span-2 flex justify-center min-w-0">
+            <input type="number" [(ngModel)]="item.afectadas" (ngModelChange)="calcularBuenas(item)" min="" [max]="item.cantidad" placeholder="0"
+            (focus)="$event.target.select()"
+                   class="w-14 h-8 text-center text-[14px] font-bold outline-none rounded-md transition-all shadow-sm [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                   [ngClass]="item.afectadas > 0 ? 'border border-red-400 text-red-600 bg-white focus:ring-2 focus:ring-red-400' : 'border border-slate-200 text-slate-400 bg-slate-50 focus:ring-2 focus:ring-slate-300 hover:bg-white'">
+          </div>
+
+          <div class="col-span-3 flex justify-center min-w-0">
+            <select [(ngModel)]="item.tipoDano" [disabled]="item.afectadas === 0"
+                    class="w-full h-8 py-1 px-2 text-[11px] leading-tight rounded-md outline-none transition-colors border"
+                    [ngClass]="item.afectadas > 0 ? 'bg-white border-slate-300 text-[#0d1f38] focus:border-red-400 focus:ring-1 focus:ring-red-400' : 'bg-slate-50 border-transparent text-slate-400 cursor-not-allowed'">
+              <option value="" disabled selected>Seleccione...</option>
+              <option *ngFor="let d of opcionesDano" [value]="d.value">{{ d.label }}</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5 mt-2 animate-fade-in flex-shrink-0">
+        <label class="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider ml-1">Descripción general del incidente</label>
+        <textarea [(ngModel)]="descripcionGeneral" rows="3" 
+                  placeholder="Ej. La caja venía abierta y los productos internos están rotos o faltan piezas..."
+                  class="bg-[#fafbfc] border border-solid border-slate-300 text-[#0d1f38] placeholder:text-slate-400 text-sm rounded-lg focus:ring-1 focus:ring-[#1D9E75] focus:border-[#1D9E75] block w-full px-3 py-2.5 outline-none transition-colors resize-none"></textarea>
+      </div>
+    </ng-container>
+    <ng-container *ngIf="paso === 3">
+      <div class="flex flex-col items-center justify-center py-6 gap-3 animate-fade-in">
+        <div class="w-16 h-16 rounded-full flex items-center justify-center border-4 border-white shadow-md"
+             [ngClass]="estadoRecepcion === 'completo' ? 'bg-[#f0f9f5]' : 'bg-[#fff1f2]'">
+          <svg *ngIf="estadoRecepcion === 'completo'" class="w-8 h-8 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+          </svg>
+          <svg *ngIf="estadoRecepcion === 'incidencia'" class="w-8 h-8 text-[#be123c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
+        </div>
+        
+        <h3 class="text-2xl font-extrabold text-[#0d1f38] mt-2">
+          ¡Recepción Registrada!
+        </h3>
+        
+        <p class="text-center text-slate-500 text-[16px] max-w-sm mb-2">
+          El pedido ha sido marcado como <strong class="text-[#0d1f38]">{{ estadoRecepcion === 'completo' ? 'Recibido Exitosamente' : 'Recibido con Incidencia' }}</strong>.
+        </p>
+      </div>
+    </ng-container>
+
+  </div>
+
+  <app-footer-modal [paddingClass]="'p-4 px-6 rounded-b-2xl border-t border-slate-100 bg-white'">
+    
+    <app-button-action *ngIf="paso === 1" [label]="'Cancelar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+    <app-button-action [label]="'Volver'"  *ngIf="paso === 2"  (click)="retrocederPaso()" [claseCss]="'btn-cerrar'"></app-button-action>
+   
+    <button *ngIf="paso === 1" (click)="avanzarPaso()"
+      class="bg-[#003B8A] text-white font-bold px-8 py-2.5 rounded-lg hover:bg-[#002b66] transition-colors text-[13px] shadow-sm ml-auto">
+      Siguiente
+    </button>
+
+    <button *ngIf="paso === 2" (click)="confirmarRecepcion()"
+      class="text-white font-bold px-8 py-2.5 rounded-lg transition-colors text-[13px] shadow-sm ml-auto"
+      [ngClass]="estadoRecepcion === 'completo' ? 'bg-[#1D9E75] hover:bg-[#15805d]' : 'bg-[#e11d48] hover:bg-[#be123c]'">
+      Confirmar {{ estadoRecepcion === 'completo' ? 'Ingreso a Stock' : 'Incidencia' }}
+    </button>
+
+    <button *ngIf="paso === 3" (click)="finalizar()"
+      class="bg-[#003B8A] text-white font-bold px-8 py-2.5 rounded-lg hover:bg-[#002b66] transition-colors text-[13px] shadow-sm w-full">
+      Terminar y cerrar
+    </button>
+
+  </app-footer-modal>
+</div>

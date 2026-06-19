@@ -273,3 +273,31 @@ ion-searchbar.ion-focused {
   background-color: #e8f5f0 !important;
   color: #0f6e56 !important;
 }
+/* ==========================================================================
+   FORZAR AUTOCOMPLETE BLANCO GLOBAL (Ignorando Ionic / Tailwind Dark Mode)
+   ========================================================================== */
+.cdk-overlay-container .cdk-overlay-pane .mat-mdc-autocomplete-panel {
+  background: #ffffff !important;
+  background-color: #ffffff !important;
+  color-scheme: light !important; /* Fuerza al navegador a usar colores claros */
+  border-radius: 8px !important;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+
+  .mat-mdc-option {
+    background: #ffffff !important;
+    background-color: #ffffff !important;
+    
+    .mdc-list-item__primary-text {
+      color: #374151 !important; /* Texto gris oscuro */
+      font-weight: 500 !important;
+    }
+
+    /* Efecto al pasar el mouse o navegar con las flechas del teclado */
+    &:hover, 
+    &.mat-mdc-option-active, 
+    &.mdc-list-item--selected {
+      background: #f3f4f6 !important; 
+      background-color: #f3f4f6 !important; 
+    }
+  }
+}

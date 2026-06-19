@@ -1,0 +1,120 @@
+<div
+  class="bg-[#f1f5f9] rounded-[10px] overflow-hidden shadow-2xl w-full mx-auto max-h-[90vh] flex flex-col border border-gray-100">
+  <app-header-modal [label]="'Registrar Nuevo Pedido a Proveedor'"></app-header-modal>
+  <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
+
+  <div class="p-6 overflow-y-auto flex-1">
+    <div class="flex flex-col gap-6 animate-fade-in">
+
+      <app-card-form title="Información General">
+        <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+
+        <div class="flex flex-col md:flex-row gap-4 w-full md:col-span-2">
+
+          <div class="flex-1 flex flex-col gap-y-1">
+            <app-select label="Proveedor" [(value)]="pedidoNuevo.id_proveedor">
+              <option [value]="null" disabled>Selecciona una marca...</option>
+              <option *ngFor="let opt of opcionesProveedor" [value]="opt.value">{{ opt.label }}</option>
+            </app-select>
+          </div>
+
+          <div class="flex-1 flex flex-col gap-y-1">
+            <app-select label="Destino" [(value)]="pedidoNuevo.destino">
+              <option value="Almacen">Almacén</option>
+              <option value="Pedido">Pedido</option>
+            </app-select>
+          </div>
+
+          <div class="flex-1 flex flex-col gap-y-1">
+            <app-date label="Fecha Estimada" [(value)]="pedidoNuevo.fecha_estimada">
+            </app-date>
+          </div>
+
+        </div>
+      </app-card-form>
+
+      <app-card-form title="Productos Solicitados">
+        <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+
+        <div class="md:col-span-2">
+
+          <div class="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm">
+
+            <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2.5 px-4 items-center">
+              <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+              <span class="col-span-4 text-[9px] font-bold text-white uppercase tracking-widest">Codigo</span>
+              <span class="col-span-5 text-[9px] font-bold text-white uppercase tracking-widest">Nombre</span>
+              <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">Pzas</span>
+              <span class="col-span-1 text-center"></span>
+            </div>
+
+            <div *ngFor="let row of productosSolicitados; let i = index"
+              class="grid grid-cols-12 gap-3 py-2 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center group">
+
+              <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
+
+              <div class="col-span-4 relative flex items-center">
+                <input type="text" [ngModel]="row.codigo" (ngModelChange)="buscarProductoBD($event, i)"
+                  placeholder="Ej. JP-284..."
+                  class="w-full bg-transparent border-b-2 border-transparent focus:border-[#003B8A] outline-none text-[13px] text-[#0d1f38] font-bold placeholder-gray-300 py-1 transition-colors">
+
+                <div *ngIf="row.buscando"
+                  class="absolute right-2 w-3.5 h-3.5 border-2 border-[#003B8A] border-t-transparent rounded-full animate-spin">
+                </div>
+              </div>
+
+              <div class="col-span-5 text-[12px] font-bold truncate" [ngClass]="{
+                     'text-red-500': row.Nombre === 'El producto no existe o no pertenece a este proveedor' || row.Nombre === 'Error de conexión', 
+                     'text-[#0d1f38]': row.Nombre && row.Nombre !== 'El producto no existe o no pertenece a este proveedor' && row.Nombre !== 'Error de conexión', 
+                     'text-slate-400': !row.Nombre
+                   }">
+                {{ row.Nombre || 'Escribe un código...' }}
+              </div>
+
+              <div class="col-span-1 flex justify-center">
+                <input type="number" min="1" [(ngModel)]="row.cantidad"
+                  class="w-[55px] h-7 text-center bg-white border border-gray-200 rounded text-[13px] text-[#003B8A] font-black outline-none focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] shadow-sm">
+              </div>
+
+              <div class="col-span-1 flex justify-center">
+                <button (click)="eliminarFila(i)"
+                  class="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center p-1 rounded-md hover:bg-red-50">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <div class="mt-2 flex justify-start">
+            <button (click)="agregarFila()"
+              class="flex items-center gap-2 px-4 py-2 bg-transparent border-2 border-dashed border-[#003B8A] rounded-lg text-sm font-bold text-[#003B8A] hover:bg-blue-50 transition-all duration-200 outline-none">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+              </svg>
+              Agregar producto
+            </button>
+          </div>
+
+        </div>
+      </app-card-form>
+
+    </div>
+  </div>
+
+  <app-footer-modal [paddingClass]="'p-4 px-6'">
+    <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+    <app-button-action [label]="'Guardar Pedido'" [claseCss]="'btn-agregar'"
+      (click)="guardarPedido()"></app-button-action>
+  </app-footer-modal>
+
+</div>

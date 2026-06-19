@@ -1,0 +1,225 @@
+<div
+    class="bg-white rounded-2xl overflow-hidden w-full max-w-4xl mx-auto max-h-[85vh] flex flex-col border border-slate-200 shadow-2xl">
+
+    <app-header-modal [label]="'Detalles del Pedido'"></app-header-modal>
+
+    <div class="p-4 overflow-y-auto bg-[#f4f7fa] flex-1">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
+            <app-card-details titulo="Información General">
+                <svg icono class="w-3.5 h-3.5 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+
+                <div class="flex flex-col text-xs mt-1">
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-[#eff6ff] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span
+                                class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Proveedor</span>
+                            <span class="text-[#0d1f38] font-bold text-[12px]">{{ pedido.nombre_proveedor }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-[#eff6ff] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Solicitado
+                                por</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px]">{{ pedido.nombre_asesor }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-[#eff6ff] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span
+                                class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Destino</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px]">{{ pedido.destino }}</span>
+                        </div>
+                    </div>
+                </div>
+            </app-card-details>
+
+            <app-card-details titulo="Fechas y Estatus">
+                <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+
+                <div class="flex flex-col text-xs mt-1">
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-[#f0f9f5] flex items-center justify-center flex-shrink-0">
+                            <span class="text-[#1D9E75] font-bold text-[10px]">SOL</span>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Fecha
+                                Solicitud</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px]">{{ pedido.fecha_solicitud |
+                                date:'mediumDate':'':'es-MX' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-[#f0f9f5] flex items-center justify-center flex-shrink-0">
+                            <span class="text-[#1D9E75] font-bold text-[10px]">EST</span>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Fecha
+                                Estimada de Llegada</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px]">{{ pedido.fecha_estimada |
+                                date:'mediumDate':'':'es-MX' }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Estatus
+                                Actual</span>
+                            <span class="font-bold text-[12px]"
+                                [ngClass]="{'text-slate-500': pedido.Estatus === 0, 'text-[#1D9E75]': pedido.Estatus === 1, 'text-red-500': pedido.Estatus === 2}">
+                                {{ pedido.estatusTexto || (pedido.Estatus === 0 ? 'Pendiente' : pedido.Estatus === 1 ?
+                                'Recibido' : 'Con incidencia') }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </app-card-details>
+
+        </div>
+
+        <app-card-details titulo="Material Solicitado">
+            <svg icono class="w-3.5 h-3.5 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+
+            <div class="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm mt-3">
+
+                <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2.5 px-4 items-center">
+                    <span
+                        class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+                    <span class="col-span-3 text-[9px] font-bold text-white uppercase tracking-widest">Código</span>
+                    <span class="col-span-6 text-[9px] font-bold text-white uppercase tracking-widest">Nombre y
+                        Modelo</span>
+                    <span
+                        class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center">Pzas</span>
+                </div>
+
+                <div *ngIf="cargando" class="flex justify-center items-center py-8">
+                    <div class="w-6 h-6 border-2 border-[#003B8A] border-t-transparent rounded-full animate-spin"></div>
+                </div>
+
+                <div *ngFor="let item of productosDetalle; let i = index"
+                    class="grid grid-cols-12 gap-3 py-2.5 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center">
+
+                    <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
+
+                    <div class="col-span-3 flex flex-col">
+                        <span class="text-[12px] font-bold text-[#0d1f38]">{{ item.Codigo_numeral || item.Codigo_japon
+                            }}</span>
+                    </div>
+
+                    <div class="col-span-6 flex flex-col truncate">
+                        <span class="text-[12px] font-bold text-[#0d1f38] truncate" [title]="item.nombre_producto">{{
+                            item.nombre_producto }}</span>
+                        <span class="text-[10px] text-slate-500 truncate">{{ item.modelo_producto }}</span>
+                    </div>
+
+                    <div class="col-span-2 flex justify-center">
+                        <span class="text-[14px] font-black text-[#003B8A]">{{ item.cantidad }}</span>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 py-2.5 px-6 flex justify-end items-center gap-4 border-t border-slate-200">
+                    <span class="text-xs font-bold text-[#0d1f38]">Total de piezas:</span>
+                    <span class="text-lg font-black text-[#003B8A] w-12 text-center">{{ getTotalPiezas() }}</span>
+                </div>
+
+            </div>
+        </app-card-details>
+        <div *ngIf="pedido.Estatus === 2" class="mt-4 animate-fade-in">
+            <app-card-details titulo="Reporte de Incidencia">
+                <svg icono class="w-3.5 h-3.5 text-[#be123c]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                          d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+
+                <div class="rounded-lg border border-red-200 overflow-hidden bg-white shadow-sm mt-3">
+                    
+                    <div class="bg-[#fff1f2] p-4 border-b border-red-100">
+                        <span class="text-[10px] font-bold text-red-800 uppercase tracking-wider mb-1.5 block">Descripción General del Problema</span>
+                        <p class="text-[12px] text-red-900 leading-relaxed">
+                            {{ pedido.descripcion_incidencia || 'No se proporcionó una descripción general del incidente.' }}
+                        </p>
+                    </div>
+
+                    <div class="bg-red-50 grid grid-cols-12 gap-3 py-2.5 px-4 items-center border-b border-red-100">
+                        <span class="col-span-6 text-[9px] font-bold text-red-800 uppercase tracking-widest min-w-0">Producto Afectado</span>
+                        <span class="col-span-3 text-[9px] font-bold text-red-800 uppercase tracking-widest text-center min-w-0">Tipo de Daño</span>
+                        <span class="col-span-3 text-[9px] font-bold text-red-800 uppercase tracking-widest text-center min-w-0">Pzas Afectadas</span>
+                    </div>
+
+                    <div *ngFor="let inc of incidentesDetalle" 
+                         class="grid grid-cols-12 gap-3 py-3 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center">
+                        
+                        <div class="col-span-6 flex flex-col min-w-0 pr-2">
+                            <span class="text-[12px] font-bold text-[#0d1f38] leading-tight truncate w-full" [title]="inc.nombre_producto">{{ inc.nombre_producto }}</span>
+                            <span class="text-[10px] text-slate-400 mt-0.5 font-mono truncate w-full">{{ inc.Codigo_numeral || inc.Codigo_japon }}</span>
+                        </div>
+                        
+                        <div class="col-span-3 flex justify-center min-w-0">
+                            <span class="text-[11px] font-bold text-red-700 bg-red-100 px-2.5 py-1 rounded-md border border-red-200">
+                                {{ inc.Tipo }}
+                            </span>
+                        </div>
+                        
+                        <div class="col-span-3 flex justify-center min-w-0">
+                            <span class="text-[14px] font-black text-[#be123c]">{{ inc.cantidad_afectada }}</span>
+                        </div>
+
+                    </div>
+                    
+                    <div *ngIf="!incidentesDetalle || incidentesDetalle.length === 0" class="p-4 text-center text-[12px] text-slate-500 font-medium">
+                        Cargando detalles de los productos afectados...
+                    </div>
+
+                </div>
+            </app-card-details>
+        </div>
+    </div>
+
+    <app-footer-modal [paddingClass]="'p-4 px-6 rounded-b-2xl'">
+        <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrarModal()"></app-button-action>
+
+        <div class="flex gap-2.5" *ngIf="pedido.Estatus === 0">
+            <app-button-action [label]="'Confirmar pedido'" [claseCss]="'btn-agregar'"
+                (click)="recibirPedido(pedido)"></app-button-action>
+        </div>
+    </app-footer-modal>
+</div>

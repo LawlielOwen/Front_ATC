@@ -1,0 +1,35 @@
+<div class="bg-white rounded-2xl overflow-hidden w-full max-w-md mx-auto">
+  
+  <div class="pt-8 px-8 pb-0 text-center">
+    
+    <div class="w-16 h-16 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-5">
+      <svg class="w-8 h-8 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    </div>
+
+    <h2 class="text-xl font-bold text-slate-800 mb-2">
+      {{ data.titulo || 'Confirmar acción' }}
+    </h2>
+    
+    <p class="text-[14.5px] text-slate-500 leading-relaxed">
+      {{ data.mensaje || '¿Estás seguro de que deseas proceder con esta acción?' }}
+    </p>
+  </div>
+
+  <app-footer-modal>
+    <app-button-action 
+      [label]="data.textoCancelar || 'Cancelar'" 
+      [claseCss]="'btn-cerrar'" 
+      (click)="cerrarDetalle()">
+    </app-button-action>
+    
+    <div class="flex gap-2.5">
+      <app-button-action 
+        (click)="procesarFuncion()" 
+        [label]="data.textoAceptar || 'Aceptar'">
+      </app-button-action>
+    </div>
+  </app-footer-modal>
+
+</div>

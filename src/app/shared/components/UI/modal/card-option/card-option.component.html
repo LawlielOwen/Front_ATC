@@ -1,0 +1,31 @@
+<div class="flex flex-col gap-1.5 mt-2 relative w-full">
+  
+  <div class="flex items-center gap-2 mb-0.5" *ngIf="label">
+    <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest bg-white pr-2 z-10">
+      {{ label }}
+    </span>
+    <div class="absolute left-0 w-full h-[1px] bg-slate-200 top-2.5"></div>
+  </div>
+
+  <div class="flex flex-col sm:flex-row gap-4 w-full">
+    
+    <div *ngFor="let opt of opciones" 
+         (click)="seleccionar(opt.value)"
+         class="flex-1 rounded-xl py-2.5 px-4 flex flex-col items-center justify-center cursor-pointer border-2 transition-all"
+         [ngClass]="value === opt.value ? 'border-[#003B8A] bg-[#eff6ff]' : 'border-slate-200 hover:bg-slate-50'">
+      
+      <span class="font-bold text-[13px] text-center"
+            [ngClass]="value === opt.value ? 'text-[#003B8A]' : 'text-slate-600'">
+        {{ opt.titulo }}
+      </span>
+      
+      <span *ngIf="opt.descripcion" 
+            class="text-[11px] text-center mt-0.5"
+            [ngClass]="value === opt.value ? 'text-[#003B8A] opacity-80' : 'text-slate-400'">
+        {{ opt.descripcion }}
+      </span>
+      
+    </div>
+
+  </div>
+</div>

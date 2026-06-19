@@ -11,6 +11,11 @@ import { SelectComponent } from "../../../shared/components/UI/form/select/selec
 import { CardFormComponent } from "../../../shared/components/UI/form/card-form/card-form.component";
 import { ValeService } from "../../../core/services/Vales.service";
 import { ValeSalida } from '../../../shared/model/vales.model';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatFormFieldModule } from '@angular/material/form-field';
+import { MatInputModule } from '@angular/material/input';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import {ClientesService} from '../../../core/services/clientes.service';
 @Component({
   selector: 'app-modal-vale',
   templateUrl: './modal-vale.page.html',
@@ -24,26 +29,38 @@ import { ValeSalida } from '../../../shared/model/vales.model';
     HeaderModalComponent,
     ButtonActionComponent,
     InputComponent,
-    SelectComponent,
-    CardFormComponent
+    CardFormComponent,
+    ReactiveFormsModule, // <-- ¡Muy importante para formControl!
+    MatFormFieldModule,  // <-- Para <mat-form-field>
+    MatInputModule,      // <-- Para matInput
+    MatAutocompleteModule
   ]
 })
 export class ModalValePage implements OnInit {
+clienteControl = new FormControl<any>('');
   solicitud = {
-    id_cliente: '',
+    id_cliente: null,
     orden_compra: '',
     num_factura: ''
   };
   productosSolicitados: any[] = [];
-  clientes: any[] = [
-    { id: 13, nombre: 'GRUPO CONPREMEX' },
-    { id: 3, nombre: 'Zapatito feliz.' }
-  ];
+  clientesFiltrados: any[] = [];
+  clientes: any[] = [];
   constructor(private dialogRef: MatDialogRef<ModalValePage>,
-    private valeService: ValeService) { }
+    private valeService: ValeService, private cs: ClientesService) { }
 
   ngOnInit() {
     this.agregarFilaProducto();
+    this.clientesFiltrados = this.clientes;
+    this.clienteControl.valueChanges.subscribe(value => {
+            if (typeof value === 'object' && value !== null) {
+        this.solicitud.id_cliente = value.id; 
+      } else {
+        this.solicitud.id_cliente = null; 
+        this.clientesFiltrados = this._filtrarClientes(value);
+      }
+    });
+    this.cargarClientes();
   }
   agregarFilaProducto() {
     this.productosSolicitados.push({
@@ -56,7 +73,6 @@ export class ModalValePage implements OnInit {
       buscando: false,
       timeoutId: null
     });
-
   }
   eliminarFila(index: number) {
     this.productosSolicitados.splice(index, 1);
@@ -141,5 +157,34 @@ export class ModalValePage implements OnInit {
       });
 
     }, 500);
+  }
+cargarClientes() {
+    this.cs.getClientes(1, 1000).subscribe({
+      next: (response: any) => {
+        const datosCrudos = response.clientes || response.data || response || [];
+        if (Array.isArray(datosCrudos)) {
+          this.clientes = datosCrudos.filter((c: any) => c.estatus === 1 || c.Estatus === 1);
+          this.clientesFiltrados = this.clientes;
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar clientes', err);
+        toast.error('Error al cargar la lista de clientes');
+      }
+    });
+  }
+
+  private _filtrarClientes(valorBuscado: any): any[] {
+    const filtro = (typeof valorBuscado === 'string' ? valorBuscado : '').toLowerCase();
+
+    return this.clientes.filter(cliente => {
+      const nombreCliente = cliente.nombre || cliente.Nombre || '';
+      return nombreCliente.toLowerCase().includes(filtro);
+    });
+  }
+
+  mostrarNombreCliente(cliente: any): string {
+    // Seguro para mostrar el nombre correcto cuando el usuario hace clic
+    return cliente ? (cliente.nombre || cliente.Nombre || '') : '';
   }
 }

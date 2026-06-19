@@ -92,18 +92,22 @@ export class HistorialESPage implements OnInit {
     ).subscribe({
       next: (response: any) => {
         const datosCrudos = response.movimientos || response.movi || response.m || response.data || [];
-        this.movimientosLista = datosCrudos.map((ms: any) => {
+       this.movimientosLista = datosCrudos.map((ms: any) => {
+          
           const f = new Date(ms.fecha);
-          const dia = f.getUTCDate().toString().padStart(2, '0');
-          let mes = f.toLocaleString('es-MX', { month: 'long', timeZone: 'UTC' }).replace('.', '');
+          
+          const dia = f.getDate().toString().padStart(2, '0');
+          
+          let mes = f.toLocaleString('es-MX', { month: 'long' }).replace('.', '');
           mes = mes.charAt(0).toUpperCase() + mes.slice(1);
 
-          const anio = f.getUTCFullYear();
-          let horas = f.getUTCHours();
-          const minutos = f.getUTCMinutes().toString().padStart(2, '0');
+          // 3. Usar getHours() y getMinutes() normales
+          let horas = f.getHours();
+          const minutos = f.getMinutes().toString().padStart(2, '0');
           const ampm = horas >= 12 ? 'p.m.' : 'a.m.';
           horas = horas % 12 || 12;
           const horasStr = horas.toString().padStart(2, '0');
+          
           const fechaFormateada = `${dia} ${mes} ${horasStr}:${minutos} ${ampm}`;
 
           return {
@@ -203,6 +207,7 @@ filtroFecha(rango: { inicio: any, fin: any }) {
   ionViewWillEnter() {
     this.cargarMov();
     this.cargarContador();
+    this.establecerMesActual();
   }
   detallesMov(movSeleccionado: any) {
     const dialogRef = this.dialog.open(DetallesPage, {
@@ -212,5 +217,22 @@ filtroFecha(rango: { inicio: any, fin: any }) {
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
       data: { m: movSeleccionado }
     });
+  }
+  establecerMesActual() {
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const mes = hoy.getMonth(); 
+    const primerDia = new Date(año, mes, 1);
+    const ultimoDia = new Date(año, mes + 1, 0);
+
+    const formatear = (fecha: Date) => {
+      const y = fecha.getFullYear();
+      const m = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      const d = fecha.getDate().toString().padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
+    this.fechaIni = formatear(primerDia);
+    this.fechaFin = formatear(ultimoDia);
   }
 }

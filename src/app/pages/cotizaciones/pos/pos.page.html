@@ -1,0 +1,321 @@
+<ion-app style="background-color: #ffffff;">
+    <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
+    <div class="container-sidebar">
+
+        <div class="container-header">
+            <app-header (toggleMenu)="mostrarSidebarMobile()"></app-header>
+
+            <ion-content style="--background :#f1f5f9;">
+                <div class="p-6 max-w-[1600px] mx-auto">
+
+                    <div class="grid grid-cols-1 lg:grid-cols-12 gap-4">
+
+                        <div class="lg:col-span-9 space-y-4">
+
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+
+                                <div class="flex justify-between items-center mb-4">
+                                    <div class="flex items-center gap-3">
+
+                                        <button (click)=" irACot()"
+                                            class="appearance-none bg-transparent p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003B8A] rounded-lg transition-colors outline-none focus:ring-2 focus:ring-slate-200"
+                                            title="Volver a cotizaciones">
+                                            <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
+                                                    d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                            </svg>
+                                        </button>
+
+                                        <h2 class="text-lg font-bold text-slate-800">Nueva cotización</h2>
+                                    </div>
+
+                                    <button (click)="limpiarFormulario()"
+                                        class="flex items-center gap-1.5 px-3 py-1.5 text-[12px] font-bold text-slate-400 bg-transparent rounded-lg hover:bg-red-50 hover:text-red-600 transition-all duration-200 outline-none select-none focus:ring-2 focus:ring-red-100">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                        </svg>
+                                        Limpiar
+                                    </button>
+                                </div>
+                                <div class="grid grid-cols-2 gap-4 mb-6">
+                                    <input type="text" [formControl]="clienteControl" [matAutocomplete]="auto"
+                                        placeholder="Ingresa nombre del cliente registrado o no registrado"
+                                        class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+
+                                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente">
+                                        <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
+                                            {{ c.nombre || c.Nombre }}
+                                        </mat-option>
+
+                                        <mat-option
+                                            *ngIf="clienteControl.value && typeof clienteControl.value === 'string' && clientesFiltrados.length === 0"
+                                            [value]="clienteControl.value">
+                                            <span class="italic text-slate-500">Usar como cliente eventual:</span>
+                                            <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value
+                                                }}</span>
+                                        </mat-option>
+                                    </mat-autocomplete>
+
+                                    <input type="text" placeholder="Atención a (Contacto)..."
+                                        class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                        [(ngModel)]="cotizacion.contacto">
+                                </div>
+                                <div class="flex gap-3 mb-6">
+                                    <div class="relative flex-1">
+                                        <input type="text" [formControl]="productoControl"
+                                            [matAutocomplete]="autoProducto"
+                                            placeholder="Buscar por nombre, Cód. Japón o Cód. Numeral..."
+                                            class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                            (keyup.enter)="onEnterProducto($event)">
+
+                                        <mat-autocomplete #autoProducto="matAutocomplete"
+                                            (optionSelected)="seleccionarProducto($event.option.value)">
+                                            <mat-option *ngFor="let p of productosFiltrados" [value]="p"
+                                                class="h-auto py-2">
+                                                <div class="flex flex-col py-1">
+                                                    <div class="flex justify-between items-center w-full gap-4">
+
+                                                        <span class="text-xs font-bold text-[#0d1f38] truncate flex-1">
+                                                            {{ p.Nombre }}
+                                                        </span>
+
+                                                        <span
+                                                            class="text-xs font-black text-[#003B8A] whitespace-nowrap flex-shrink-0">
+                                                            {{ p.Precio | currency: (cotizacion.moneda === 'USD' ? 'USD'
+                                                            : 'MXN') : '$' }}
+                                                        </span>
+
+                                                    </div>
+                                                    <div
+                                                        class="text-[10px] text-slate-400 font-semibold mt-0.5 flex gap-2">
+                                                        <span>JP: <span class="text-slate-600">{{ p.Codigo_japon || '--'
+                                                                }}</span></span>
+                                                        <span class="text-slate-300">|</span>
+                                                        <span>Num: <span class="text-slate-600">{{ p.Codigo_numeral ||
+                                                                '--' }}</span></span>
+                                                    </div>
+                                                </div>
+                                            </mat-option>
+                                        </mat-autocomplete>
+                                    </div>
+
+                                    <button
+                                        class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold border border-slate-200 hover:bg-slate-200 transition">
+                                        Fila manual
+                                    </button>
+                                </div>
+                                <div class="rounded-lg border border-slate-200 bg-white shadow-sm mt-4">
+
+                                    <div
+                                        class="bg-[#003B8A] rounded-t-lg grid grid-cols-[30px_2.5fr_1.5fr_1.5fr_1fr_60px_1.2fr_40px] gap-3 py-3.5 px-4 items-center">
+                                        <span
+                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+                                        <span
+                                            class="text-[10px] font-bold text-white uppercase tracking-widest">Producto
+                                            / Modelo</span>
+                                        <span
+                                            class="text-[10px] font-bold text-white uppercase tracking-widest">Descripción</span>
+                                        <span
+                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-center">T.
+                                            Entrega</span>
+                                        <span
+                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-right">Precio
+                                            Unit.</span>
+                                        <span
+                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-center">Cant.</span>
+                                        <span
+                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-right">Subtotal</span>
+                                        <span></span>
+                                    </div>
+
+                                    <div *ngFor="let item of detalles; let i = index"
+                                        class="grid grid-cols-[30px_2.5fr_1.5fr_1.5fr_1fr_60px_1.2fr_40px] gap-3 py-3 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center group">
+
+                                        <div class="text-[12px] font-semibold text-slate-400 text-center">{{ i + 1 }}
+                                        </div>
+
+                                        <div class="flex flex-col justify-center pr-2 overflow-hidden">
+                                            <span class="text-[13px] font-bold text-[#0d1f38] leading-tight truncate"
+                                                title="{{ item.nombre_producto }}">
+                                                {{ item.nombre_producto }}
+                                            </span>
+                                            <span class="text-[10px] font-semibold text-slate-400 truncate mt-0.5"
+                                                title="Modelo">
+                                                {{ item.Modelo || item.Codigo_japon || 'Sin Cód.' }}
+                                            </span>
+                                        </div>
+
+                                        <div class="relative w-full h-8 z-10 focus-within:z-50">
+                                            <textarea placeholder="Añadir descripción..."
+                                                class="absolute top-0 left-0 w-full h-8 bg-transparent border-b border-transparent hover:border-slate-300 focus:w-[280px] focus:h-32 focus:bg-white focus:border focus:border-[#003B8A] focus:shadow-2xl focus:rounded-lg outline-none text-[11px] text-slate-600 placeholder-slate-300 py-1.5 px-2 transition-all duration-300 ease-in-out resize-none overflow-hidden focus:overflow-y-auto"
+                                                [(ngModel)]="item.extra_descripcion"></textarea>
+                                        </div>
+
+                                        <div class="flex justify-center items-center px-1">
+                                            <input type="text" placeholder="Ej. 1-2 DÍAS"
+                                                class="appearance-none w-full max-w-[95px] bg-transparent border border-transparent hover:bg-slate-100 focus:bg-white focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center py-1.5 transition-all cursor-pointer focus:cursor-text uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-300"
+                                                [(ngModel)]="item.tiempo_entrega">
+                                        </div>
+
+                                        <div class="flex justify-end items-center pr-1">
+                                            <span
+                                                class="text-[13px] font-semibold text-slate-700 text-right whitespace-nowrap">
+                                                {{ item.precio_unitario_cotizado | currency: (cotizacion.moneda ===
+                                                'USD' ? 'USD' : 'MXN') : '$' }}
+                                            </span>
+                                        </div>
+
+                                        <div class="flex justify-center">
+                                            <input type="number" min="1"
+                                                class="appearance-none w-full max-w-[50px] h-[30px] text-center bg-[#fafbfc] border border-slate-200 hover:border-slate-300 rounded-md text-[13px] font-black text-[#003B8A] outline-none focus:bg-white focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] transition-all m-0"
+                                                [(ngModel)]="item.cantidad_producto" (change)="calcularTotales()">
+                                        </div>
+
+                                        <div class="text-[13px] font-bold text-[#003B8A] text-right whitespace-nowrap">
+                                            {{ (item.cantidad_producto * item.precio_unitario_cotizado) | currency:
+                                            (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
+                                        </div>
+
+                                        <div class="flex justify-end items-center">
+                                            <button (click)="eliminarItem(i)"
+                                                class="text-slate-300 hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-md hover:bg-red-50"
+                                                title="Eliminar partida">
+                                                <svg class="w-4 h-5" fill="none" viewBox="0 0 24 24"
+                                                    stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round"
+                                                        stroke-width="2"
+                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+
+                                    </div>
+
+                                    <div *ngIf="detalles.length === 0"
+                                        class="py-12 flex flex-col items-center justify-center text-slate-400">
+                                        <svg class="w-12 h-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24"
+                                            stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        <p class="text-[13px] font-medium italic">No hay productos. Utiliza el buscador
+                                            para agregar ítems.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="lg:col-span-3 space-y-4">
+
+                            <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
+                                <h3 class="text-md font-bold text-slate-800 mb-4">Resumen</h3>
+
+                                <div class="mb-5">
+                                    <p class="text-[11px] font-bold text-slate-400 uppercase mb-2">Divisa de Cotización
+                                    </p>
+                                    <div class="flex bg-[#e2e8f0] p-1 rounded-lg w-full h-[38px] relative mb-3">
+                                        <button (click)="cambiarMoneda('MONEDA NACIONAL')"
+                                            [ngClass]="cotizacion.moneda === 'MONEDA NACIONAL' ? 'bg-white text-[#003B8A] shadow-md font-bold' : 'bg-transparent text-[#475569] hover:text-[#0f172a]'"
+                                            class="flex-1 px-2 py-1 text-[11px] tracking-wide rounded-md transition-all duration-300 ease-in-out flex items-center justify-center">
+                                            MXN
+                                        </button>
+
+                                        <button (click)="cambiarMoneda('USD')"
+                                            [ngClass]="cotizacion.moneda === 'USD' ? 'bg-white text-[#003B8A] shadow-md font-bold' : 'bg-transparent text-[#475569] hover:text-[#0f172a]'"
+                                            class="flex-1 px-2 py-1 text-[11px] tracking-wide rounded-md transition-all duration-300 ease-in-out flex items-center justify-center">
+                                            USD
+                                        </button>
+                                    </div>
+
+                                    <div class="flex items-center gap-2 text-[12px] text-slate-600"
+                                        *ngIf="cotizacion.moneda === 'USD'">
+                                        <span>1 USD = </span>
+
+                                        <input type="number" step="0.01"
+                                            class="w-20 border border-slate-300 rounded p-1 text-center outline-none focus:border-[#003B8A]"
+                                            [(ngModel)]="cotizacion.tipo_cambio" (ngModelChange)="calcularTotales()">
+
+                                        <span>MXN</span>
+                                    </div>
+                                </div>
+
+                                <hr class="border-slate-100 my-4">
+
+                                <div class="space-y-2 text-[13px] text-slate-600 mb-4 font-medium">
+                                    <div class="flex justify-between items-center">
+                                        <span>Ítems <span
+                                                class="bg-slate-100 px-1.5 rounded text-[11px] font-bold text-[#003B8A]">{{
+                                                detalles.length }}</span></span>
+                                    </div>
+                                    <div class="flex justify-between">
+                                        <span>Subtotal</span>
+                                        <span class="font-bold text-slate-800">{{ subtotal_final | currency:
+                                            (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}</span>
+                                    </div>
+                                    <div class="flex justify-between items-center">
+                                        <span>IVA <span
+                                                class="text-yellow-700 bg-yellow-100 px-1 rounded text-[11px] font-bold">16%</span></span>
+                                        <span class="font-bold text-slate-800">{{ iva_final | currency:
+                                            (cotizacion.moneda ===
+                                            'USD' ? 'USD' : 'MXN') : '$' }}</span>
+                                    </div>
+                                </div>
+                                <div class="bg-[#003B8A] rounded-xl p-4 text-white shadow-md">
+                                    <p class="text-[11px] font-bold opacity-90 uppercase tracking-wider">TOTAL {{
+                                        cotizacion.moneda === 'USD' ? 'USD' : 'MXN' }}</p>
+                                    <p class="text-3xl font-black my-1 tracking-tight">{{ total_final | currency:
+                                        (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}</p>
+                                    <p class="text-[11px] opacity-80 font-medium" *ngIf="cotizacion.moneda === 'USD'">
+                                        Equivalente: {{ (total_final * cotizacion.tipo_cambio) | currency:'MXN':'$' }}
+                                        MXN
+                                    </p>
+                                </div>
+                                <hr class="border-slate-100 my-4">
+
+                                <div class="space-y-4">
+                                    <div>
+                                        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Condiciones de
+                                            pago (Vigencia)</p>
+                                        <select
+                                            class="w-full border border-slate-200 rounded-lg p-2 text-[13px] text-slate-700 outline-none focus:border-[#003B8A]"
+                                            [(ngModel)]="cotizacion.vigencia_dias">
+                                            <option value="7">7 días</option>
+                                            <option value="15">15 días</option>
+                                            <option value="30">30 días</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Ciudad de destino
+                                        </p>
+                                        <input type="text" placeholder="Ingrese la ciudad..."
+                                            class="bg-[#fafbfc] border border-solid
+                                             border-[#d2ddec] bg-clip-padding text-[#0d1f38]
+                                              placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 
+                                              focus:ring-[#003B8A] appearance-none shadow-none ring-0
+                                               focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                            [(ngModel)]="cotizacion.ciudad_destino">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="space-y-2 mt-4">
+                                <button
+                                    class="w-full bg-[#003B8A] hover:bg-blue-800 text-white font-semibold py-3 rounded-lg shadow-sm transition text-sm"
+                                    (click)="guardarCotizacion()">
+                                    Guardar cotización
+                                </button>
+
+                                <button (click)="guardarYDescargar()"
+                                    class="w-full bg-[#008f5d] hover:bg-green-700 text-white font-semibold py-3 rounded-lg shadow-sm transition text-sm">
+                                    Guardar y descargar PDF
+                                </button>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </ion-content>
+        </div>
+    </div>
+</ion-app>

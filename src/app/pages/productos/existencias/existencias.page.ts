@@ -1,6 +1,8 @@
 import { Component, OnInit, Inject } from '@angular/core';
 import { HeaderModalComponent } from "../../../shared/components/UI/modal/header-modal/header-modal.component";
 import { FooterModalComponent } from "../../../shared/components/UI/modal/footer-modal/footer-modal.component";
+import { StepItemComponent} from "../../../shared/components/UI/modal/step-item/step-item.component";
+import { CardSelectComponent, CardOption } from "../../../shared/components/UI/modal/card-option/card-option.component";
 import { CommonModule } from '@angular/common';
 import { IonicModule } from "@ionic/angular";
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
@@ -22,9 +24,13 @@ import { FormsModule } from '@angular/forms';
     HeaderModalComponent,
     FooterModalComponent,
     ButtonActionComponent,
-    NgxSonnerToaster]
+    NgxSonnerToaster,
+    StepItemComponent,
+    CardSelectComponent
+  ]
 })
 export class ExistenciasPage implements OnInit {
+
   productoEncontrado: any = null;
   paso: number = 1;
   cantidad: number = 0;
@@ -137,5 +143,19 @@ confirmarMovimiento() {
         toast.error("Producto no encontrado");
       }
     });
+  }
+  // Transformamos el arreglo estático en un 'get' dinámico
+  get opcionesDestino(): CardOption[] {
+    // La opción 'pedido' siempre existe, así que la ponemos por defecto
+    const opciones: CardOption[] = [
+      { value: 'pedido', titulo: 'Para pedido', descripcion: 'Suministra un pedido' }
+    ];
+
+    // Simulamos tu *ngIf: Si es entrada, agregamos 'almacen' al principio de la lista
+    if (this.esEntrada) {
+      opciones.unshift({ value: 'almacen', titulo: 'Para almacén', descripcion: 'Se suma al stock general' });
+    }
+
+    return opciones;
   }
 }

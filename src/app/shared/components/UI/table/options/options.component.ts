@@ -16,8 +16,8 @@ export interface MenuOption {
 export class MenuOpcionesComponent {
   @Input() opcionesExtra: MenuOption[] = [];
   @Output() accionSeleccionada = new EventEmitter<string>();
-
-  menuAbierto = false;
+@Input() omitirBase: boolean = false; 
+ menuAbierto = false;
 
   opcionesBase: MenuOption[] = [
     { accion: 'editar', etiqueta: 'Modificar', claseColor: 'texto-azul' },
@@ -26,8 +26,9 @@ export class MenuOpcionesComponent {
 
   constructor(private eRef: ElementRef) {}
 
-  get opciones(): MenuOption[] {
-    return [...this.opcionesBase, ...this.opcionesExtra];
+ get opciones(): MenuOption[] {
+    // Si omitirBase es true, solo devuelve las extra. Si no, junta ambas.
+    return this.omitirBase ? this.opcionesExtra : [...this.opcionesBase, ...this.opcionesExtra];
   }
 
   toggleMenu(event: Event) {

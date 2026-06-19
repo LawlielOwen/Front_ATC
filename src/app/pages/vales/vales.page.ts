@@ -1,5 +1,7 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, ViewChild, OnDestroy } from '@angular/core'; 
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
+
 import { SiderbarComponent } from '../../shared/components/layout/siderbar/siderbar.component';
 import { IonicModule } from '@ionic/angular';
 import { EstatusComponent } from '../../shared/components/UI/Filter/estatus/estatus.component'
@@ -14,12 +16,15 @@ import { StatCardComponent } from '../../shared/components/UI/stat-card/stat-car
 import { ContainerTableComponent } from '../../shared/components/layout/container-table/container-table.component';
 import { PaginationComponent } from '../../shared/components/UI/pagination/pagination.component';
 import { FiltroFechaComponent } from '../../shared/components/UI/Filter/filtro-fecha/filtro-fecha.component';
+
+
 import { MatDialog } from '@angular/material/dialog';
 import { toast } from 'ngx-sonner';
 import { ValeService } from '../../core/services/Vales.service';
 import { ValeSalida } from '../../shared/model/vales.model';
 import { ModalValePage } from './modal-vale/modal-vale.page';
 import { DetallesValePage } from "./detalles-vale/detalles-vale.page";
+import { notificacionService } from '../../core/services/Notificaciones.service';
 @Component({
   selector: 'app-vales',
   templateUrl: './vales.page.html',
@@ -31,10 +36,11 @@ import { DetallesValePage } from "./detalles-vale/detalles-vale.page";
     , FiltroFechaComponent, CommonModule, EtiquetaComponent, EstatusComponent
   ]
 })
-export class ValesPage implements OnInit {
+export class ValesPage implements OnInit, OnDestroy{
   @ViewChild(SiderbarComponent) sidebar!: SiderbarComponent;
   currentPage: number = 1;
   totalPages: number = 1;
+  private socketSub!: Subscription;
   totalRecords: number = 0;
   limit: number = 10;
   terminoActual: string = '';
@@ -54,7 +60,7 @@ export class ValesPage implements OnInit {
       this.sidebar.toggleMenu();
     }
   }
-  constructor(private vs: ValeService, private dialog: MatDialog) { }
+  constructor(private vs: ValeService, private dialog: MatDialog,private notiService: notificacionService) { }
   estatusVales = [
     { label: 'Todos', value: null },
     { label: 'Pendientes', value: 0 },
@@ -62,7 +68,10 @@ export class ValesPage implements OnInit {
     { label: 'Rechazados', value: 2 }
   ]
   ngOnInit() {
-
+this.socketSub = this.notiService.escucharActualizacionTabla().subscribe(() => {
+      this.cargarVal(); 
+      this.cargarContador();
+  });
   }
   cargarContador() {
     const userString = localStorage.getItem('user');
@@ -133,21 +142,21 @@ export class ValesPage implements OnInit {
       default: return 'azul';
     }
   }
- formatearFecha(fecha: string | Date): string {
+formatearFecha(fecha: string | Date): string {
     if (!fecha) return 'Sin fecha';
     const f = new Date(fecha);
     if (isNaN(f.getTime())) return 'Fecha inválida';
 
-    // Usamos getUTCDate para evitar que reste horas
-    const dia = f.getUTCDate().toString().padStart(2, '0');
+    // 1. Usar getDate en lugar de getUTCDate
+    const dia = f.getDate().toString().padStart(2, '0');
     
-    // Agregamos timeZone: 'UTC' al mes
-    let mes = f.toLocaleString('es-MX', { month: 'long', timeZone: 'UTC' }).replace('.', '');
+    // 2. Quitar el timeZone: 'UTC'
+    let mes = f.toLocaleString('es-MX', { month: 'long' }).replace('.', '');
     mes = mes.charAt(0).toUpperCase() + mes.slice(1);
     
-    // Usamos getUTCHours y getUTCMinutes
-    let horas = f.getUTCHours();
-    const minutos = f.getUTCMinutes().toString().padStart(2, '0');
+    // 3. Usar getHours y getMinutes normales
+    let horas = f.getHours();
+    const minutos = f.getMinutes().toString().padStart(2, '0');
     const ampm = horas >= 12 ? 'p.m.' : 'a.m.';
 
     horas = horas % 12 || 12;
@@ -182,7 +191,8 @@ export class ValesPage implements OnInit {
       maxWidth: '105vw',
       data: { tipo: 'Entrada' },
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-      panelClass: []
+      panelClass: [],
+      autoFocus: false
     });
 
     dialogRef.afterClosed().subscribe((exito: boolean) => {
@@ -210,6 +220,7 @@ export class ValesPage implements OnInit {
   ionViewWillEnter() {
     this.cargarContador();
     this.cargarVal();
+    this.establecerMesActual();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     this.rolUsuario = user.Rol || '';
     this.idUsuario = user.id || 0;
@@ -239,5 +250,27 @@ export class ValesPage implements OnInit {
       },
       error: (err) => { toast.error('Error al rechazar el vale.'); }
     });
+  }
+  ngOnDestroy() {
+    if (this.socketSub) {
+      this.socketSub.unsubscribe();
+    }
+  }
+  establecerMesActual() {
+    const hoy = new Date();
+    const año = hoy.getFullYear();
+    const mes = hoy.getMonth(); 
+    const primerDia = new Date(año, mes, 1);
+    const ultimoDia = new Date(año, mes + 1, 0);
+
+    const formatear = (fecha: Date) => {
+      const y = fecha.getFullYear();
+      const m = (fecha.getMonth() + 1).toString().padStart(2, '0');
+      const d = fecha.getDate().toString().padStart(2, '0');
+      return `${y}-${m}-${d}`;
+    };
+
+    this.fechaIni = formatear(primerDia);
+    this.fechaFin = formatear(ultimoDia);
   }
 }

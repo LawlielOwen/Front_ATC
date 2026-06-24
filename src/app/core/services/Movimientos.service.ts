@@ -22,12 +22,13 @@ export class MovimientoService {
             .set('limite', limite.toString());
         return this.http.get<RespuestaPaginada>(`${this.apiUrl}/movimientos`, { params });
     }
-    salidaProducto(codigo: string, cantidad: number, destino: string, id_asesor: number) {
+    salidaProducto(codigo: string, cantidad: number, destino: string, id_asesor: number, id_cliente: number) {
         const payload = {
             codigo: codigo,
             cantidad: cantidad,
             destino: destino,
-            id_asesor: id_asesor
+            id_asesor: id_asesor,
+            id_cliente: id_cliente
         };
 
         return this.http.post(`${this.apiUrl}/movimientos/salida`, payload);

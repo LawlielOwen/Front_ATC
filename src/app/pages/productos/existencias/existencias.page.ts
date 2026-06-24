@@ -12,6 +12,10 @@ import { toast } from 'ngx-sonner';
 import { NgxSonnerToaster } from 'ngx-sonner';
 import { MovimientoService } from '../../../core/services/Movimientos.service';
 import { FormsModule } from '@angular/forms';
+import { ClientesService } from '../../../core/services/clientes.service';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { MatOptionModule } from '@angular/material/core';
 @Component({
   selector: 'app-existencias',
   templateUrl: './existencias.page.html',
@@ -26,7 +30,10 @@ import { FormsModule } from '@angular/forms';
     ButtonActionComponent,
     NgxSonnerToaster,
     StepItemComponent,
-    CardSelectComponent
+    CardSelectComponent,
+    MatOptionModule,
+    MatAutocompleteModule,
+    ReactiveFormsModule
   ]
 })
 export class ExistenciasPage implements OnInit {
@@ -36,8 +43,12 @@ export class ExistenciasPage implements OnInit {
   cantidad: number = 0;
   destino: 'almacen' | 'pedido' = 'almacen';
   tipoMovimiento: 'Entrada' | 'Salida' = 'Entrada';
+   clientes: any[] = [];
+  clientesFiltrados: any[] = [];
+    clienteControl = new FormControl<any>('');
+
   constructor(private dialogRef: MatDialogRef<ExistenciasPage>,
-    @Inject(MAT_DIALOG_DATA) public data: any, private ps: ProductoService, private ms: MovimientoService) {
+    @Inject(MAT_DIALOG_DATA) public data: any, private ps: ProductoService, private ms: MovimientoService, private cs: ClientesService ) {
   if (this.data && this.data.tipo) {
       this.tipoMovimiento = this.data.tipo;
       if (this.tipoMovimiento === 'Salida') {
@@ -50,6 +61,12 @@ export class ExistenciasPage implements OnInit {
     cantidad: null as any
   }
   ngOnInit() {
+    this.cargarClientes();
+
+    this.clienteControl.valueChanges.subscribe((valorBuscado) => {
+      this.clientesFiltrados = this._filtrarClientes(valorBuscado);
+     
+    });
   }
   get esEntrada() { return this.tipoMovimiento === 'Entrada'; }
   get colorHex() { return this.esEntrada ? '#1D9E75' : '#b91c1c'; } 
@@ -72,42 +89,35 @@ export class ExistenciasPage implements OnInit {
   cerrar() {
     this.dialogRef.close();
   }
-  confirmarEntrada() {
-    const codigoP = this.productoEncontrado.Codigo_japon || this.productoEncontrado.Codigo_numeral;
-    const usuarioString = localStorage.getItem('user');
-    let idAsesor = null;
 
-    if (usuarioString) {
-      const usuarioObj = JSON.parse(usuarioString);
-      idAsesor = usuarioObj.id;
-    }
-    this.ps.entradaProducto(codigoP, this.cantidad, this.destino, idAsesor).subscribe({
-      next: (response) => {
-        this.paso = 3;
-        toast.success('Entrada registrada correctamente');
-      },
-      error: (err) => {
-        console.error(err);
-        toast.error('Ocurrió un error al registrar la entrada');
-      }
-    });
-    this.dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
-      if (necesitaRecargar) {
-        this.dialogRef.close(true);
-      }
-    });
-  }
 confirmarMovimiento() {
-    if (!this.esEntrada && this.cantidad > this.productoEncontrado.Stock) {
-      toast.error('No hay suficiente stock para esta salida');
+    const cantidadNumerica = Number(this.cantidad);
+    
+    if (isNaN(cantidadNumerica) || !Number.isInteger(cantidadNumerica) || cantidadNumerica <= 0) {
+      toast.error('La cantidad debe ser un número entero mayor a 0.');
       return;
     }
+    
+    this.cantidad = cantidadNumerica;
 
     const codigoP = this.productoEncontrado.Codigo_japon || this.productoEncontrado.Codigo_numeral;
     const usuarioString = localStorage.getItem('user');
     let idAsesor = usuarioString ? JSON.parse(usuarioString).id : null;
 
+    if (!this.esEntrada) {
+      if (this.cantidad > this.productoEncontrado.Stock) {
+        toast.error('No hay suficiente stock para esta salida.');
+        return;
+      }
+      
+      if (!idAsesor) {
+        toast.error('Error de sesión: Es obligatorio registrar un asesor responsable para la salida.');
+        return;
+      }
+    }
+
     if (this.esEntrada) {
+      
       this.ps.entradaProducto(codigoP, this.cantidad, this.destino, idAsesor).subscribe({
         next: () => {
           this.paso = 3;
@@ -115,8 +125,17 @@ confirmarMovimiento() {
         },
         error: (err) => { console.error(err); toast.error('Error al registrar la entrada'); }
       });
+      
     } else {
-      this.ms.salidaProducto(codigoP, this.cantidad, this.destino, idAsesor).subscribe({
+      
+      let idCliente = null;
+      const clienteSeleccionado = this.clienteControl.value;
+      
+      if (clienteSeleccionado && typeof clienteSeleccionado === 'object') {
+        idCliente = clienteSeleccionado.id || clienteSeleccionado.Id; 
+      }
+
+      this.ms.salidaProducto(codigoP, this.cantidad, this.destino, idAsesor, idCliente).subscribe({
         next: () => {
           this.paso = 3;
           toast.success('Salida registrada correctamente');
@@ -128,10 +147,14 @@ confirmarMovimiento() {
   finalizar() {
     this.dialogRef.close(true);
   }
-  consultarProducto() {
-    const codigoP = this.producto.codigo;
-
-    if (!codigoP) return;
+consultarProducto() {
+    // Extraemos y limpiamos los espacios en blanco
+    const codigoP = (this.producto.codigo || '').toString().trim();
+    
+    if (!codigoP) {
+      toast.warning('Por favor, ingresa el código del producto antes de buscar.');
+      return;
+    }
 
     this.ps.buscarProductoCodigo(codigoP).subscribe({
       next: (response: any) => {
@@ -157,5 +180,32 @@ confirmarMovimiento() {
     }
 
     return opciones;
+  }
+    cargarClientes() {
+    this.cs.getClientes(1, 1000).subscribe({
+      next: (response: any) => {
+        const datosCrudos = response.clientes || response.data || response || [];
+        if (Array.isArray(datosCrudos)) {
+          this.clientes = datosCrudos.filter((c: any) => c.estatus === 1 || c.Estatus === 1);
+          this.clientesFiltrados = this.clientes;
+        }
+      },
+      error: (err) => {
+        console.error('Error al cargar clientes', err);
+        toast.error('Error al cargar la lista de clientes');
+      }
+    });
+  }
+    private _filtrarClientes(valorBuscado: any): any[] {
+    const filtro = (typeof valorBuscado === 'string' ? valorBuscado : '').toLowerCase();
+
+    return this.clientes.filter(cliente => {
+      const nombreCliente = cliente.nombre || cliente.Nombre || '';
+      return nombreCliente.toLowerCase().includes(filtro);
+    });
+  }
+
+  mostrarNombreCliente(cliente: any): string {
+    return cliente ? (cliente.nombre || cliente.Nombre || '') : '';
   }
 }

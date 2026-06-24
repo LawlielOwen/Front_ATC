@@ -1,10 +1,10 @@
-import { Component, OnInit, ViewChild } from '@angular/core';
+import { Component, OnInit, Inject, Optional } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { SiderbarComponent } from '../../../shared/components/layout/siderbar/siderbar.component';
 import { IonicModule } from '@ionic/angular';
 import { HeaderComponent } from '../../../shared/components/layout/header/header.component';
 import { NgxSonnerToaster } from 'ngx-sonner';
 import { toast } from 'ngx-sonner';
+
 import { CotizacionService } from '../../../core/services/Cotizaciones.service'
 import { FormsModule } from '@angular/forms';
 import { ClientesService } from '../../../core/services/clientes.service';
@@ -16,6 +16,8 @@ import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
 import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
+import { Asesor } from "../../../shared/model/asesor.model"
+import { AsesoresService } from "../../../core/services/Asesores.service";
 
 @Component({
   selector: 'app-pos',
@@ -23,7 +25,7 @@ import Swal from 'sweetalert2';
   styleUrls: ['./pos.page.scss'],
   standalone: true,
   imports: [
-    IonicModule, SiderbarComponent, HeaderComponent, NgxSonnerToaster, FormsModule, CommonModule, MatAutocompleteModule,MatInputModule,
+    IonicModule,  HeaderComponent, NgxSonnerToaster, FormsModule, CommonModule, MatAutocompleteModule,MatInputModule,
     MatFormFieldModule,ReactiveFormsModule,
   ]
 })
@@ -31,9 +33,10 @@ export class POSPage implements OnInit {
   clienteControl = new FormControl<any>('');
  idUsuario: number = 0;
   rolUsuario: string = '';
-  @ViewChild(SiderbarComponent) sidebar!: SiderbarComponent;
   clientes: any[] = [];
   clientesFiltrados: any[] = [];
+    asesores: Asesor[] = [];
+
 productoControl = new FormControl('');
 productosFiltrados: any[] = [];
 cotizacion = {
@@ -50,12 +53,11 @@ cotizacion = {
   iva_final: number = 0;
   total_final: number = 0;
   detalles: any[] = [];
-  constructor(private cs: CotizacionService,private c: ClientesService,private router: Router) { }
-  mostrarSidebarMobile() {
-    if (this.sidebar) {
-      this.sidebar.toggleMenu();
-    }
-  }
+   public data: any
+  constructor(private cs: CotizacionService,private c: ClientesService,private router: Router,private service: AsesoresService,
+    
+  ) { }
+ 
   ngOnInit() {
     this.cargarClientes();
 
@@ -88,6 +90,20 @@ cotizacion = {
       }
     }
   });
+  this.cargarAsesores();
+  }
+ cargarAsesores() {
+    this.service.getAsesores().subscribe({
+      next: (response: any) => {
+        this.asesores = response.filter((asesor: Asesor) => asesor.Rol === 'Asesor');
+        
+        // CORRECCIÓN: Solo asignamos el asesor si 'this.data' existe
+        if (this.data && this.data.id_asesor) {
+           this.cotizacion.id_asesor = this.data.id_asesor.toString();
+        }
+      },
+      error: (err) => console.error('Error al cargar asesores', err)
+    });
   }
   onEnterProducto(event: any) {
   const termino = event.target.value?.trim();
@@ -197,9 +213,7 @@ guardarYDescargar() {
     });
   }
 guardarCotizacion() {
-  const usuarioString = localStorage.getItem('user');
-    let idAsesor = usuarioString ? JSON.parse(usuarioString).id : null;
-    this.cotizacion.id_asesor = idAsesor;
+
     if (this.detalles.length === 0) {
       toast.error('La cotización debe tener al menos un producto');
       return;

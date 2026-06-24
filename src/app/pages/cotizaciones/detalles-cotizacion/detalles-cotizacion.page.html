@@ -140,29 +140,29 @@
                         <span class="text-[13px] font-black text-[#003B8A]">{{ item.cantidad_producto }}</span>
                     </div>
 
-                    <div class="col-span-2 flex justify-end">
+                   <div class="col-span-2 flex justify-end">
                         <span class="text-[11px] font-semibold text-slate-600">
-                            {{ cot?.moneda === 'USD' ? 'USD ' : 'MXN ' }}{{ item.precio_unitario_cotizado | number:'1.2-2' }}
+                            {{ item.precio_formateado }}
                         </span>
                     </div>
 
                     <div class="col-span-2 flex justify-end">
                         <span class="text-[11px] font-bold text-[#0d1f38]">
-                            {{ cot?.moneda === 'USD' ? 'USD ' : 'MXN ' }}{{ (item.cantidad_producto * item.precio_unitario_cotizado) | number:'1.2-2' }}
+                            {{ item.importe_formateado }}
                         </span>
                     </div>
                 </div>
 
-                <div class="bg-slate-50 py-2.5 px-5 flex flex-col items-end gap-1 border-t border-slate-200">
+               <div class="bg-slate-50 py-2.5 px-5 flex flex-col items-end gap-1 border-t border-slate-200">
                     
                     <div class="flex justify-between w-48 text-[11px] text-slate-500">
                         <span>Subtotal:</span>
-                        <span class="font-semibold">{{ cot?.moneda === 'USD' ? 'USD ' : 'MXN ' }}{{ cot?.subtotal | number:'1.2-2' }}</span>
+                        <span class="font-semibold">{{ cot?.subtotal_formateado }}</span>
                     </div>
                     
                     <div class="flex justify-between w-48 text-[11px] text-slate-500">
                         <span>IVA (16%):</span>
-                        <span class="font-semibold">{{ cot?.moneda === 'USD' ? 'USD ' : 'MXN ' }}{{ cot?.iva | number:'1.2-2' }}</span>
+                        <span class="font-semibold">{{ cot?.iva_formateado }}</span>
                     </div>
                     
                     <div class="flex justify-between w-48 items-center mt-0.5 pt-1.5 border-t border-slate-200">
@@ -170,7 +170,7 @@
                         
                         <div class="flex items-center gap-1.5">
                             <span class="font-black text-[#003B8A] text-sm">
-                                {{ cot?.moneda === 'USD' ? 'USD ' : 'MXN ' }}{{ cot?.total | number:'1.2-2' }}
+                                {{ cot?.total_formateado_completo }}
                             </span>
                             
                             <div class="flex flex-col text-[7px] font-bold text-slate-400 leading-[8px]">
@@ -179,9 +179,7 @@
                             </div>
                         </div>
                     </div>
-
-                </div>
-
+                    </div>
             </div>
         </app-card-details>
     </div>

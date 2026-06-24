@@ -1,0 +1,226 @@
+<div class="bg-white rounded-2xl overflow-hidden w-full max-w-4xl mx-auto max-h-[85vh] flex flex-col border border-slate-200 shadow-2xl">
+  <ngx-sonner-toaster position="top-right" richColors="true" duration="6000"></ngx-sonner-toaster>
+
+    <app-header-modal [label]="'Detalles de Pedido'"></app-header-modal>
+
+    <div class="p-4 overflow-y-auto bg-[#f4f7fa] flex-1">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+            
+          <div class="flex flex-col gap-4">
+                <app-card-details titulo="Información General">
+                    <svg icono class="w-3.5 h-3.5 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    </svg>
+
+                    <div class="flex flex-col text-xs mt-1">
+                        <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                            <div class="w-7 h-7 rounded-md bg-[#eff6ff] flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                            </div>
+                            <div class="flex flex-col flex-1">
+                                <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Cliente</span>
+                                <span class="text-[#0d1f38] font-bold text-[12px]">{{ ped?.nombre_cliente || 'Sin Nombre' }}</span>
+                            </div>
+                        </div>
+
+                        <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                            <div class="w-7 h-7 rounded-md bg-[#eff6ff] flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                            </div>
+                            <div class="flex flex-col flex-1">
+                                <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Asesor Encargado</span>
+                                <span class="text-[#0d1f38] font-semibold text-[12px]">{{ ped?.nombre_asesor || 'No asignado' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </app-card-details>
+
+                <app-card-details titulo="Recibo de Pago Adjunto">
+                    <svg icono class="w-3.5 h-3.5 text-[#1D9E75] -rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+                    </svg>
+
+                    <div *ngIf="ped?.factura_ruta; else sinArchivo" class="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg p-1.5 w-full overflow-hidden mt-3">
+                        <div class="w-8 h-8 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                        </div>
+
+                        <div class="flex flex-col justify-center pl-1 pr-2 flex-1 min-w-0 overflow-hidden">
+                            <p class="text-[10px] font-bold text-[#0d1f38] leading-none mb-0.5 block truncate w-full" [title]="ped?.nombre_factura || 'Recibo_Pago.pdf'">
+                                {{ ped?.nombre_factura || 'Recibo_Pago.pdf' }} 
+                            </p>
+                            <p class="text-[10px] text-[#94a3b8] font-medium leading-none block truncate w-full">
+                                PDF • {{ ped?.fecha_factura | date:'dd MMM yyyy' }}
+                            </p>
+                        </div>
+
+                        <button (click)="verFactura()" class="bg-white border border-slate-200 hover:bg-slate-50 p-1.5 rounded-md transition-colors shadow-sm flex-shrink-0">
+                            <svg class="w-3.5 h-3.5 text-[#0d1f38]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                        </button>
+                    </div>
+
+                    <ng-template #sinArchivo>
+                        <div class="flex items-center gap-2 bg-slate-50/50 border border-slate-200 border-dashed rounded-lg p-1.5 w-full overflow-hidden mt-3">
+                            <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
+                                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            </div>
+                            <p class="text-[10px] text-slate-500 font-medium pr-3 leading-none">
+                                Sin recibo de pago adjunto
+                            </p>
+                        </div>
+                    </ng-template>
+                </app-card-details>
+            </div>
+
+            <app-card-details titulo="Fechas y Estatus">
+                <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+
+                <div class="flex flex-col text-xs mt-1">
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-[#f0f9f5] flex items-center justify-center flex-shrink-0">
+                            <span class="text-[#1D9E75] font-bold text-[10px]">REG</span>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Fecha de Registro</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px]">{{ ped?.fecha_pedido }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-[#f0f9f5] flex items-center justify-center flex-shrink-0">
+                            <span class="text-[#1D9E75] font-bold text-[10px]">LIM</span>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Fecha Límite</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px]">{{ ped?.fecha_limite }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Estatus Actual</span>
+                            <span class="font-bold text-[12px]"
+                                [ngClass]="{
+                                    'text-slate-500': ped?.estatusTexto === 'Pendiente', 
+                                    'text-[#0f6e56]': ped?.estatusTexto === 'Completado', 
+                                    'text-red-500': ped?.estatusTexto === 'Cancelado'
+                                }">
+                                {{ ped?.estatusTexto || 'Pendiente' }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </app-card-details>
+        </div>
+
+        <app-card-details titulo="Productos Solicitados">
+            <svg icono class="w-3.5 h-3.5 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+
+            <div class="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm mt-3">
+
+                <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2 px-4 items-center">
+                    <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+                    <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest">Código</span>
+                    <span class="col-span-4 text-[9px] font-bold text-white uppercase tracking-widest">Descripción</span>
+                    <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">Cant.</span>
+                    <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-right">P. Unitario</span>
+                    <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-right">Importe</span>
+                </div>
+
+                <div *ngIf="cargando" class="flex justify-center items-center py-8">
+                    <div class="w-6 h-6 border-2 border-[#003B8A] border-t-transparent rounded-full animate-spin"></div>
+                </div>
+
+                <div *ngIf="!cargando && pedidoDetalle.length === 0" class="py-6 text-center text-slate-400 text-xs font-medium">
+                    No se encontraron productos en este pedido.
+                </div>
+
+                <div *ngFor="let item of pedidoDetalle; let i = index"
+                    class="grid grid-cols-12 gap-3 py-2 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center">
+
+                    <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
+
+                    <div class="col-span-2 flex flex-col">
+                        <span class="text-[11px] font-bold text-[#0d1f38] truncate">{{ item.Codigo_numeral || item.Codigo_japon || 'S/C' }}</span>
+                    </div>
+
+                    <div class="col-span-4 flex flex-col truncate pr-2">
+                        <span class="text-[12px] font-bold text-[#0d1f38] truncate" [title]="item.nombre_producto">{{ item.nombre_producto }}</span>
+                    </div>
+
+                    <div class="col-span-1 flex justify-center">
+                        <span class="text-[13px] font-black text-[#003B8A]">{{ item.cantidad }}</span>
+                    </div>
+
+                   <div class="col-span-2 flex justify-end">
+    <span class="text-[11px] font-semibold text-slate-600">
+        {{ formatearDinero(item.precio_unitario, true) }} </span>
+</div>
+
+<div class="col-span-2 flex justify-end">
+    <span class="text-[11px] font-bold text-[#0d1f38]">
+        {{ formatearDinero(item.importe, true) }} </span>
+</div>
+                </div>
+
+                <div class="bg-slate-50 py-2.5 px-5 flex flex-col items-end gap-1 border-t border-slate-200">
+                  <div class="flex justify-between w-48 text-[11px] text-slate-500">
+    <span>Subtotal:</span>
+    <span class="font-semibold">{{ formatearDinero(subtotal, true) }}</span> </div>
+
+<div class="flex justify-between w-48 text-[11px] text-slate-500">
+    <span>IVA (16%):</span>
+    <span class="font-semibold">{{ formatearDinero(iva, true) }}</span> </div>
+                    
+                    <div class="flex justify-between w-48 items-center mt-0.5 pt-1.5 border-t border-slate-200">
+                        <span class="font-bold text-[#0d1f38] text-xs">TOTAL:</span>
+                        
+                        <div class="flex items-center gap-1.5">
+                            <span class="font-black text-[#003B8A] text-sm">
+                                {{ formatearDinero(total) }}
+                            </span>
+                            
+                            <div class="flex flex-col text-[7px] font-bold text-slate-400 leading-[8px]">
+                                <span>{{ monedaActual === 'USD' ? 'DOLARES' : 'MONEDA' }}</span>
+                                <span>{{ monedaActual === 'USD' ? 'AMERICANOS' : 'NACIONAL' }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </app-card-details>
+        
+    </div>
+<app-footer-modal [paddingClass]="'p-4 px-6 rounded-b-2xl'">
+        <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+
+        <div class="flex gap-2.5">
+    
+    <ng-container *ngIf="ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente'">
+        <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cancelar'" *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador'])"
+            (click)="cancelarPedido()"></app-button-action>
+    </ng-container>
+
+    <ng-container *ngIf="(ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente') && ped?.factura_ruta">
+        <app-button-action [label]="'Validar y Completar'" [claseCss]="'btn-pdf'" *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador'])"
+            (click)="validarYCompletar()"></app-button-action>
+    </ng-container>
+
+    <ng-container *ngIf="ped?.Estatus !== 0 && ped?.estatusTexto !== 'Cancelado'">
+        <app-button-action 
+            [label]="ped?.factura_ruta ? 'Cambiar Recibo' : 'Subir Recibo'" 
+            [claseCss]="'btn-aceptar'"
+            (click)="subirPDF()">
+        </app-button-action>
+    </ng-container>
+    
+</div>
+    </app-footer-modal>
+</div>

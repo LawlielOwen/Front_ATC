@@ -59,7 +59,7 @@ export class RecepcionesPage implements OnInit {
   rolUsuario: string = '';
   pedidosLista: any[] = [];
   proveedorActual: number | null = null;
-
+timeoutBusqueda: any;
   constructor(private ps: ProveedorService,public dialog: MatDialog) { }
   columnasPedidos: TableColumn[] = [
     {
@@ -198,10 +198,19 @@ const dialogRef = this.dialog.open(ModalRepecionPage, {
       }
     });
   }
-  busquedaTexto(texto: string) {
+ busquedaTexto(texto: string) {
     this.terminoActual = texto;
     this.currentPage = 1;
-    this.cargarPedidos();
+
+    if (this.timeoutBusqueda) {
+      clearTimeout(this.timeoutBusqueda);
+    }
+
+    this.timeoutBusqueda = setTimeout(() => {
+      
+      this.cargarPedidos();
+      
+    }, 500);
   }
   filtroEstatus(estatus: number | null) {
     this.estatusActual = estatus;

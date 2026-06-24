@@ -1,0 +1,10 @@
+::ng-deep .apexcharts-xaxistooltip,
+::ng-deep .apexcharts-xaxistooltip-bottom {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
+
+::ng-deep .apexcharts-xcrosshairs {
+  display: none !important;
+}

@@ -14,7 +14,7 @@
               </svg>
             </app-count>
             <div class="flex gap-3">
-              <app-button-new label="Nuevo Cliente" variante="btn-azul" (click)="nuevoCliente()"></app-button-new>
+              <app-button-new label="Nuevo Cliente" variante="btn-azul" (click)="nuevoCliente()" *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])"></app-button-new>
             </div>
           </app-button-layout>
           <app-search-layout>

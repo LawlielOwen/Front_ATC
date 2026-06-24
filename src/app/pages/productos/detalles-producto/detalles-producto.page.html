@@ -166,9 +166,9 @@
     <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrarDetalle()"></app-button-action>
     <div class="flex gap-2.5">
       <app-button-action (click)="procesarFuncion()" [label]="'Eliminar'" [esEliminar]="true"
-        [estatus]="producto.Estatus"></app-button-action>
+        [estatus]="producto.Estatus"  *ngIf="authService.tieneAcceso(['Administrador'])"></app-button-action>
       <app-button-action [label]="'Editar Producto'" [claseCss]="'btn-editar'"
-        (click)="abrirModalEdicion(producto)"></app-button-action>
+        (click)="abrirModalEdicion(producto)"  *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Almacen'])"></app-button-action>
     </div>
   </app-footer-modal>
 </div>

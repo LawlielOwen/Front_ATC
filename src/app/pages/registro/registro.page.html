@@ -1,0 +1,121 @@
+<ion-content [fullscreen]="true" class="ion-padding-none">
+  <div class="flex min-h-screen items-center justify-center bg-slate-100 py-8">
+    <div class="w-full max-w-xl bg-white rounded-2xl shadow-sm p-10">
+
+      <div class="mb-8 text-center">
+        <img src="../../../assets//img/logo_atc.png" alt="Logo ATC" class="h-10 mx-auto mb-6">
+        <p class="text-emerald-600 text-xs font-bold tracking-widest uppercase mb-1">Nuevo Ingreso</p>
+        <h2 class="text-2xl font-extrabold text-slate-900 mb-1">Solicitud de Acceso</h2>
+        <p class="text-slate-400 text-sm">Ingresa tus datos. Un administrador validará tu cuenta.</p>
+      </div>
+
+      <form class="space-y-4">
+
+        <div class="grid grid-cols-2 gap-4">
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Nombre(s)</label>
+            <div class="relative flex items-center">
+              <input type="text" placeholder=""
+                [(ngModel)]="registro.Nombre" name="nombre"
+                class="w-full bg-slate-100 border-0 text-slate-700 text-sm rounded-xl pl-4 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#003B8A]/20 focus:bg-white transition-all">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Apellido Paterno</label>
+            <div class="relative flex items-center">
+              <input type="text" placeholder=""
+                [(ngModel)]="registro.app" name="app"
+                class="w-full bg-slate-100 border-0 text-slate-700 text-sm rounded-xl pl-4 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#003B8A]/20 focus:bg-white transition-all">
+            </div>
+          </div>
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Apellido Materno</label>
+            <div class="relative flex items-center">
+              <input type="text" placeholder=""
+                [(ngModel)]="registro.apm" name="apm"
+                class="w-full bg-slate-100 border-0 text-slate-700 text-sm rounded-xl pl-4 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#003B8A]/20 focus:bg-white transition-all">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Fecha de Nacimiento</label>
+            <div class="relative flex items-center">
+              <input type="date"
+                [(ngModel)]="registro.Fecha_nacimiento" name="fecha_nacimiento"
+                class="w-full bg-slate-100 border-0 text-slate-700 text-sm rounded-xl pl-4 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#003B8A]/20 focus:bg-white transition-all">
+            </div>
+          </div>
+
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Correo Electrónico</label>
+            <div class="relative flex items-center">
+              <input type="email" placeholder=""
+                [(ngModel)]="registro.Correo" name="correo"
+                class="w-full bg-slate-100 border-0 text-slate-700 text-sm rounded-xl pl-4 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#003B8A]/20 focus:bg-white transition-all">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Teléfono de Contacto</label>
+            <div class="relative flex items-center">
+              <input type="tel" placeholder=""
+                [(ngModel)]="registro.Telefono" name="telefono"
+                class="w-full bg-slate-100 border-0 text-slate-700 text-sm rounded-xl pl-4 pr-4 py-3 outline-none focus:ring-2 focus:ring-[#003B8A]/20 focus:bg-white transition-all">
+            </div>
+          </div>
+
+        </div>
+
+      <div>
+          <label class="block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-1.5">Contraseña</label>
+          <div class="relative flex items-center">
+            <ion-icon name="lock-closed-outline" class="absolute left-3.5 text-[#008B72] text-base z-10"></ion-icon>
+            
+            <input [type]="mostrarContra ? 'text' : 'password'" placeholder="••••••••"
+              [(ngModel)]="registro.Contra" name="contra"
+              class="w-full bg-slate-100 border-0 text-slate-700 text-sm rounded-xl pl-10 pr-11 py-3 outline-none focus:ring-2 focus:ring-[#003B8A]/20 focus:bg-white transition-all">
+            
+            <ion-icon 
+              [name]="mostrarContra ? 'eye-off-outline' : 'eye-outline'" 
+              (click)="mostrarContra = !mostrarContra"
+              class="absolute right-3.5 text-slate-400 text-base cursor-pointer hover:text-slate-600 transition-colors z-10">
+            </ion-icon>
+            
+          </div>
+          <span class="text-[11px] text-slate-400 mt-1.5 block">Mín. 6 caracteres, 1 mayúscula y 1 número.</span>
+        </div>
+
+        <div class="flex justify-center pt-1">
+          <ion-router-link routerLink="/login" routerDirection="back"
+            class="flex items-center gap-1.5 text-sm font-semibold text-slate-400 hover:text-[#003B8A] transition-colors cursor-pointer">
+            Volver al inicio de sesión
+          </ion-router-link>
+        </div>
+
+        <button type="button" (click)="registrar()"
+          class="w-full flex items-center justify-center gap-2 bg-[#003B8A] hover:bg-[#002b66] text-white text-sm font-bold py-3.5 rounded-xl transition-all focus:ring-4 focus:ring-[#003B8A]/30 outline-none">
+          Enviar Solicitud
+          <ion-icon name="paper-plane-outline" class="text-base"></ion-icon>
+        </button>
+
+      </form>
+
+      <p class="text-center text-xs font-medium text-emerald-600 flex justify-center items-center gap-1.5 mt-8">
+        <ion-icon name="shield-checkmark-outline" class="text-base"></ion-icon>
+        Conexión segura · ATC ©
+      </p>
+
+    </div>
+  </div>
+</ion-content>

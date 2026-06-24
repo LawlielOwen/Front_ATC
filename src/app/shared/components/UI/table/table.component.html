@@ -11,8 +11,8 @@
         </tr>
       </thead>
       <tbody class="bg-white divide-y divide-slate-100">
-
-        <tr *ngFor="let row of data" (click)="rowClick.emit(row)"
+ 
+        <tr *ngFor="let row of data; let rowIndex = index"(click)="rowClick.emit(row)"
           class="hover:bg-slate-50/80 transition-colors duration-200 group relative cursor-pointer">
 
           <td *ngFor="let col of columns" class="py-4 px-4 relative"
@@ -82,10 +82,13 @@
                 {{ row[col.key] }}
               </span>
 
-              <div *ngSwitchCase="'actions'" class="flex justify-center" (click)="$event.stopPropagation()">
+             <div *ngSwitchCase="'actions'" class="flex justify-center" (click)="$event.stopPropagation()">
   <app-options 
     [opcionesExtra]="col.menuOptions || []"
-    [omitirBase]="col.omitirBase || false"  (accionSeleccionada)="manejarAccionMenu($event, row)">
+    [omitirBase]="col.omitirBase || false" 
+    (accionSeleccionada)="manejarAccionMenu($event, row)"
+    [abrirHaciaArriba]="data ? rowIndex >= (data.length - 2) : false"
+     [filaDatos]="row">
   </app-options>
 </div>
 

@@ -34,7 +34,7 @@
     </div>
 
     <!-- PANEL DERECHO -->
-    <div class="right-panel">
+   <div class="right-panel">
       <div class="form-content">
         <div class="form-header">
           <p class="welcome-text">BIENVENIDO</p>
@@ -51,35 +51,38 @@
             </div>
           </div>
 
-          <!-- Input Contraseña -->
           <div class="input-group">
             <label>Contraseña</label>
             <div class="input-wrapper">
               <ion-icon name="lock-closed-outline" class="ico-left"></ion-icon>
-              <ion-input type="password" placeholder="••••••••" 
+              <ion-input [type]="mostrarContra ? 'text' : 'password'" placeholder="••••••••" 
               fill="outline" [(ngModel)]="password" name="password">
               </ion-input>
-              <ion-icon name="eye-outline" class="ico-right" id="togglePass"></ion-icon>
+              <ion-icon [name]="mostrarContra ? 'eye-off-outline' : 'eye-outline'" (click)="mostrarContra = !mostrarContra" class="ico-right" id="togglePass"></ion-icon>
             </div>
           </div>
 
-          <!-- Acciones -->
           <div class="form-actions">
-            <ion-checkbox class="remember-check">
-              <span class="check-label">Recordarme</span>
-            </ion-checkbox>
             <a href="#" class="forgot-password">¿Olvidaste tu contraseña?</a>
           </div>
 
-          <!-- Botón -->
           <ion-button expand="block" class="btn-login" (click)="login()">
             Ingresar
             <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
           </ion-button>
+
+          <div style="text-align: center; margin-top: 1.5rem;">
+            <span style="font-size: 13px; color: #64748b;">¿Eres de nuevo ingreso?</span>
+           <ion-router-link 
+    routerLink="/registro" 
+    routerDirection="forward"
+    style="font-size: 13px; color: #003B8A; font-weight: 800; text-decoration: none; margin-left: 5px; cursor: pointer;">
+    Solicita tu cuenta
+  </ion-router-link>
+          </div>
+
         </form>
-        <!-- Input Usuario -->
-
-
+        
         <div class="divider">
           <span>Acceso corporativo interno</span>
         </div>

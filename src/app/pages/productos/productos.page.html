@@ -6,7 +6,7 @@
     <app-header (toggleMenu)="mostrarSidebarMobile()"></app-header>
     <ion-content style="--background :#f1f5f9;">
       <app-button-layout>
-        <app-count [label]="'En stock'" [count]="totalStock" accentColor="#1D9E75" iconBg="#E1F5EE">
+        <app-count [label]="'En stock'" [count]="totalStock" accentColor="#1D9E75" iconBg="#E1F5EE"  *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Almacen'])">
           <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
               d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
@@ -14,8 +14,8 @@
         </app-count>
         <div class="flex gap-3">
           <app-button-new label="Agregar Existencias" variante="btn-verde"
-            (click)="registrarExistencia()"></app-button-new>
-          <app-button-new label="Nuevo Producto" variante="btn-azul" (click)="nuevoProducto()"></app-button-new>
+            (click)="registrarExistencia()"  *ngIf="authService.tieneAcceso(['Administrador','Almacen'])"></app-button-new>
+          <app-button-new label="Nuevo Producto" variante="btn-azul" (click)="nuevoProducto()"  *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Almacen'])"></app-button-new>
         </div>
       </app-button-layout>
       <app-container-table>

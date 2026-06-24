@@ -12,6 +12,7 @@ import { CardDetailsComponent } from "../../../shared/components/UI/modal/card-d
 import { ButtonActionComponent } from "../../../shared/components/UI/buttons/button-action/button-action.component";
 import { Productos } from '../../../shared/model/productos.model';
 import { toast } from 'ngx-sonner';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-detalles-producto',
@@ -32,7 +33,7 @@ export class DetallesProductoPage implements OnInit {
   constructor(
     private dialogRef: MatDialogRef<DetallesProductoPage>,
     private dialog: MatDialog, private pr: ProductoService,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: any
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any,public authService: AuthService
   ) {
     if (this.data && this.data.producto) {
       this.producto = this.data.producto;

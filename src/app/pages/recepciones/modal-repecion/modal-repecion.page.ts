@@ -6,7 +6,6 @@ import { toast, NgxSonnerToaster } from 'ngx-sonner';
 import { FooterModalComponent } from "../../../shared/components/UI/modal/footer-modal/footer-modal.component";
 import { HeaderModalComponent } from "../../../shared/components/UI/modal/header-modal/header-modal.component";
 import { ButtonActionComponent } from "../../../shared/components/UI/buttons/button-action/button-action.component";
-import { InputComponent } from "../../../shared/components/UI/form/input/input.component";
 import { DateComponent } from "../../../shared/components/UI/form/date/date.component";
 
 import { CardFormComponent } from "../../../shared/components/UI/form/card-form/card-form.component";
@@ -64,20 +63,22 @@ productosSolicitados: any[] = [
 
   ngOnInit() {
   }
- buscarProductoBD(codigoEscrito: string, index: number) {
+buscarProductoBD(codigoEscrito: string, index: number) {
     const fila = this.productosSolicitados[index];
-    fila.codigo = codigoEscrito;
+    
+    const codigoLimpio = (codigoEscrito || '').toString().trim();
+    fila.codigo = codigoLimpio; 
 
     if (!this.pedidoNuevo.id_proveedor) {
-      if (codigoEscrito.length > 0) {
+      if (codigoLimpio.length > 0) {
         toast.error('Primero debes seleccionar un proveedor en la parte superior.');
         fila.codigo = '';
       }
       return;
     }
 
-    if (!codigoEscrito || codigoEscrito.length < 3) {
-      fila.Nombre = ''; // <-- Cambiado de fila.modelo a fila.Nombre
+    if (!codigoLimpio || codigoLimpio.length < 3) {
+      fila.Nombre = ''; 
       fila.id_producto = null;
       return;
     }
@@ -89,7 +90,7 @@ productosSolicitados: any[] = [
     fila.buscando = true;
     fila.timeoutId = setTimeout(() => {
 
-      this.ps.buscarProductos(codigoEscrito, this.pedidoNuevo.id_proveedor).subscribe({
+      this.ps.buscarProductos(codigoLimpio, this.pedidoNuevo.id_proveedor).subscribe({
         next: (respuesta: any) => {
           fila.buscando = false;
           const productosEncontrados = respuesta.data || respuesta;
@@ -97,18 +98,26 @@ productosSolicitados: any[] = [
           if (productosEncontrados && productosEncontrados.length > 0) {
             const producto = productosEncontrados[0];
             fila.id_producto = producto.id;
-            // <-- Concatenamos Nombre y Modelo para mejor visualización
             fila.Nombre = `${producto.Nombre} - ${producto.Modelo}`; 
           } else {
             fila.id_producto = null;
-            fila.Nombre = 'El producto no existe o no pertenece a este proveedor'; // <-- Corregido
-            toast.error('El producto no existe o no pertenece a este proveedor');
+            fila.Nombre = 'Producto no encontrado'; 
+            toast.warning(`No se encontró el código "${codigoLimpio}" para este proveedor.`);
           }
         },
         error: (err) => {
           console.error(err);
           fila.buscando = false;
-          fila.Nombre = 'Error de conexión'; // <-- Corregido
+          
+          if (err.status === 404) {
+            fila.id_producto = null;
+            fila.Nombre = 'Producto no encontrado';
+            toast.warning(`No se encontró el código "${codigoLimpio}" para este proveedor.`);
+          } else {
+            fila.id_producto = null;
+            fila.Nombre = 'Error de conexión'; 
+            toast.error('Hubo un problema al comunicarse con el servidor.');
+          }
         }
       });
 

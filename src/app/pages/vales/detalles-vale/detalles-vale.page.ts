@@ -5,7 +5,6 @@ import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { FooterModalComponent } from "../../../shared/components/UI/modal/footer-modal/footer-modal.component";
 import { HeaderModalComponent } from "../../../shared/components/UI/modal/header-modal/header-modal.component";
 import { ButtonActionComponent } from "../../../shared/components/UI/buttons/button-action/button-action.component";
-import { CardFormComponent } from "../../../shared/components/UI/form/card-form/card-form.component";
 import { ValeService } from "../../../core/services/Vales.service";
 import { FormsModule } from '@angular/forms';
 import { toast } from 'ngx-sonner';
@@ -20,7 +19,6 @@ import { toast } from 'ngx-sonner';
     FooterModalComponent,
     HeaderModalComponent,
     ButtonActionComponent,
-    CardFormComponent,
     FormsModule,
   ]
 })

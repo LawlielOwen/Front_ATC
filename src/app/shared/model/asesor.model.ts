@@ -6,10 +6,10 @@ export interface Asesor {
     telefono: string;
     usuario: string;
     contra: string;
-    estatus: boolean;
+    Estatus: number;
     Rol: string;
     Fecha_nacimiento: Date;
-    fecha_contratacion: Date;
+    Fecha_contratacion: Date;
     Correo: string;
-    Nombre_completo: string;
+    Nombre_completo:string;
 }

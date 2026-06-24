@@ -1,0 +1,21 @@
+<div class="bg-[#f1f5f9] rounded-[10px] overflow-hidden shadow-2xl w-full mx-auto max-h-[90vh] flex flex-col border border-gray-100">
+  <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
+
+  <app-header-modal [label]="'Subir recibo de pago del cliente'"></app-header-modal>
+  
+  <app-upload-modal 
+    [label]="'Arrastra el archivo aqui o haz clic para seleccionar'"
+    (fileSelected)="onArchivoSeleccionado($event)">
+  </app-upload-modal>
+  
+  <app-footer-modal [paddingClass]="'p-4 px-6'">
+    <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+    
+    <app-button-action 
+        [label]="guardando ? 'Subiendo...' : 'Subir pdf'" 
+        [claseCss]="'btn-agregar'"
+        [disabled]="!archivoSeleccionado || guardando"
+        (click)="subirRecibo()">
+    </app-button-action>
+  </app-footer-modal>
+</div>

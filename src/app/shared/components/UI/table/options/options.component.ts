@@ -4,6 +4,7 @@ export interface MenuOption {
   accion: string;      
   etiqueta: string;   
   claseColor?: string;
+  mostrarSi?: (row: any) => boolean;
 }
 @Component({
   selector: 'app-options',
@@ -18,7 +19,8 @@ export class MenuOpcionesComponent {
   @Output() accionSeleccionada = new EventEmitter<string>();
 @Input() omitirBase: boolean = false; 
  menuAbierto = false;
-
+@Input() abrirHaciaArriba: boolean = false;
+@Input() filaDatos: any = null;
   opcionesBase: MenuOption[] = [
     { accion: 'editar', etiqueta: 'Modificar', claseColor: 'texto-azul' },
     { accion: 'eliminar', etiqueta: 'Eliminar', claseColor: 'texto-rojo' }
@@ -26,9 +28,18 @@ export class MenuOpcionesComponent {
 
   constructor(private eRef: ElementRef) {}
 
- get opciones(): MenuOption[] {
-    // Si omitirBase es true, solo devuelve las extra. Si no, junta ambas.
-    return this.omitirBase ? this.opcionesExtra : [...this.opcionesBase, ...this.opcionesExtra];
+get opciones(): MenuOption[] {
+    const lista = this.omitirBase ? this.opcionesExtra : [...this.opcionesBase, ...this.opcionesExtra];
+    
+    // NUEVO: Filtramos la lista evaluando la condición de cada opción
+    return lista.filter(op => {
+      // Si la opción tiene la función 'mostrarSi' y tenemos los datos de la fila, la evaluamos
+      if (op.mostrarSi && this.filaDatos) {
+        return op.mostrarSi(this.filaDatos);
+      }
+      // Si no tiene condición especial, se muestra siempre
+      return true; 
+    });
   }
 
   toggleMenu(event: Event) {

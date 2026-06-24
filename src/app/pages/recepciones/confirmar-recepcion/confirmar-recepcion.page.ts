@@ -10,7 +10,6 @@ import { FooterModalComponent } from "../../../shared/components/UI/modal/footer
 import { StepItemComponent } from "../../../shared/components/UI/modal/step-item/step-item.component";
 import { CardSelectComponent, CardOption } from "../../../shared/components/UI/modal/card-option/card-option.component";
 import { ButtonActionComponent } from "../../../shared/components/UI/buttons/button-action/button-action.component";
-import { SelectComponent } from "../../../shared/components/UI/form/select/select.component";
 import { ProveedorService } from '../../../core/services/Proveedores.service';
 
 @Component({
@@ -27,7 +26,6 @@ import { ProveedorService } from '../../../core/services/Proveedores.service';
     ButtonActionComponent,
     StepItemComponent, // Asegúrate de que este es el nombre de tu componente Stepper
     CardSelectComponent,
-    SelectComponent,
     NgxSonnerToaster
   ]
 })
@@ -146,7 +144,7 @@ confirmarRecepcion() {
     const idPedido = this.pedido.id_pedido;
 
     if (this.estadoRecepcion === 'completo') {
-      // Lógica de pedido completo (se queda igual)
+      // Lógica de pedido completo
       this.ps.recibirPedido(idPedido, idAsesor).subscribe({
         next: (res) => {
           this.paso = 3; 
@@ -157,12 +155,56 @@ confirmarRecepcion() {
 
     } else if (this.estadoRecepcion === 'incidencia') {
       
+      // ✦ 1. VALIDAR DESCRIPCIÓN GENERAL
+      const descLimpia = (this.descripcionGeneral || '').toString().trim();
+      if (!descLimpia) {
+        toast.error('Debes ingresar una descripción detallada de la incidencia.');
+        return;
+      }
+      this.descripcionGeneral = descLimpia; // Guardamos el texto sin espacios extra
+
+      let totalAfectadasPedido = 0;
+
+      for (let i = 0; i < this.productosDetalle.length; i++) {
+        const p = this.productosDetalle[i];
+
+        // Validar piezas buenas (Entero puro, 0 o mayor)
+        const buenasNum = Number(p.buenas || 0);
+        if (isNaN(buenasNum) || !Number.isInteger(buenasNum) || buenasNum < 0) {
+          toast.error(`Error en la fila ${i + 1}: Las piezas buenas deben ser un número entero (0 o mayor).`);
+          return;
+        }
+        p.buenas = buenasNum; // Forzamos formato numérico
+
+        const afectadasNum = Number(p.afectadas || 0);
+        if (isNaN(afectadasNum) || !Number.isInteger(afectadasNum) || afectadasNum < 0) {
+          toast.error(`Error en la fila ${i + 1}: Las piezas afectadas deben ser un número entero (0 o mayor).`);
+          return;
+        }
+        p.afectadas = afectadasNum; // Forzamos formato numérico
+
+        totalAfectadasPedido += afectadasNum;
+
+        if (afectadasNum > 0) {
+          if (!p.tipoDano || p.tipoDano.toString().trim() === '') {
+            toast.error(`Falta seleccionar el "Tipo de Daño" para el producto de la fila ${i + 1}.`);
+            return;
+          }
+        }
+      }
+
+
+      if (totalAfectadasPedido <= 0) {
+        toast.error('Para reportar una incidencia, al menos un producto debe tener 1 o más piezas afectadas.');
+        return;
+      }
+
       const productosIncidencia = this.productosDetalle.map(p => ({
         id_producto: p.id_producto,
-        cantidad_buena: p.buenas || 0,                
-        cantidad_afectada: p.afectadas || 0,          
-        Tipo: p.tipoDano || null,                    
-        Descripcion: p.afectadas > 0 ? this.descripcionGeneral : null // Mismo nombre que PATH '$.Descripcion'
+        cantidad_buena: p.buenas,                
+        cantidad_afectada: p.afectadas,          
+        Tipo: p.tipoDano ? p.tipoDano.toString().trim() : null,                    
+        Descripcion: p.afectadas > 0 ? this.descripcionGeneral : null 
       }));
 
       this.ps.recibirPedidoIncidencia(idPedido, idAsesor, productosIncidencia).subscribe({

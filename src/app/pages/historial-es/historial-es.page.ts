@@ -38,6 +38,8 @@ export class HistorialESPage implements OnInit {
   currentPage: number = 1;
   totalPages: number = 1;
   totalRecords: number = 0;
+    timeoutBusqueda: any;
+
   limit: number = 10;
   terminoActual: string = '';
   entradaTipo: string = '';
@@ -161,7 +163,16 @@ export class HistorialESPage implements OnInit {
   busquedaTexto(texto: string) {
     this.terminoActual = texto;
     this.currentPage = 1;
-    this.cargarMov();
+
+    if (this.timeoutBusqueda) {
+      clearTimeout(this.timeoutBusqueda);
+    }
+
+    this.timeoutBusqueda = setTimeout(() => {
+      
+      this.cargarMov();
+      
+    }, 500);
   }
 filtroFecha(rango: { inicio: any, fin: any }) {
    

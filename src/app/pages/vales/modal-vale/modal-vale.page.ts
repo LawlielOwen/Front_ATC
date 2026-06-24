@@ -83,32 +83,65 @@ clienteControl = new FormControl<any>('');
   cerrar() {
     this.dialogRef.close();
   }
-  guardarSolicitud() {
+guardarSolicitud() {
+    // ✦ 1. VALIDACIÓN DE SESIÓN (Asesor responsable)
     const usuarioString = localStorage.getItem('user');
     let idAsesor = usuarioString ? JSON.parse(usuarioString).id : null;
+
+    if (!idAsesor) {
+      toast.error('Error de sesión. Inicia sesión nuevamente.');
+      return;
+    }
+
+    // ✦ 2. VALIDACIÓN DE CLIENTE DESTINO
     if (!this.solicitud.id_cliente) {
       toast.error('Selecciona un cliente destino');
       return;
     }
 
-    const productosValidos = this.productosSolicitados
-      .filter(p => p.codigo && p.piezas > 0)
-      .map(p => ({
-        id_producto: p.id_producto || 0,
-        piezas: p.piezas
-      }));
-
-    if (productosValidos.length === 0) {
-      toast.error('Agrega al menos un producto válido');
+    // ✦ 3. VALIDACIÓN ESTRICTA DE ORDEN DE COMPRA
+    const ordenLimpia = (this.solicitud.orden_compra || '').toString().trim();
+    if (!ordenLimpia) {
+      toast.error('La Orden de Compra es obligatoria.');
       return;
     }
-   const payload = {
+    this.solicitud.orden_compra = ordenLimpia;
+    
+    this.solicitud.num_factura = (this.solicitud.num_factura || '').toString().trim();
+
+    const productosValidos = [];
+
+    for (let i = 0; i < this.productosSolicitados.length; i++) {
+      const p = this.productosSolicitados[i];
+
+      if (p.id_producto) {
+        const cantidadNum = Number(p.piezas);
+
+        if (isNaN(cantidadNum) || !Number.isInteger(cantidadNum) || cantidadNum <= 0) {
+          toast.error(`Error en la fila ${i + 1}: La cantidad debe ser un número entero mayor a 0.`);
+          return; 
+        }
+
+        productosValidos.push({
+          id_producto: p.id_producto,
+          piezas: cantidadNum
+        });
+      }
+    }
+
+    if (productosValidos.length === 0) {
+      toast.error('Agrega al menos un producto válido a la solicitud.');
+      return;
+    }
+
+    const payload = {
       id_asesor: idAsesor,
       id_cliente: parseInt(this.solicitud.id_cliente),
       orden_compra: this.solicitud.orden_compra,
       num_factura: this.solicitud.num_factura,
       productos: productosValidos 
     };
+
     this.valeService.crearVale(payload).subscribe({
       next: (response) => {
         toast.success('Solicitud de vale creada correctamente');
@@ -120,21 +153,28 @@ clienteControl = new FormControl<any>('');
       }
     });
   }
-  buscarProductoBD(codigoEscrito: string, index: number) {
+buscarProductoBD(codigoEscrito: string, index: number) {
     const fila = this.productosSolicitados[index];
-    fila.codigo = codigoEscrito;
-    if (!codigoEscrito || codigoEscrito.length < 3) {
-      fila.modelo = '';
+    
+    // Limpieza de espacios en blanco
+    const codigoLimpio = (codigoEscrito || '').toString().trim();
+    fila.codigo = codigoLimpio;
+
+    if (!codigoLimpio || codigoLimpio.length < 3) {
+      fila.Nombre = '';
+      fila.Modelo = '';
       fila.id_producto = null;
       return;
     }
+
     if (fila.timeoutId) {
       clearTimeout(fila.timeoutId);
     }
+
     fila.buscando = true;
     fila.timeoutId = setTimeout(() => {
 
-      this.valeService.buscarProductos(codigoEscrito).subscribe({
+      this.valeService.buscarProductos(codigoLimpio).subscribe({
         next: (respuesta: any) => {
           fila.buscando = false;
           const productosEncontrados = respuesta.data || respuesta;
@@ -145,14 +185,29 @@ clienteControl = new FormControl<any>('');
             fila.Nombre = producto.Nombre;
             fila.Modelo = producto.Modelo;
           } else {
+            // CASO: La BD responde correctamente pero no hay coincidencias
             fila.id_producto = null;
-            fila.modelo = 'Producto no encontrado';
+            fila.Nombre = 'Producto no encontrado';
+            fila.Modelo = '';
+            toast.warning(`No se encontró el código "${codigoLimpio}".`);
           }
         },
         error: (err) => {
           console.error(err);
           fila.buscando = false;
-          fila.modelo = 'Error de conexión';
+          
+          // CASO: El backend arroja un error 404
+          if (err.status === 404) {
+            fila.id_producto = null;
+            fila.Nombre = 'Producto no encontrado';
+            fila.Modelo = '';
+            toast.warning(`No se encontró el código "${codigoLimpio}".`);
+          } else {
+            fila.id_producto = null;
+            fila.Nombre = 'Error de conexión';
+            fila.Modelo = '';
+            toast.error('Hubo un problema al comunicarse con el servidor.');
+          }
         }
       });
 

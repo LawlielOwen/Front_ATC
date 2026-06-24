@@ -55,6 +55,8 @@ export class ValesPage implements OnInit, OnDestroy{
   vales: ValeSalida[] = [];
   idUsuario: number = 0;
   rolUsuario: string = '';
+  timeoutBusqueda: any;
+  
   mostrarSidebarMobile() {
     if (this.sidebar) {
       this.sidebar.toggleMenu();
@@ -168,10 +170,19 @@ formatearFecha(fecha: string | Date): string {
     this.currentPage = nuevaPagina;
     this.cargarVal();
   }
-  busquedaTexto(texto: string) {
+busquedaTexto(texto: string) {
     this.terminoActual = texto;
     this.currentPage = 1;
-    this.cargarVal();
+
+    if (this.timeoutBusqueda) {
+      clearTimeout(this.timeoutBusqueda);
+    }
+
+    this.timeoutBusqueda = setTimeout(() => {
+      
+      this.cargarVal();
+      
+    }, 500);
   }
   filtroFecha(rango: { inicio: any, fin: any }) {
     this.fechaIni = rango.inicio;

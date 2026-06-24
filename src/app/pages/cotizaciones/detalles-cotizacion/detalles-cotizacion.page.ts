@@ -46,20 +46,53 @@ export class DetallesCotizacionPage implements OnInit {
   cerrar() {
     this.dialogRef.close(false);
   }
-  cargarDetallesCot() {
+ cargarDetallesCot() {
     this.cargando = true;
     this.cs.obtenerCotizacionPorId(this.cot.id).subscribe({
       next: (res: any) => {
+        let detallesCrudos = [];
         if (Array.isArray(res)) {
-          this.cotizacionDetalle = res;
-        }
-        else if (res.data && Array.isArray(res.data)) {
-          this.cotizacionDetalle = res.data;
+          detallesCrudos = res;
+        } else if (res.data && Array.isArray(res.data)) {
+          detallesCrudos = res.data;
+        } else {
+          detallesCrudos = Object.values(res).find(Array.isArray) || [];
         }
 
-        else {
-          this.cotizacionDetalle = Object.values(res).find(Array.isArray) || [];
-        }
+        const formateador = new Intl.NumberFormat('es-MX', {
+          style: 'currency',
+          currency: this.cot.moneda === 'USD' ? 'USD' : 'MXN',
+          currencyDisplay: 'narrowSymbol' as any 
+        });
+
+        // 1. Identificamos si es USD y obtenemos el tipo de cambio
+        const esUSD = this.cot.moneda === 'USD';
+        // Usamos el tipo de cambio de la cotización, si no hay o es 0, usamos 1 para no afectar el valor
+        const factorConversion = (esUSD && this.cot.tipo_cambio > 0) ? Number(this.cot.tipo_cambio) : 1;
+
+        this.cotizacionDetalle = detallesCrudos.map((item: any) => {
+          const precioRaw = item.precio_unitario || item.precio_unitario_cotizado || 0;
+          
+          // 2. Aplicamos la conversión matemática
+          const precioConvertido = Number(precioRaw) / factorConversion;
+          const importeConvertido = (item.cantidad_producto * precioConvertido) || 0;
+
+          return {
+            ...item,
+            // 3. Formateamos ya la cantidad dividida en dólares
+            precio_formateado: formateador.format(precioConvertido),
+            importe_formateado: formateador.format(importeConvertido)
+          };
+        });
+
+        this.cot.subtotal_formateado = formateador.format(this.cot.subtotal);
+        this.cot.iva_formateado = formateador.format(this.cot.iva);
+        
+        this.cot.total_formateado_completo = new Intl.NumberFormat('es-MX', {
+          style: 'currency',
+          currency: this.cot.moneda === 'USD' ? 'USD' : 'MXN',
+          currencyDisplay: 'code' 
+        }).format(this.cot.total);
 
         this.cargando = false;
       },

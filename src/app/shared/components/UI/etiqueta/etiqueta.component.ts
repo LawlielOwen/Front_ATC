@@ -16,7 +16,7 @@ export class EtiquetaComponent {
   @Input() tipoBorde: 'rojo' | 'azul' | 'naranja' | 'verde' = 'azul';
   @Input() mostrarCuadro: boolean = false; 
   @Input() mostrarBotones: boolean = false;
-
+   @Input() cargando: boolean = false;
   @Output() aprobar = new EventEmitter<void>();
   @Output() rechazar = new EventEmitter<void>();
 

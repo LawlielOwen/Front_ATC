@@ -2,7 +2,6 @@ import { Component, OnInit, ViewChild } from '@angular/core';
 import { SiderbarComponent } from '../../shared/components/layout/siderbar/siderbar.component';
 import { IonicModule } from '@ionic/angular';
 import { HeaderComponent } from '../../shared/components/layout/header/header.component';
-import { NgxSonnerToaster } from 'ngx-sonner';
 import { ButtonNewComponent } from '../../shared/components/UI/buttons/button/button-new.component';
 import { SearchBarComponent } from '../../shared/components/UI/search-bar/search-bar.component';
 import { EstatusComponent } from '../../shared/components/UI/Filter/estatus/estatus.component';
@@ -19,6 +18,8 @@ import { CommonModule } from '@angular/common';
 import { MatDialog } from '@angular/material/dialog';
 import { CountComponent } from '../../shared/components/UI/count/count.component'
 import { CardSkeletonComponent } from '../../shared/components/UI/card/card-skeleton/card-skeleton.component';
+import { AuthService } from '../../core/services/auth.service';
+
 @Component({
   selector: 'app-clientes',
   templateUrl: './clientes.page.html',
@@ -32,7 +33,7 @@ import { CardSkeletonComponent } from '../../shared/components/UI/card/card-skel
 })
 export class ClientesPage implements OnInit {
   @ViewChild(SiderbarComponent) sidebar!: SiderbarComponent;
-  constructor(public dialog: MatDialog, private clientesService: ClientesService) { }
+  constructor(public dialog: MatDialog, private clientesService: ClientesService,public authService: AuthService) { }
   currentPage: number = 1;
   totalPages: number = 1;
   totalRecords: number = 0;
@@ -42,6 +43,8 @@ export class ClientesPage implements OnInit {
   estatusActual: number | null = 1;
   cargando: boolean = true;
   totalActivos: number = 0;
+    timeoutBusqueda: any;
+
   ngOnInit() {
     this.cargarClientes();
     this.obtenerTotalActivos();
@@ -106,12 +109,20 @@ export class ClientesPage implements OnInit {
       }
     });
   }
-  busquedaTexto(texto: string) {
+ busquedaTexto(texto: string) {
     this.terminoActual = texto;
     this.currentPage = 1;
-    this.cargarClientes();
-  }
 
+    if (this.timeoutBusqueda) {
+      clearTimeout(this.timeoutBusqueda);
+    }
+
+    this.timeoutBusqueda = setTimeout(() => {
+      
+      this.cargarClientes();
+      
+    }, 500);
+  }
 
   filtroEstatus(estatus: number | null) {
     this.estatusActual = estatus;

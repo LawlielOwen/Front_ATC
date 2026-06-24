@@ -47,6 +47,8 @@ export class CotizacionesPage implements OnInit {
   fechaIni: string = '';
   fechaFin: string = '';
   orden: string = '';
+    timeoutBusqueda: any;
+
   cargando: boolean = true;
   Totalcanceladas: number = 0;
   Totalpendientes: number = 0;
@@ -109,8 +111,8 @@ export class CotizacionesPage implements OnInit {
       omitirBase: true, // <--- Le decimos que no ponga Editar/Eliminar
       menuOptions: [    // <--- Pasamos las nuevas opciones
         { accion: 'ver_pdf', etiqueta: 'Ver PDF' },
-        { accion: 'aceptar', etiqueta: 'Aceptar' },
-        { accion: 'cancelar', etiqueta: 'Cancelar' }
+        { accion: 'aceptar', etiqueta: 'Aceptar' , mostrarSi: (row) => row.Estatus === 1},
+        { accion: 'cancelar', etiqueta: 'Cancelar',mostrarSi: (row) => row.Estatus === 1 }
       ]
     }
   ];
@@ -144,9 +146,16 @@ export class CotizacionesPage implements OnInit {
       }
     });
   }
-  formatearFecha(fecha: string | Date): string {
+   formatearFecha(fecha: string | Date): string {
     if (!fecha) return 'Sin fecha';
-    const f = new Date(fecha);
+    
+    // Si la fecha viene con guiones y sin hora (ej. '2026-06-20'), 
+    // le agregamos 'T12:00:00' para evitar que la zona horaria le reste un día.
+    let f = new Date(fecha);
+    if (typeof fecha === 'string' && fecha.length === 10 && fecha.includes('-')) {
+        f = new Date(`${fecha}T12:00:00`);
+    }
+
     if (isNaN(f.getTime())) return 'Fecha inválida';
 
     const dia = f.getDate().toString().padStart(2, '0');
@@ -154,14 +163,9 @@ export class CotizacionesPage implements OnInit {
     let mes = f.toLocaleString('es-MX', { month: 'long' }).replace('.', '');
     mes = mes.charAt(0).toUpperCase() + mes.slice(1);
 
-    let horas = f.getHours();
-    const minutos = f.getMinutes().toString().padStart(2, '0');
-    const ampm = horas >= 12 ? 'p.m.' : 'a.m.';
+    const anio = f.getFullYear();
 
-    horas = horas % 12 || 12;
-    const horasStr = horas.toString().padStart(2, '0');
-
-    return `${dia} ${mes} ${horasStr}:${minutos} ${ampm}`;
+    return `${dia} ${mes} ${anio}`;
   }
   obtenerTextoEstatus(estatus: number): string {
     const mapaEstatus: Record<number, string> = {
@@ -171,19 +175,19 @@ export class CotizacionesPage implements OnInit {
     };
     return mapaEstatus[estatus] || 'Desconocido';
   }
-  cargarCotizaciones() {
+ cargarCotizaciones() {
     this.cargando = true;
+    
     this.cs.buscarCotizacion(
       this.terminoActual,
       this.estatusActual,
-      this.fechaIni,
-      this.fechaFin,
+      this.fechaIni, // Pasamos la fecha de inicio
+      this.fechaFin, // Agregamos la fecha de fin
       this.orden,
       this.currentPage,
       this.limit
     ).subscribe({
       next: (res: any) => {
-        // Usamos res.c o res.cot dependiendo de cómo lo devuelva exactamente tu backend
         const listaCruda = res.c || res.cot || res.cotizaciones || [];
         this.cotizacionesLista = listaCruda.map((cot: any) => ({
           ...cot,
@@ -211,10 +215,19 @@ export class CotizacionesPage implements OnInit {
     this.currentPage = nuevaPagina;
     this.cargarCotizaciones();
   }
-  busquedaTexto(texto: string) {
+ busquedaTexto(texto: string) {
     this.terminoActual = texto;
     this.currentPage = 1;
-    this.cargarCotizaciones();
+
+    if (this.timeoutBusqueda) {
+      clearTimeout(this.timeoutBusqueda);
+    }
+
+    this.timeoutBusqueda = setTimeout(() => {
+      
+      this.cargarCotizaciones();
+      
+    }, 500);
   }
   filtroEstatus(estatus: number | null) {
     this.estatusActual = estatus;

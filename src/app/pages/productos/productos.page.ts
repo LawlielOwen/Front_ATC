@@ -14,9 +14,10 @@ import { PaginationComponent } from '../../shared/components/UI/pagination/pagin
 import { FiltroDinamicoComponent } from '../../shared/components/UI/Filter/filtro-dinamico/filtro-dinamico.component';
 import { TableComponent, TableColumn } from '../../shared/components/UI/table/table.component';
 import { TableSkeletonComponent } from '../../shared/components/UI/table/table-skeleton/table-skeleton.component';
+import { AuthService } from '../../core/services/auth.service';
 
 import { ProductoService } from '../../core/services/Productos.service'
-import {  MatDialog } from '@angular/material/dialog';
+import { MatDialog } from '@angular/material/dialog';
 import { Productos } from "../../shared/model/productos.model";
 import { ModalProductoPage } from "../productos/modal-producto/modal-producto.page";
 import { DetallesProductoPage } from "../productos/detalles-producto/detalles-producto.page";
@@ -36,16 +37,8 @@ import { toast } from 'ngx-sonner';
   ]
 })
 export class ProductosPage implements OnInit {
-  columnasProductos: TableColumn[] = [
-    { header: 'Producto', key: 'Nombre', subKey: 'MarcaModelo', type: 'text' },
-    { header: 'Códigos', key: 'CodigoPrincipal', subKey: 'CodigoSecundario', type: 'text' },
-    { header: 'Estanteria', key: 'Estanteria', type: 'text', align: 'center' },
-    { header: 'Precio', key: 'Precio', type: 'currency', align: 'right' },
-    { header: 'Stock', key: 'Stock', type: 'stock', align: 'center' },
-    { header: 'Estatus', key: 'EstatusTexto', type: 'status', align: 'center' },
-    { header: '', key: 'acciones', type: 'actions', align: 'center' }
-  ];
-  
+ 
+columnasProductos: TableColumn[] = [];
   productosLista: any[] = [];
   @ViewChild(SiderbarComponent) sidebar!: SiderbarComponent;
   currentPage: number = 1;
@@ -58,7 +51,10 @@ export class ProductosPage implements OnInit {
   estatusActual: number | null = 1;
   cargando: boolean = true;
   totalStock: number = 0;
-  constructor(public dialog: MatDialog, private ps: ProductoService) { }
+  rolUsuario: string = '';
+  user: any;
+timeoutBusqueda: any;
+  constructor(public dialog: MatDialog, private ps: ProductoService,public authService: AuthService) { }
   opcionesMarcas = [
     { label: 'Todas las marcas', value: null },
     { label: 'SMC', value: 1 },
@@ -77,8 +73,50 @@ export class ProductosPage implements OnInit {
     { label: 'Inactivos', value: 0 },
     { label: 'Sin Stock', value: 2 }
   ];
+  definirColumnasPorRol() {
+    // Columnas base comunes para todos los empleados
+    const columnasBase: TableColumn[] = [
+      { header: 'Producto', key: 'Nombre', subKey: 'MarcaModelo', type: 'text' },
+      { header: 'Códigos', key: 'CodigoPrincipal', subKey: 'CodigoSecundario', type: 'text' },
+      { header: 'Estanteria', key: 'Estanteria', type: 'text', align: 'center' },
+      { header: 'Precio', key: 'Precio', type: 'currency', align: 'right' },
+      { header: 'Stock', key: 'Stock', type: 'stock', align: 'center' },
+      { header: 'Estatus', key: 'EstatusTexto', type: 'status', align: 'center' }
+    ];
+
+    const opcionesMenuAutorizadas = [];
+
+    if (this.authService.tieneAcceso(['Administrador', 'Almacen', 'Cotizador'])) {
+      opcionesMenuAutorizadas.push({
+        accion: 'editar',
+        etiqueta: 'Modificar',
+      });
+    }
+
+    // RESTRICCIÓN 2: "Eliminar" disponible ÚNICAMENTE para el Administrador
+    if (this.authService.tieneAcceso(['Administrador'])) {
+      opcionesMenuAutorizadas.push({
+        accion: 'eliminar',
+        etiqueta: 'Eliminar',
+        mostrarSi: (row: any) => row.estatus !== 0 && row.Estatus !== 0
+      });
+    }
+
+    if (opcionesMenuAutorizadas.length > 0) {
+      columnasBase.push({
+        header: '',
+        key: 'acciones',
+        type: 'actions',
+        align: 'center',
+        omitirBase: true,
+        menuOptions: opcionesMenuAutorizadas // <--- Le pasamos solo las acciones que su rol permite
+      });
+    }
+
+    this.columnasProductos = columnasBase;
+  }
   ngOnInit() {
-   
+
   }
   mostrarSidebarMobile() {
     if (this.sidebar) {
@@ -121,10 +159,19 @@ export class ProductosPage implements OnInit {
       }
     })
   }
-  busquedaTexto(texto: string) {
+   busquedaTexto(texto: string) {
     this.terminoActual = texto;
     this.currentPage = 1;
-    this.cargarProductos();
+
+    if (this.timeoutBusqueda) {
+      clearTimeout(this.timeoutBusqueda);
+    }
+
+    this.timeoutBusqueda = setTimeout(() => {
+      
+      this.cargarProductos();
+      
+    }, 500);
   }
   filtroEstatus(estatus: number | null) {
     this.estatusActual = estatus;
@@ -206,7 +253,7 @@ export class ProductosPage implements OnInit {
       }
     });
   }
- abrirModalEdicion(productoAEditar: any) {
+  abrirModalEdicion(productoAEditar: any) {
     const dialogRef = this.dialog.open(ModalProductoPage, {
       width: '630px',
       maxWidth: '105vw',
@@ -222,7 +269,7 @@ export class ProductosPage implements OnInit {
       }
     });
   }
-eliminarProducto(producto: any) {
+  eliminarProducto(producto: any) {
     const dialogRef = this.dialog.open(DeleteComponent, {
       width: '400px',
       panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
@@ -240,7 +287,7 @@ eliminarProducto(producto: any) {
         this.ps.deleteProducto(producto.id).subscribe({
           next: (response: any) => {
             toast.success('Producto eliminado correctamente');
-  
+
             this.cargarProductos();
             this.obtenerTotalActivos();
           },
@@ -254,6 +301,7 @@ eliminarProducto(producto: any) {
   }
   ionViewWillEnter() {
     this.cargarProductos();
-    this.obtenerTotalActivos(); 
+    this.obtenerTotalActivos();
+    this.definirColumnasPorRol();
   }
 }

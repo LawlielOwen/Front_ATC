@@ -12,6 +12,8 @@ import { RegimenFiscalPipe } from "./regimen-fiscal-pipe";
 import { MatDialog } from '@angular/material/dialog';
 import { ModalClientePage } from "../modal-cliente/modal-cliente.page";
 import {CardDetailsComponent} from "../../../shared/components/UI/modal/card-details/card-details.component";
+import { AuthService } from '../../../core/services/auth.service';
+
 @Component({
   selector: 'app-detalles-cliente',
   templateUrl: './detalles-cliente.page.html',
@@ -27,7 +29,7 @@ export class DetallesClientePage implements OnInit {
 constructor(
     private dialogRef: MatDialogRef<DetallesClientePage>,
     @Inject(MAT_DIALOG_DATA) public cliente: Cliente,
-    private clientesService: ClientesService, public dialog: MatDialog,
+    private clientesService: ClientesService, public dialog: MatDialog,public authService: AuthService
   ) { }
 
   ngOnInit() {

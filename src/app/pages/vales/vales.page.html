@@ -40,7 +40,7 @@
           </app-search-layout>
         </div>
         <div body>
-         <app-etiqueta *ngFor="let vale of vales" [titulo]="vale.folio_vale + ' — ' + vale.nombre_cliente"
+         <app-etiqueta [cargando]="cargando" *ngFor="let vale of vales" [titulo]="vale.folio_vale + ' — ' + vale.nombre_cliente"
             [subtitulo]="'Solicita: ' + vale.nombre_asesor + ' · OC-' + vale.orden_compra + ' · ' + formatearFecha(vale.fecha)"
             [badge]="getBadgeText(vale.estatus)" [tipoBorde]="getTipoBorde(vale.estatus)" [mostrarCuadro]="true"
             [mostrarBotones]="vale.estatus === 0 && (rolUsuario === 'Administrador' || rolUsuario === 'Almacen')"

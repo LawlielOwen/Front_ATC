@@ -24,7 +24,7 @@ import { NgxSonnerToaster } from 'ngx-sonner';
   imports: [IonicModule,
     CommonModule, FooterModalComponent, HeaderModalComponent, ButtonActionComponent,
     UploadModalComponent, InputComponent, SelectComponent, CardFormComponent,
-  NgxSonnerToaster],
+    NgxSonnerToaster],
 })
 export class ModalClientePage implements OnInit {
   asesores: Asesor[] = [];
@@ -43,18 +43,20 @@ export class ModalClientePage implements OnInit {
     Razon_social: '',
     Regimen_fiscal: '',
     Direccion: '',
+    contacto_principal: '',
+    correo_contacto: '',
     CP: '',
     id_asesor: '',
     asesor_tipo: ''
   };
 
-ngOnInit() {
+  ngOnInit() {
     if (this.data && this.data.id) {
       this.isEditMode = true;
-      this.uploadMode = false; 
+      this.uploadMode = false;
 
-      this.clienteNuevo = { ...this.data }; 
-      this.clienteNuevo.id_asesor = ''; 
+      this.clienteNuevo = { ...this.data };
+      this.clienteNuevo.id_asesor = '';
     }
     this.cargarAsesores();
   }
@@ -66,7 +68,7 @@ ngOnInit() {
   recibirArchivo(archivo: File | undefined) {
     this.archivoActual = archivo;
   }
-cargarAsesores() {
+  cargarAsesores() {
     this.service.getAsesores().subscribe({
       next: (response: any) => {
 
@@ -74,7 +76,7 @@ cargarAsesores() {
         if (this.isEditMode && this.data.id_asesor) {
           setTimeout(() => {
             this.clienteNuevo.id_asesor = this.data.id_asesor.toString();
-          }, 50); 
+          }, 50);
         }
       },
       error: (err) => console.error('Error al cargar asesores', err)
@@ -88,12 +90,16 @@ cargarAsesores() {
     formData.append('Razon_social', this.clienteNuevo.Razon_social);
     formData.append('Regimen_fiscal', this.clienteNuevo.Regimen_fiscal);
     formData.append('Direccion', this.clienteNuevo.Direccion);
+    formData.append('contacto_principal', this.clienteNuevo.contacto_principal); // NUEVO
+    formData.append('correo_contacto', this.clienteNuevo.correo_contacto);       // NUEVO
     formData.append('CP', this.clienteNuevo.CP);
     formData.append('id_asesor', this.clienteNuevo.id_asesor);
     formData.append('asesor_tipo', this.clienteNuevo.asesor_tipo);
+
     if (this.archivoActual) {
       formData.append('archivo', this.archivoActual);
     }
+
     this.clienteService.addCliente(formData).subscribe({
       next: (response) => {
         toast.success('Cliente agregado correctamente');
@@ -129,11 +135,19 @@ cargarAsesores() {
       this.agregarCliente();
     }
   }
-  procesarAccion() {
+ procesarAccion() {
     if (this.uploadMode) {
       this.procesarPDF();
     } else {
       
+      if (!this.validarCamposObligatorios()) {
+        return; 
+      }
+
+      if (!this.validarYSanitizarOpcionales()) {
+        return; 
+      }
+
       if (this.isEditMode) {
         this.actualizarClienteExistente();
       } else {
@@ -143,20 +157,81 @@ cargarAsesores() {
   }
   actualizarClienteExistente() {
     const idCliente = this.clienteNuevo.id;
-     this.clienteService.updateCliente(idCliente, this.clienteNuevo as any).subscribe({
+
+
+    this.clienteService.updateCliente(idCliente, this.clienteNuevo as any).subscribe({
       next: (response) => {
         toast.success('Cliente actualizado correctamente');
-        this.dialogRef.close(true);
+        this.dialogRef.close(true); // Cerrar y recargar
       },
       error: (err) => {
         console.error(err);
         toast.error('Error al actualizar el cliente');
       }
     });
-    this.dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
-      if (necesitaRecargar) {
-        this.dialogRef.close(true);
+  }
+  validarYSanitizarOpcionales(): boolean {
+    if (this.clienteNuevo.contacto_principal && this.clienteNuevo.contacto_principal.trim() !== '') {
+      let telLimpio = this.clienteNuevo.contacto_principal.replace(/[\s\-\(\)\+]/g, '');
+
+
+      const regexTelefono = /^\d{10,15}$/;
+      if (!regexTelefono.test(telLimpio)) {
+        toast.error('El contacto principal debe ser un número telefónico válido.');
+        return false;
       }
-    });
+
+
+      this.clienteNuevo.contacto_principal = telLimpio;
+    } else {
+      this.clienteNuevo.contacto_principal = '';
+    }
+
+    if (this.clienteNuevo.correo_contacto && this.clienteNuevo.correo_contacto.trim() !== '') {
+      this.clienteNuevo.correo_contacto = this.clienteNuevo.correo_contacto.trim();
+
+
+      const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      if (!regexEmail.test(this.clienteNuevo.correo_contacto)) {
+        toast.error('El formato del correo electrónico de contacto es incorrecto.');
+        return false;
+      }
+    } else {
+      this.clienteNuevo.correo_contacto = '';
+    }
+
+    return true;
+  }
+  validarCamposObligatorios(): boolean {
+
+    this.clienteNuevo.Nombre = (this.clienteNuevo.Nombre || '').trim();
+    this.clienteNuevo.RFC = (this.clienteNuevo.RFC || '').trim().toUpperCase(); // RFC siempre en mayúsculas
+    this.clienteNuevo.Razon_social = (this.clienteNuevo.Razon_social || '').trim();
+    this.clienteNuevo.Regimen_fiscal = (this.clienteNuevo.Regimen_fiscal || '').trim();
+    this.clienteNuevo.Direccion = (this.clienteNuevo.Direccion || '').trim();
+    this.clienteNuevo.CP = (this.clienteNuevo.CP || '').trim();
+
+    if (!this.clienteNuevo.Nombre || !this.clienteNuevo.RFC ||
+      !this.clienteNuevo.Razon_social || !this.clienteNuevo.Regimen_fiscal ||
+      !this.clienteNuevo.Direccion || !this.clienteNuevo.CP ||
+      !this.clienteNuevo.id_asesor || !this.clienteNuevo.asesor_tipo) {
+
+      toast.error('Por favor, completa todos los campos obligatorios.');
+      return false;
+    }
+
+    const regexCP = /^\d{5}$/;
+    if (!regexCP.test(this.clienteNuevo.CP)) {
+      toast.error('El Código Postal debe contener exactamente 5 números.');
+      return false;
+    }
+
+    this.clienteNuevo.RFC = this.clienteNuevo.RFC.replace(/[\s\-]/g, '');
+    if (this.clienteNuevo.RFC.length < 12 || this.clienteNuevo.RFC.length > 13) {
+      toast.error('El RFC debe tener entre 12 y 13 caracteres válidos.');
+      return false;
+    }
+
+    return true; // Todos los campos obligatorios están listos
   }
 }

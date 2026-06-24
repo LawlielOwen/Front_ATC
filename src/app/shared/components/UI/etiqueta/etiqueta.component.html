@@ -1,6 +1,33 @@
-<div [ngClass]="[borderClass, cardBgClass]" class="flex items-center justify-between rounded-xl border 
-border-slate-200 border-l-[4px] px-5 py-4 mb-3 mx-4 
-lg:mx-6 shadow-sm transition-all hover:shadow-md cursor-pointer">
+<div *ngIf="cargando" 
+  class="flex items-center justify-between rounded-xl border border-slate-200 border-l-[4px] border-l-slate-200 bg-white px-5 py-4 mb-3 mx-4 lg:mx-6 shadow-sm animate-pulse cursor-wait">
+  
+  <div class="flex items-center gap-4 w-full">
+    
+    <div *ngIf="mostrarCuadro" class="w-11 h-11 rounded-xl bg-slate-200 flex-shrink-0"></div>
+
+    <div class="flex flex-col w-full">
+      <div class="flex items-center gap-2 mb-2">
+        <div class="h-4 bg-slate-200 rounded-md w-32"></div>
+        <div *ngIf="badge" class="h-3 bg-slate-200 rounded-md w-16"></div>
+      </div>
+      
+      <div class="h-3 bg-slate-200 rounded-md w-48 max-w-[80%]"></div>
+    </div>
+  </div>
+
+  <div class="flex items-center gap-2">
+    
+    <ng-container *ngIf="mostrarBotones">
+      <div class="w-20 h-8 bg-slate-200 rounded-lg"></div>
+      <div class="w-20 h-8 bg-slate-200 rounded-lg"></div>
+    </ng-container>
+
+  </div>
+</div>
+
+<div *ngIf="!cargando" 
+  [ngClass]="[borderClass, cardBgClass]" 
+  class="flex items-center justify-between rounded-xl border border-slate-200 border-l-[4px] px-5 py-4 mb-3 mx-4 lg:mx-6 shadow-sm transition-all hover:shadow-md cursor-pointer">
   
   <div class="flex items-center gap-4">
     
@@ -14,9 +41,9 @@ lg:mx-6 shadow-sm transition-all hover:shadow-md cursor-pointer">
       <div class="flex items-center gap-2 mb-0.5">
         <span class="text-[14px] font-bold text-[#0d1f38]">{{ titulo }}</span>
         
-       <span *ngIf="badge" [ngClass]="badgeClass" class="text-[10px] font-bold px-2 py-0.5 rounded-md border shadow-sm">
-  {{ badge }}
-</span>
+        <span *ngIf="badge" [ngClass]="badgeClass" class="text-[10px] font-bold px-2 py-0.5 rounded-md border shadow-sm">
+          {{ badge }}
+        </span>
       </div>
       
       <span class="text-xs text-slate-500 font-medium">{{ subtitulo }}</span>
@@ -25,7 +52,7 @@ lg:mx-6 shadow-sm transition-all hover:shadow-md cursor-pointer">
 
   <div class="flex items-center gap-2">
     
-  <ng-container *ngIf="mostrarBotones">
+    <ng-container *ngIf="mostrarBotones">
       <button (click)="$event.stopPropagation(); aprobar.emit()" class="bg-[#0f6e56] hover:bg-[#0b5341] text-white text-xs font-bold px-4 py-2 rounded-lg transition-colors shadow-sm">
         Aprobar
       </button>

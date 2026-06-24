@@ -39,6 +39,9 @@ export class TableComponent implements OnInit {
     // --- Cotizaciones ---
     if (s === 'aceptada' || s === 'aceptado') return 'bg-blue-50 text-blue-700 border-blue-200'; // Azul profesional
     if (s === 'cancelada' || s === 'cancelado') return 'bg-red-50 text-red-700 border-red-200'; // Rojo estándar
+        // --- Pedidos ---
+    if(s === 'completado' || s === 'completado') return 'bg-[#e8f5f0] text-[#0f6e56] border-[#bce3d4]';
+    if (s === 'Cancelado') return 'bg-red-50 text-red-700 border-red-200'; 
 
     // --- Compartido (Por defecto o Pendiente) ---
     if (s === 'pendiente') return 'bg-slate-50 text-slate-600 border-slate-200'; // Gris
@@ -61,6 +64,9 @@ export class TableComponent implements OnInit {
     if (s === 'aceptada' || s === 'aceptado') return 'bg-blue-500';
     if (s === 'cancelada' || s === 'cancelado') return 'bg-red-500';
 
+       // --- Pedidos ---
+    if(s === 'completado' || s === 'completada')  return 'bg-[#1D9E75]';
+    if (s === 'Cancelado') return 'bg-rose-600';
     // --- Compartido (Por defecto o Pendiente) ---
     if (s === 'pendiente') return 'bg-slate-400'; // Gris
 

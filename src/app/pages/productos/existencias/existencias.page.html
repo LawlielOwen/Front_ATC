@@ -112,8 +112,27 @@
   [opciones]="opcionesDestino"
   [(value)]="destino">
 </app-card-option>
+<div *ngIf="!esEntrada" class="mt-1 text-left">
+        <label class="block text-sm font-bold text-[#0d1f38] mb-1">Cliente destino</label>
+        
+        <input type="text" [formControl]="clienteControl" [matAutocomplete]="auto"
+            placeholder="Ingresa nombre del cliente registrado o no registrado"
+            class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
 
-      <div class="bg-[#fffbeb] border border-[#fde68a] text-[#92400e] text-[13px] px-4 py-2 rounded-lg mt-2">
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente">
+            <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
+                {{ c.nombre || c.Nombre }}
+            </mat-option>
+
+            <mat-option
+                *ngIf="clienteControl.value && typeof clienteControl.value === 'string' && clientesFiltrados.length === 0"
+                [value]="clienteControl.value">
+                <span class="italic text-slate-500">Usar como cliente eventual:</span>
+                <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value }}</span>
+            </mat-option>
+        </mat-autocomplete>
+      </div>
+      <div class="bg-[#fffbeb] border border-[#fde68a] text-[#92400e] text-[13px] px-4 py-2 rounded-lg ">
         Al confirmar, el stock pasará de <strong>{{ productoEncontrado.Stock }}</strong> a
         <strong>{{ nuevoStock }}</strong> unidades.
       </div>

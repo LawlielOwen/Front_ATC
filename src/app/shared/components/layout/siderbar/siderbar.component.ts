@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
+import { AuthService } from '../../../../core/services/auth.service';
 @Component({
   selector: 'app-siderbar',
   templateUrl: './siderbar.component.html',
@@ -12,8 +13,7 @@ import { CommonModule } from '@angular/common';
 export class SiderbarComponent  implements OnInit {
 public isMobileMenuOpen: boolean = false;
 user: any;
-  constructor() { }
-
+constructor(public authService: AuthService) { }
   ngOnInit() {
     const userData = localStorage.getItem('user');
     if (userData) {
@@ -23,10 +23,5 @@ user: any;
 toggleMenu() {
     this.isMobileMenuOpen = !this.isMobileMenuOpen;
   }
-  tieneAcceso(rolesPermitidos: string[]): boolean {
-    if (!this.user || !this.user.Rol) {
-      return false;
-    }
-    return rolesPermitidos.includes(this.user.Rol);
-  }
+
 }

@@ -3,7 +3,7 @@
     <div class="container-sidebar">
 
         <div class="container-header">
-            <app-header (toggleMenu)="mostrarSidebarMobile()"></app-header>
+            <app-header></app-header>
 
             <ion-content style="--background :#f1f5f9;">
                 <div class="p-6 max-w-[1600px] mx-auto">
@@ -295,6 +295,18 @@
                                               focus:ring-[#003B8A] appearance-none shadow-none ring-0
                                                focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                                             [(ngModel)]="cotizacion.ciudad_destino">
+                                    </div>
+                                    <div>
+                                        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Seleccionar
+                                            asesor</p>
+                                        <select
+                                            class="w-full border border-slate-200 rounded-lg p-2 text-[13px] text-slate-700 outline-none focus:border-[#003B8A]"
+                                           [(ngModel)]="cotizacion.id_asesor">
+                                            <option value="">Seleccione un asesor...</option>
+                                            <option *ngFor="let asesor of asesores" [value]="asesor.id">
+                                                {{ asesor.Nombre_completo }}
+                                            </option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>

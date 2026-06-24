@@ -13,7 +13,7 @@ export class StatCardComponent {
   @Input() subtext: string = '';
   
   @Input() accentColor: string = '#1D9E75'; 
-  
+  @Input() tooltipText: string = '';
 
   @Input() subtextClass: string = 'text-slate-500'; 
 }

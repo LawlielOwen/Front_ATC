@@ -11,6 +11,8 @@ import { SelectComponent } from "../../../shared/components/UI/form/select/selec
 import { CardFormComponent } from "../../../shared/components/UI/form/card-form/card-form.component";
 import { ProductoService } from "../../../core/services/Productos.service";
 import { Productos } from '../../../shared/model/productos.model';
+import { AuthService } from '../../../core/services/auth.service';
+
 @Component({
   selector: 'app-modal-producto',
   templateUrl: './modal-producto.page.html',
@@ -60,7 +62,7 @@ export class ModalProductoPage implements OnInit {
   constructor(
     private ps: ProductoService,
     private dialogRef: MatDialogRef<ModalProductoPage>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: any
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any,public authService: AuthService
   ) {
     if (this.data && this.data.producto) {
       this.isEditMode = true;
@@ -72,12 +74,13 @@ export class ModalProductoPage implements OnInit {
   }
   ngOnInit() {
   }
-  procesarAccion() {
-    if (!this.productoNuevo.Nombre || !this.productoNuevo.Precio || !this.productoNuevo.Estanteria || !this.productoNuevo.id_marca) {
-      toast.error('Por favor, completa los campos requeridos (Nombre, Precio, Marca, Estantería).');
+ procesarAccion() {
+    // Disparamos la validación. Si falla, el return detiene el guardado.
+    if (!this.validarCampos()) {
       return;
     }
 
+    // Si llega hasta aquí, los datos son 100% seguros
     if (this.isEditMode) {
       this.actualizarProducto();
     } else {
@@ -96,22 +99,57 @@ export class ModalProductoPage implements OnInit {
       }
     });
   }
-  actualizarProducto() {
+ actualizarProducto() {
     const idProducto = this.productoNuevo.id;
     this.ps.updateProducto(idProducto, this.productoNuevo as any).subscribe({
       next: (response) => {
         toast.success('Producto actualizado correctamente');
-        this.dialogRef.close(true);
+        this.dialogRef.close(true); // Esto es suficiente para cerrar y avisar
       },
       error: (err) => {
         console.error(err);
         toast.error('Error al actualizar el producto');
       }
     });
-    this.dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
-      if (necesitaRecargar) {
-        this.dialogRef.close(true);
-      }
-    });
+  }
+  validarCampos(): boolean {
+    this.productoNuevo.Nombre = (this.productoNuevo.Nombre || '').toString().trim();
+    this.productoNuevo.Descripcion = (this.productoNuevo.Descripcion || '').toString().trim();
+    this.productoNuevo.Codigo_numeral = (this.productoNuevo.Codigo_numeral || '').toString().trim();
+    this.productoNuevo.Codigo_japon = (this.productoNuevo.Codigo_japon || '').toString().trim();
+    this.productoNuevo.Modelo = (this.productoNuevo.Modelo || '').toString().trim();
+    this.productoNuevo.Estanteria = (this.productoNuevo.Estanteria || '').toString().trim();
+    this.productoNuevo.Caja = (this.productoNuevo.Caja || '').toString().trim();
+
+    if (
+      !this.productoNuevo.Nombre ||
+      !this.productoNuevo.Descripcion ||
+      !this.productoNuevo.Codigo_numeral ||
+      !this.productoNuevo.Codigo_japon ||
+      !this.productoNuevo.Modelo ||
+      !this.productoNuevo.Estanteria ||
+      !this.productoNuevo.Caja ||
+      !this.productoNuevo.id_marca
+    ) {
+      toast.error('Por favor, completa todos los campos del formulario.');
+      return false;
+    }
+
+
+    const precioNumerico = Number(this.productoNuevo.Precio);
+    if (isNaN(precioNumerico) || precioNumerico <= 0) {
+      toast.error('El precio debe ser un número válido mayor a 0.');
+      return false;
+    }
+    this.productoNuevo.Precio = precioNumerico; // Forzamos el tipo numérico limpio
+
+    const stockNumerico = Number(this.productoNuevo.Stock);
+    if (isNaN(stockNumerico) || !Number.isInteger(stockNumerico) || stockNumerico < 0) {
+      toast.error('El stock debe ser un número entero válido (0 o mayor).');
+      return false;
+    }
+    this.productoNuevo.Stock = stockNumerico; // Forzamos el tipo numérico limpio
+
+    return true; // Si superó todas las pruebas, los datos son perfectos
   }
 }

@@ -17,28 +17,27 @@ export class CotizacionService {
     private apiUrl = environment.apiurl;
     constructor(private http: HttpClient) { }
 
-    buscarCotizacion(busqueda: string = '', estatus: number | null = null, fechaInicio: string = '',
-        fechaFin: string = '', ordenTotal: string = '', pagina: number = 1, limite: number = 10): Observable<RespuestaPaginada> {
+buscarCotizacion(
+        busqueda: string = '', 
+        estatus: number | null = null, 
+        fechaInicio: string = '',
+        fechaFin: string = '', 
+        ordenTotal: string = '', 
+        pagina: number = 1, 
+        limite: number = 10
+    ): Observable<RespuestaPaginada> {
+        
         let params = new HttpParams()
             .set('pagina', pagina.toString())
             .set('limite', limite.toString());
-        if (busqueda) {
-            params = params.set('busqueda', busqueda);
-        }
-        if (estatus !== null) {
-            params = params.set('estatus', estatus.toString());
-        }
-        if (fechaInicio) {
-            params = params.set('fechaInicio', fechaInicio);
-        }
-        if (fechaFin) {
-            params = params.set('fechaFin', fechaFin);
-        }
-        if (ordenTotal) {
-            params = params.set('ordenTotal', ordenTotal);
-        }
-        return this.http.get<RespuestaPaginada>(`${this.apiUrl}/cotizaciones`, { params });
 
+        if (busqueda) params = params.set('busqueda', busqueda);
+        if (estatus !== null) params = params.set('estatus', estatus.toString());
+        if (fechaInicio) params = params.set('fechaInicio', fechaInicio);
+        if (fechaFin) params = params.set('fechaFin', fechaFin);
+        if (ordenTotal) params = params.set('ordenTotal', ordenTotal);
+
+        return this.http.get<RespuestaPaginada>(`${this.apiUrl}/cotizaciones`, { params });
     }
     obtenerTipoCambioDelDia(): Observable<any> {
         return this.http.get<any>(`${this.apiUrl}/tipo-cambio`);

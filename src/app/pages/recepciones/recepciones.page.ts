@@ -114,7 +114,13 @@ timeoutBusqueda: any;
     { label: 'KLINGSPOR', value: 6 },
     { label: 'KING TONY', value: 7 },
     { label: 'Mighty Seven (m7)', value: 8 },
-    { label: 'Fuji Electric', value: 9 }
+    { label: 'Fuji Electric', value: 9 },
+    { label: 'Sumitomo Drive Technologies', value: 10 },
+    { label: 'Wenglor', value: 11 },
+    { label: 'PHOENIX CONTACT', value: 12 },
+    { label: 'PILZ', value: 13 },
+    { label: 'EUCHNER', value: 14 },
+    { label: 'CONTRINEX', value: 15 }
   ];
   ngOnInit() {
     this.cargarEstadisticas();

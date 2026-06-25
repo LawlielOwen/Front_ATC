@@ -147,14 +147,7 @@ cotizacion = {
 
 
 guardarYDescargar() {
-    // 1. Validaciones iniciales
-    const usuarioString = localStorage.getItem('user');
-    const idAsesor = usuarioString ? JSON.parse(usuarioString).id : null;
-
-    if (!idAsesor) {
-      toast.error('Error de sesión. Inicia sesión nuevamente.');
-      return;
-    }
+  
     if (this.detalles.length === 0) {
       toast.error('La cotización debe tener al menos un producto');
       return;
@@ -164,7 +157,6 @@ guardarYDescargar() {
       return;
     }
 
-    this.cotizacion.id_asesor = idAsesor;
     Swal.fire({
       title: 'Procesando...',
       text: 'Guardando cotización y generando PDF',

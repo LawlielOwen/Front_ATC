@@ -82,12 +82,15 @@ export class PedidoService {
     obtenerEstadisticas(): Observable<{ pendientes: number, cancelados: number, pagados: number, total_mes: number }> {
         return this.http.get<{ pendientes: number, cancelados: number, pagados: number, total_mes: number }>(`${this.apiUrl}/pedido/estadisticas`);
     }
-    obtenerUrlFactura(rutaRelativa: string): string {
+obtenerUrlFactura(rutaRelativa: string): string {
+    if (!rutaRelativa) return '';
     if (rutaRelativa.startsWith('http')) return rutaRelativa;
     
-    const baseUrl = this.apiUrl.replace('/api', ''); 
-    const pathLimpio = rutaRelativa.startsWith('/') ? rutaRelativa : `/${rutaRelativa}`;
+    const partes = rutaRelativa.split(/[/\\]/);
+    const nombreArchivo = partes[partes.length - 1]; // Ej: recibo-1782062568592-875973605.pdf
     
-    return `${baseUrl}${pathLimpio}`;
+    const baseUrl = this.apiUrl.replace(/\/api\/?$/, ''); 
+    
+    return `${baseUrl}/uploads/recibos/${nombreArchivo}`;
   }
 }

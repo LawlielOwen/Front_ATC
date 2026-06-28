@@ -60,10 +60,16 @@ export class ClientesService {
 
     return this.http.post(`${this.apiUrl}/clientes/procesar-csf`, formData);
   }
-  obtenerUrlArchivo(rutaConstancia: string): string {
-    const rutaFormateada = rutaConstancia.replace(/\\/g, '/');
+ obtenerUrlArchivo(rutaConstancia: string): string {
+    if (!rutaConstancia) return '';
+
+    const partes = rutaConstancia.split(/[/\\]/);
+    
+    const nombreArchivo = partes[partes.length - 1];
+
     const baseUrl = this.apiUrl.replace(/\/api\/?$/, '');
-    return `${baseUrl}/${rutaFormateada}`;
+    
+    return `${baseUrl}/uploads/CSF/${nombreArchivo}`;
   }
   cantidadClientesActivos() {
     return this.http.get(`${this.apiUrl}/clientes/count`);

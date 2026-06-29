@@ -72,7 +72,9 @@ export class ModalClientePage implements OnInit {
     this.service.getAsesores().subscribe({
       next: (response: any) => {
 
-        this.asesores = response.filter((asesor: Asesor) => asesor.Rol === 'Asesor');
+        this.asesores = response.filter((asesor: Asesor) => 
+  ['Asesor', 'Administrador'].includes(asesor.Rol)
+);
         if (this.isEditMode && this.data.id_asesor) {
           setTimeout(() => {
             this.clienteNuevo.id_asesor = this.data.id_asesor.toString();

@@ -24,7 +24,10 @@ import { FiltroFechaComponent } from '../../shared/components/UI/Filter/filtro-f
 import { Router } from '@angular/router';
 import { CotizacionService } from '../../core/services/Cotizaciones.service'
 import Swal from 'sweetalert2';
-import {DetallesCotizacionPage} from './detalles-cotizacion/detalles-cotizacion.page'
+import { DetallesCotizacionPage } from './detalles-cotizacion/detalles-cotizacion.page'
+import { solicitarOrdenCompra, confirmarRegistroCliente } from '../../shared/utils/cotizacion-alerts.util';
+import { ModalClientePage } from '../clientes/modal-cliente/modal-cliente.page'
+
 @Component({
   selector: 'app-cotizaciones',
   templateUrl: './cotizaciones.page.html',
@@ -33,7 +36,7 @@ import {DetallesCotizacionPage} from './detalles-cotizacion/detalles-cotizacion.
   imports: [IonicModule, SiderbarComponent, HeaderComponent, NgxSonnerToaster, ButtonLayoutComponent,
     ButtonNewComponent, CountComponent, ContainerTableComponent, TableComponent, StatCardComponent, SearchLayoutComponent,
     EstatusComponent, SearchBarComponent, TableSkeletonComponent, PaginationComponent, CommonModule, FiltroFechaComponent,
-    FiltroDinamicoComponent, 
+    FiltroDinamicoComponent,
   ]
 })
 export class CotizacionesPage implements OnInit {
@@ -47,7 +50,7 @@ export class CotizacionesPage implements OnInit {
   fechaIni: string = '';
   fechaFin: string = '';
   orden: string = '';
-    timeoutBusqueda: any;
+  timeoutBusqueda: any;
 
   cargando: boolean = true;
   Totalcanceladas: number = 0;
@@ -111,8 +114,8 @@ export class CotizacionesPage implements OnInit {
       omitirBase: true, // <--- Le decimos que no ponga Editar/Eliminar
       menuOptions: [    // <--- Pasamos las nuevas opciones
         { accion: 'ver_pdf', etiqueta: 'Ver PDF' },
-        { accion: 'aceptar', etiqueta: 'Aceptar' , mostrarSi: (row) => row.Estatus === 1},
-        { accion: 'cancelar', etiqueta: 'Cancelar',mostrarSi: (row) => row.Estatus === 1 }
+        { accion: 'aceptar', etiqueta: 'Aceptar', mostrarSi: (row) => row.Estatus === 1 },
+        { accion: 'cancelar', etiqueta: 'Cancelar', mostrarSi: (row) => row.Estatus === 1 }
       ]
     }
   ];
@@ -120,6 +123,7 @@ export class CotizacionesPage implements OnInit {
 
   }
   ionViewWillEnter() {
+    this.establecerRangoMesActual();
     this.cargarCotizaciones();
     this.cargarEstadisticas();
   }
@@ -146,14 +150,14 @@ export class CotizacionesPage implements OnInit {
       }
     });
   }
-   formatearFecha(fecha: string | Date): string {
+  formatearFecha(fecha: string | Date): string {
     if (!fecha) return 'Sin fecha';
-    
+
     // Si la fecha viene con guiones y sin hora (ej. '2026-06-20'), 
     // le agregamos 'T12:00:00' para evitar que la zona horaria le reste un día.
     let f = new Date(fecha);
     if (typeof fecha === 'string' && fecha.length === 10 && fecha.includes('-')) {
-        f = new Date(`${fecha}T12:00:00`);
+      f = new Date(`${fecha}T12:00:00`);
     }
 
     if (isNaN(f.getTime())) return 'Fecha inválida';
@@ -175,9 +179,9 @@ export class CotizacionesPage implements OnInit {
     };
     return mapaEstatus[estatus] || 'Desconocido';
   }
- cargarCotizaciones() {
+  cargarCotizaciones() {
     this.cargando = true;
-    
+
     this.cs.buscarCotizacion(
       this.terminoActual,
       this.estatusActual,
@@ -215,7 +219,7 @@ export class CotizacionesPage implements OnInit {
     this.currentPage = nuevaPagina;
     this.cargarCotizaciones();
   }
- busquedaTexto(texto: string) {
+  busquedaTexto(texto: string) {
     this.terminoActual = texto;
     this.currentPage = 1;
 
@@ -224,9 +228,9 @@ export class CotizacionesPage implements OnInit {
     }
 
     this.timeoutBusqueda = setTimeout(() => {
-      
+
       this.cargarCotizaciones();
-      
+
     }, 500);
   }
   filtroEstatus(estatus: number | null) {
@@ -246,7 +250,7 @@ export class CotizacionesPage implements OnInit {
     this.cargarCotizaciones();
   }
   detallesCot(coti: any) {
-   const dialogRef = this.dialog.open(DetallesCotizacionPage, {
+    const dialogRef = this.dialog.open(DetallesCotizacionPage, {
       width: '750px',
       maxWidth: '95vw',
       panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
@@ -290,37 +294,72 @@ export class CotizacionesPage implements OnInit {
       }
     });
   }
-  aceptarCotizacion(cot: any) {
-    const dialogRef = this.dialog.open(AceptarComponent, {
-      width: '400px',
-      panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
-      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-      data: {
-        titulo: 'Aceptar Cotizacion',
-        mensaje: `¿Desear confirmar esta cotizacion como aceptada?`,
-        textoAceptar: 'Aceptar',
-        textoCancelar: 'Cancelar'
-      }
-    });
+vincularYConvertir(idCotizacion: number, idNuevoCliente: number, orden_compra: string = '') {
+  this.cs.vincularClienteCotizacion(idCotizacion, idNuevoCliente).subscribe({
+    next: () => {
+      this.ejecutarConversionSp(idCotizacion, orden_compra);
+    },
+    error: (err) => {
+      toast.error('Error al vincular el cliente con la cotización.');
+      console.error(err);
+    }
+  });
+}
 
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
-      if (confirmado) {
-        this.cs.convertirAPedido(cot.id).subscribe({
-          next: (response: any) => {
-            toast.success('Cotizacion aceptada');
+ejecutarConversionSp(idCotizacion: number, oc: string = '') {
+  this.cs.convertirAPedido(idCotizacion, oc).subscribe({
+    next: (response: any) => {
+      toast.success('Cotización convertida a pedido exitosamente');
+      this.cargarCotizaciones();
+      this.cargarEstadisticas();
+    },
+    error: (err) => {
+      console.error('Error al aceptar', err);
+      toast.error(err.error?.error || 'Error al convertir a pedido.');
+    }
+  });
+}
 
-            this.cargarCotizaciones();
-            this.cargarEstadisticas();
-          },
-          error: (err) => {
-            console.error('Error al aceptar', err);
-            toast.error('No se pudo aceptar');
+aceptarCotizacion(cot: any) {
+  if (!cot.id_cliente) {
+    confirmarRegistroCliente(cot.nombre_prospecto || cot.Cliente).then((deseaRegistrar) => {
+      if (!deseaRegistrar) return; // usuario cerró, no pasa nada más
+    const nombreCliente = cot.nombre_cliente_final && cot.nombre_cliente_final !== 'Sin Nombre'
+          ? cot.nombre_cliente_final
+          : (cot.nombre_prospecto || cot.Cliente || '');
+      const dialogRef = this.dialog.open(ModalClientePage, {
+        width: '630px',
+        maxWidth: '105vw',
+        panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+        backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+       data: {
+            nombrePrellenado: nombreCliente,
+            idAsesorPrellenado: cot.id_asesor
           }
-        });
-      }
+      });
+
+      dialogRef.afterClosed().subscribe((nuevoIdCliente) => {
+        if (nuevoIdCliente && typeof nuevoIdCliente === 'number') {
+          solicitarOrdenCompra().then((ordenCompra) => {
+            if (ordenCompra !== null) {
+              this.vincularYConvertir(cot.id, nuevoIdCliente, ordenCompra);
+            }
+          });
+        }
+      });
     });
+
+    return;
   }
-abrirPdf(idCotizacion: number) {
+
+  solicitarOrdenCompra().then((ordenCompra) => {
+    if (ordenCompra !== null) {
+      this.ejecutarConversionSp(cot.id, ordenCompra);
+    }
+  });
+}
+
+  abrirPdf(idCotizacion: number) {
     Swal.fire({
       title: 'Abriendo documento...',
       text: 'Por favor espera un momento',
@@ -335,25 +374,25 @@ abrirPdf(idCotizacion: number) {
     this.cs.verPdfCotizacion(idCotizacion).subscribe({
       next: (blob: Blob) => {
         Swal.close();
-        
+
         // 1. Tipamos el PDF
         const pdfBlob = new Blob([blob], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(pdfBlob);
-        
+
         // 2. CREAMOS UN ENLACE INVISIBLE (Esto evita el bloqueo del navegador)
         const a = document.createElement('a');
         a.href = fileURL;
         a.target = '_blank'; // Fuerza que se abra en otra pestaña
-        
+
         // IMPORTANTE: NO ponemos a.download para que se visualice en lugar de descargarse
         document.body.appendChild(a);
         a.click(); // Simulamos el clic humano
-        
+
         // 3. Limpieza de memoria
         document.body.removeChild(a);
-        
+
         // Liberamos la URL después de unos segundos para que el navegador no gaste RAM
-        setTimeout(() => URL.revokeObjectURL(fileURL), 10000); 
+        setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
       },
       error: (err) => {
         Swal.close();
@@ -366,6 +405,7 @@ abrirPdf(idCotizacion: number) {
       }
     });
   }
+
   abrirOpciones(evento: { accion: string, row: any }) {
     switch (evento.accion) {
       case 'ver_pdf':
@@ -379,4 +419,19 @@ abrirPdf(idCotizacion: number) {
         break;
     }
   }
+private establecerRangoMesActual() {
+  const hoy = new Date();
+  const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  const ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+
+  this.fechaIni = this.formatearFechaISO(primerDia);
+  this.fechaFin = this.formatearFechaISO(ultimoDia);
+}
+
+private formatearFechaISO(fecha: Date): string {
+  const anio = fecha.getFullYear();
+  const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+  const dia = fecha.getDate().toString().padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
 }

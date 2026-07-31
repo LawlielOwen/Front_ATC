@@ -1,0 +1,41 @@
+<div class="container-sidebar">
+  <div class="sidebar-wrapper">
+    <app-siderbar></app-siderbar>
+  </div>
+  <div class="container-header">
+    <app-header (toggleMenu)="mostrarSidebarMobile()"></app-header>
+    <ion-content style="--background :#f1f5f9;">
+      <app-button-layout>
+        <app-count [label]="'Tickets anuales'" [count]="totalTickets" accentColor="#1D9E75" iconBg="#E1F5EE"  *ngIf="authService.tieneAcceso(['Administrador'])">
+          <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+          </svg>
+        </app-count>
+        <div class="flex gap-3">
+          <app-button-new label="Nuevo ticket" variante="btn-azul"   *ngIf="authService.tieneAcceso(['Administrador'])" (click)="altaTicket()"></app-button-new>
+        </div>
+      </app-button-layout>
+      <app-container-table>
+        <div header>
+          <app-search-layout>
+            <app-search-bar placeholder="Buscar por nombre, codigo japon, numeral"
+              (onSearch)="busquedaTexto($event)"></app-search-bar>
+            <app-estatus [opciones]="EstatusTickets" (onFilterChange)="filtroEstatus($event)"></app-estatus>
+          </app-search-layout>
+        </div>
+        <div body>
+          <app-table-skeleton *ngIf="cargando" [rows]="6"></app-table-skeleton>
+
+          <app-table *ngIf="!cargando" [columns]="columnasTickets" [data]="tickets"
+           (rowClick)="verDetalle($event)" >
+          </app-table>
+        </div>
+        <div footer>
+          <app-pagination [paginaActual]="currentPage" [totalPaginas]="totalPages"
+            (onPageChange)="cambiarPaginaPadre($event)"></app-pagination>
+        </div>
+      </app-container-table>
+    </ion-content>
+  </div>
+</div>

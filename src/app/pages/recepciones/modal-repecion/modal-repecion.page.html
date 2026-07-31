@@ -15,98 +15,104 @@
         <div class="flex flex-col md:flex-row gap-4 w-full md:col-span-2">
 
           <div class="flex-1 flex flex-col gap-y-1">
-            <app-select label="Proveedor" [(value)]="pedidoNuevo.id_proveedor">
-              <option [value]="null" disabled>Selecciona una marca...</option>
-              <option *ngFor="let opt of opcionesProveedor" [value]="opt.value">{{ opt.label }}</option>
-            </app-select>
+            <app-select label="Proveedor *" [(value)]="pedidoNuevo.id_proveedor" (valueChange)="onCambiarProveedor()">
+    <option [value]="null" disabled>Selecciona una marca...</option>
+    <option *ngFor="let opt of opcionesProveedor" [value]="opt.value">{{ opt.label }}</option>
+</app-select>
           </div>
 
           <div class="flex-1 flex flex-col gap-y-1">
-            <app-select label="Destino" [(value)]="pedidoNuevo.destino">
-              <option value="Almacen">Almacén</option>
-              <option value="Pedido">Pedido</option>
-            </app-select>
-          </div>
-
-          <div class="flex-1 flex flex-col gap-y-1">
-            <app-date label="Fecha Estimada" [(value)]="pedidoNuevo.fecha_estimada">
+            <app-date label="Fecha Estimada *" [(value)]="pedidoNuevo.fecha_estimada">
             </app-date>
           </div>
 
         </div>
       </app-card-form>
 
-      <app-card-form title="Productos Solicitados">
-        <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-        </svg>
+     <app-card-form title="Productos Solicitados">
+  <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+  </svg>
 
-        <div class="md:col-span-2">
+  <div class="flex flex-col gap-3 w-full md:col-span-2">
 
-          <div class="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm">
+    <div class="relative">
+      <input type="text" [formControl]="productoControl" [matAutocomplete]="autoProducto"
+        [placeholder]="pedidoNuevo.id_proveedor ? 'Buscar por nombre, Cód. Japón o Cód. Numeral...' : 'Selecciona un proveedor primero...'"
+        class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+        (keyup.enter)="onEnterProducto($event)">
 
-            <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2.5 px-4 items-center">
-              <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
-              <span class="col-span-4 text-[9px] font-bold text-white uppercase tracking-widest">Codigo</span>
-              <span class="col-span-5 text-[9px] font-bold text-white uppercase tracking-widest">Nombre</span>
-              <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">Pzas</span>
-              <span class="col-span-1 text-center"></span>
+      <mat-autocomplete #autoProducto="matAutocomplete"
+        (optionSelected)="seleccionarProducto($event.option.value)">
+        <mat-option *ngFor="let p of productosFiltrados" [value]="p" class="h-auto py-2">
+          <div class="flex flex-col py-1">
+            <div class="flex justify-between items-center w-full gap-4">
+              <span class="text-xs font-bold text-[#0d1f38] truncate flex-1">{{ p.Nombre }}</span>
+              <span class="text-[10px] font-bold whitespace-nowrap flex-shrink-0"
+                [class.text-emerald-600]="p.Stock > 0" [class.text-rose-500]="p.Stock <= 0">
+                Stock: {{ p.Stock }}
+              </span>
             </div>
-
-            <div *ngFor="let row of productosSolicitados; let i = index"
-              class="grid grid-cols-12 gap-3 py-2 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center group">
-
-              <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
-
-              <div class="col-span-4 relative flex items-center">
-                <input type="text" [ngModel]="row.codigo" (ngModelChange)="buscarProductoBD($event, i)"
-                  placeholder="Ej. JP-284..."
-                  class="w-full bg-transparent border-b-2 border-transparent focus:border-[#003B8A] outline-none text-[13px] text-[#0d1f38] font-bold placeholder-gray-300 py-1 transition-colors">
-
-                <div *ngIf="row.buscando"
-                  class="absolute right-2 w-3.5 h-3.5 border-2 border-[#003B8A] border-t-transparent rounded-full animate-spin">
-                </div>
-              </div>
-
-              <div class="col-span-5 text-[12px] font-bold truncate" [ngClass]="{
-                     'text-red-500': row.Nombre === 'El producto no existe o no pertenece a este proveedor' || row.Nombre === 'Error de conexión', 
-                     'text-[#0d1f38]': row.Nombre && row.Nombre !== 'El producto no existe o no pertenece a este proveedor' && row.Nombre !== 'Error de conexión', 
-                     'text-slate-400': !row.Nombre
-                   }">
-                {{ row.Nombre || 'Escribe un código...' }}
-              </div>
-
-              <div class="col-span-1 flex justify-center">
-                <input type="number" min="1" [(ngModel)]="row.cantidad"
-                  class="w-[55px] h-7 text-center bg-white border border-gray-200 rounded text-[13px] text-[#003B8A] font-black outline-none focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] shadow-sm">
-              </div>
-
-              <div class="col-span-1 flex justify-center">
-                <button (click)="eliminarFila(i)"
-                  class="text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 flex items-center justify-center p-1 rounded-md hover:bg-red-50">
-                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                  </svg>
-                </button>
-              </div>
-
+            <div class="text-[10px] text-slate-400 font-semibold mt-0.5 flex gap-2">
+              <span>JP: <span class="text-slate-600">{{ p.Codigo_japon || '--' }}</span></span>
+              <span class="text-slate-300">|</span>
+              <span>Num: <span class="text-slate-600">{{ p.Codigo_numeral || '--' }}</span></span>
             </div>
           </div>
+        </mat-option>
+      </mat-autocomplete>
+    </div>
 
-          <div class="mt-2 flex justify-start">
-            <button (click)="agregarFila()"
-              class="flex items-center gap-2 px-4 py-2 bg-transparent border-2 border-dashed border-[#003B8A] rounded-lg text-sm font-bold text-[#003B8A] hover:bg-blue-50 transition-all duration-200 outline-none">
-              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
-              </svg>
-              Agregar producto
-            </button>
-          </div>
+    <div class="rounded-lg border border-slate-200 bg-white shadow-sm">
+      <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2 px-4 items-center">
+        <span class="col-span-4 text-[9px] font-bold text-white uppercase">Producto</span>
+        <span class="col-span-2 text-[9px] font-bold text-white uppercase text-center">Código</span>
+        <span class="col-span-2 text-[9px] font-bold text-white uppercase text-center">Cantidad</span>
+        <span class="col-span-3 text-[9px] font-bold text-white uppercase text-center">Destino</span>
+        <span class="col-span-1"></span>
+      </div>
 
-        </div>
-      </app-card-form>
+      <div *ngIf="productosSolicitados.length === 0" class="py-8 text-center text-slate-400 text-xs">
+        Usa el buscador de arriba para agregar productos al pedido.
+      </div>
+
+     <div *ngFor="let item of productosSolicitados; let i = index"
+    class="grid grid-cols-12 gap-3 py-2 px-4 border-b border-slate-100 last:border-0 items-center"
+    [class.bg-amber-50]="contarOcurrencias(item.id_producto) > 1">
+
+    <div class="col-span-4 flex flex-col truncate">
+        <span class="text-[12px] font-bold text-[#0d1f38] truncate">{{ item.Nombre }}</span>
+        <span *ngIf="contarOcurrencias(item.id_producto) > 1" 
+              class="text-[9px] font-bold text-amber-600 uppercase tracking-wide mt-0.5">
+            ⤷ Dividido en {{ contarOcurrencias(item.id_producto) }} partidas
+        </span>
+    </div>
+
+    <div class="col-span-2 text-[11px] text-slate-500 text-center">{{ item.Codigo_japon || item.Codigo_numeral || 'S/C' }}</div>
+    <div class="col-span-2 flex justify-center">
+        <input type="number" min="1" [(ngModel)]="item.cantidad"
+            class="w-16 h-8 text-center bg-[#fafbfc] border border-slate-200 rounded-md text-[13px] font-black text-[#003B8A] outline-none focus:border-[#003B8A]">
+    </div>
+    <div class="col-span-3">
+        <app-select [(value)]="item.destino">
+            <option value="">Selecciona...</option>
+            <option *ngFor="let d of opcionesDestino" [value]="d.value">{{ d.label }}</option>
+        </app-select>
+    </div>
+    <div class="col-span-1 flex justify-center">
+        <button (click)="eliminarFila(i)" class="text-slate-400 hover:text-red-600 p-1.5 rounded-md hover:bg-red-50">
+            <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+        </button>
+    </div>
+</div>
+    </div>
+
+  </div>
+</app-card-form>
 
     </div>
   </div>

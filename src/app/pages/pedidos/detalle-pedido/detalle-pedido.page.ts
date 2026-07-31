@@ -12,6 +12,7 @@ import { PedidoService } from '../../../core/services/Pedidos.service';
 import { toast } from 'ngx-sonner';
 import { NgxSonnerToaster } from 'ngx-sonner';
 import { AuthService } from '../../../core/services/auth.service';
+import { mostrarAvisoStockIncompleto, mostrarExitoPedido } from '../../../shared/utils/pedido-alerts.util';
 
 @Component({
   selector: 'app-detalle-pedido',
@@ -33,7 +34,7 @@ export class DetallePedidoPage implements OnInit {
   ped: any;
   cargando: boolean = true;
   guardando: boolean = false;
-  // Variables para los totales
+  actualizoAlgo: boolean = false;
   subtotal: number = 0;
   iva: number = 0;
   total: number = 0;
@@ -42,7 +43,7 @@ export class DetallePedidoPage implements OnInit {
   constructor(
     private ps: PedidoService,
     public dialogRef: MatDialogRef<DetallePedidoPage>,
-    @Inject(MAT_DIALOG_DATA) public data: any,public authService: AuthService,
+    @Inject(MAT_DIALOG_DATA) public data: any, public authService: AuthService,
     public dialog: MatDialog
   ) {
     // Los datos del encabezado del pedido
@@ -54,7 +55,7 @@ export class DetallePedidoPage implements OnInit {
   }
 
   cerrar() {
-    this.dialogRef.close(false);
+    this.dialogRef.close(this.actualizoAlgo);
   }
 
   cargarDetalles() {
@@ -90,8 +91,6 @@ export class DetallePedidoPage implements OnInit {
     this.total = this.subtotal + this.iva;
   }
 
-  // Función auxiliar para darle formato al dinero
-  // Si ocultarLetras es true, solo mostrará el símbolo "$"
   formatearDinero(cantidad: number, ocultarLetras: boolean = false): string {
     let codigoDivisa = this.monedaActual;
 
@@ -112,8 +111,33 @@ export class DetallePedidoPage implements OnInit {
 
     return new Intl.NumberFormat('es-MX', opciones).format(cantidad);
   }
-
- subirPDF() {
+ recargarPedidoCompleto() {
+    this.ps.obtenerDetallesPedido(this.ped.id).subscribe({
+      next: (pedidoActualizado: any) => {
+        this.ped = {
+          ...this.ped,           // conservamos lo que ya teníamos (por si el backend no manda todo)
+          ...pedidoActualizado,  // sobreescribimos con lo fresco: Estatus, factura_ruta, nombre_factura, fecha_factura...
+          estatusTexto: this.obtenerTextoEstatus(pedidoActualizado.Estatus)
+        };
+        this.cargarDetalles(); // y de paso refrescamos la tabla de productos (cantidad_surtida, etc.)
+      },
+      error: (err) => {
+        console.error('Error al refrescar el pedido:', err);
+        // Como mínimo, refrescamos productos aunque el header falle
+        this.cargarDetalles();
+      }
+    });
+  }
+   obtenerTextoEstatus(estatus: number): string {
+    const mapaEstatus: Record<number, string> = {
+      0: 'Cancelado',
+      1: 'Pendiente',
+      2: 'Completado',
+      3: 'Incompleto'
+    };
+    return mapaEstatus[estatus] || 'Desconocido';
+  }
+   subirPDF() {
     const dialogRef = this.dialog.open(SubirReciboPage, {
       width: '650px',
       maxWidth: '95vw',
@@ -124,17 +148,18 @@ export class DetallePedidoPage implements OnInit {
 
     dialogRef.afterClosed().subscribe((resultado: any) => {
       if (resultado && resultado.subido) {
-        
-        const mensajeBackend = resultado.mensaje || '';
 
-        if (mensajeBackend.includes('Advertencia')) {
-            toast.warning(mensajeBackend);
-            this.cargarDetalles();
-            
+        const mensajeBackend = resultado.mensaje || '';
+        this.actualizoAlgo = true; // NUEVO: marcamos que hubo cambios
+
+        if (mensajeBackend.toLowerCase().includes('incompleto')) {
+            mostrarAvisoStockIncompleto(mensajeBackend).then(() => {
+              this.recargarPedidoCompleto(); // CAMBIO: antes era this.cargarDetalles()
+            });
         } else {
-            toast.success(mensajeBackend || 'Archivo subido y pedido completado correctamente.');
-            
-            this.dialogRef.close(true); 
+            mostrarExitoPedido(mensajeBackend || 'Archivo subido y pedido completado correctamente.').then(() => {
+              this.dialogRef.close(true);
+            });
         }
       }
     });
@@ -173,36 +198,28 @@ export class DetallePedidoPage implements OnInit {
       toast.error('No hay ninguna factura adjunta a este pedido.');
       return;
     }
-    
+
     const url = this.ps.obtenerUrlFactura(this.ped.factura_ruta);
-    
+
     // Abrimos el PDF en una nueva pestaña (como lo hacías en clientes)
     const link = document.createElement('a');
     link.href = url;
     link.target = '_blank';
     // Si quieres forzar descarga pon: link.download = this.ped.nombre_factura || 'factura.pdf';
-    
+
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
   }
   validarYCompletar() {
-    // Si prefieres agregar un modal de confirmación antes de esto (como en cancelar), puedes hacerlo.
-    // Aquí ejecutamos la acción directa:
-    
     this.ps.aceptarPedido(this.ped.id).subscribe({
       next: (res: any) => {
-        // Mostrar mensaje de éxito (puedes usar el que manda tu backend en res.mensaje)
         toast.success(res.mensaje || '¡Pedido completado!');
-        
-        // Cerramos el modal enviando "true" para que la vista principal recargue la tabla
         this.dialogRef.close(true);
       },
       error: (err) => {
         console.error('Error al validar/completar pedido:', err);
-        
         const mensajeError = err.error?.error || 'No se pudo completar el pedido. Verifica el stock y la factura.';
-        
         toast.error(mensajeError);
       }
     });

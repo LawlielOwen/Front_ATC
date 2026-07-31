@@ -47,7 +47,7 @@ export class RecepcionesPage implements OnInit {
   totalRecords: number = 0;
   limit: number = 10;
   terminoActual: string = '';
-  estatusActual: number | null = 0;
+  estatusActual: number | null = null;
   fechaIni: string = '';
   fechaFin: string = '';
   cargando: boolean = true;
@@ -65,12 +65,11 @@ timeoutBusqueda: any;
     {
       header: 'Proveedor',
       key: 'nombre_proveedor',
-      // ¡Listo! Ya no hay subKey aquí, el proveedor sale solo
       type: 'avatar-text'
     },
     {
       header: 'Solicitado por',
-      key: 'nombre_asesor', // Aquí se mostrará "Morgan Gutierrez Moreno"
+      key: 'nombre_asesor',
       type: 'text-light'
     },
     {

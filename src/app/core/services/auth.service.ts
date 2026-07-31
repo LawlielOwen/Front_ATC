@@ -1,27 +1,29 @@
 import { Injectable } from '@angular/core';
 
 @Injectable({
-  providedIn: 'root' // Esto lo hace disponible en toda la aplicación
+  providedIn: 'root'
 })
 export class AuthService {
 
   constructor() { }
 
-  // 1. Obtenemos el usuario directamente cuando se necesite
   obtenerUsuarioActual() {
-    const userData = localStorage.getItem('user');
-    return userData ? JSON.parse(userData) : null;
+    const token = localStorage.getItem('token');
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return payload;
+    } catch (error) {
+      return null;
+    }
   }
 
-  // 2. Tu función exacta, pero ahora vive aquí
   tieneAcceso(rolesPermitidos: string[]): boolean {
-    const user = this.obtenerUsuarioActual();
+    const usuario = this.obtenerUsuarioActual();
     
-    if (!user || !user.Rol) {
-      return false;
-    }
-    
-    return rolesPermitidos.includes(user.Rol);
+    if (!usuario || !usuario.Rol) return false;
+
+    return rolesPermitidos.includes(usuario.Rol);
   }
-  
 }

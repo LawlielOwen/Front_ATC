@@ -26,7 +26,7 @@
                                             </svg>
                                         </button>
 
-                                        <h2 class="text-lg font-bold text-slate-800">Nueva cotización</h2>
+                                        <h2 class="text-lg font-bold text-slate-800">{{ isEditMode ? 'Editar Cotización' : 'Nueva cotización' }}</h2>
                                     </div>
 
                                     <button (click)="limpiarFormulario()"
@@ -40,24 +40,24 @@
                                 </div>
                                 <div class="grid grid-cols-2 gap-4 mb-6">
                                     <input type="text" [formControl]="clienteControl" [matAutocomplete]="auto"
-                                        placeholder="Ingresa nombre del cliente registrado o no registrado"
-                                        class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+    placeholder="Ingresa nombre del cliente registrado o no registrado"
+    class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
 
-                                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente">
-                                        <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
-                                            {{ c.nombre || c.Nombre }}
-                                        </mat-option>
+<mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente"
+    (optionSelected)="onClienteSeleccionado($event.option.value)">
+    <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
+        {{ c.nombre || c.Nombre }}
+    </mat-option>
 
-                                        <mat-option
-                                            *ngIf="clienteControl.value && typeof clienteControl.value === 'string' && clientesFiltrados.length === 0"
-                                            [value]="clienteControl.value">
-                                            <span class="italic text-slate-500">Usar como cliente eventual:</span>
-                                            <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value
-                                                }}</span>
-                                        </mat-option>
-                                    </mat-autocomplete>
+    <mat-option
+        *ngIf="clienteControl.value && typeof clienteControl.value === 'string' && clientesFiltrados.length === 0"
+        [value]="clienteControl.value">
+        <span class="italic text-slate-500">Usar como cliente eventual:</span>
+        <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value }}</span>
+    </mat-option>
+</mat-autocomplete>
 
-                                    <input type="text" placeholder="Atención a (Contacto)..."
+                                    <input type="text" placeholder="Telefono (opcional)"
                                         class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                                         [(ngModel)]="cotizacion.contacto">
                                 </div>
@@ -99,23 +99,17 @@
                                             </mat-option>
                                         </mat-autocomplete>
                                     </div>
-
-                                    <button
-                                        class="bg-slate-100 text-slate-700 px-4 py-2 rounded-lg text-sm font-semibold border border-slate-200 hover:bg-slate-200 transition">
-                                        Fila manual
-                                    </button>
                                 </div>
                                 <div class="rounded-lg border border-slate-200 bg-white shadow-sm mt-4">
 
                                     <div
                                         class="bg-[#003B8A] rounded-t-lg grid grid-cols-[30px_2.5fr_1.5fr_1.5fr_1fr_60px_1.2fr_40px] gap-3 py-3.5 px-4 items-center">
-                                        <span
-                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+                                        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">N.</span>
                                         <span
                                             class="text-[10px] font-bold text-white uppercase tracking-widest">Producto
                                             / Modelo</span>
                                         <span
-                                            class="text-[10px] font-bold text-white uppercase tracking-widest">Descripción</span>
+                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-center">Origen</span>
                                         <span
                                             class="text-[10px] font-bold text-white uppercase tracking-widest text-center">T.
                                             Entrega</span>
@@ -145,13 +139,20 @@
                                                 {{ item.Modelo || item.Codigo_japon || 'Sin Cód.' }}
                                             </span>
                                         </div>
+                                        <div class="flex justify-center items-center px-1 w-full">
 
-                                        <div class="relative w-full h-8 z-10 focus-within:z-50">
-                                            <textarea placeholder="Añadir descripción..."
-                                                class="absolute top-0 left-0 w-full h-8 bg-transparent border-b border-transparent hover:border-slate-300 focus:w-[280px] focus:h-32 focus:bg-white focus:border focus:border-[#003B8A] focus:shadow-2xl focus:rounded-lg outline-none text-[11px] text-slate-600 placeholder-slate-300 py-1.5 px-2 transition-all duration-300 ease-in-out resize-none overflow-hidden focus:overflow-y-auto"
-                                                [(ngModel)]="item.extra_descripcion"></textarea>
-                                        </div>
+    <span *ngIf="item.Marca?.toUpperCase().includes('SMC')"
+          class="w-full max-w-[120px] bg-slate-100 border border-slate-200 text-slate-500 rounded-md text-[11px] font-bold text-center py-1.5 truncate cursor-not-allowed select-none"
+          title="Origen fijo (SMC)">
+        {{ item.origen || 'N/A' }}
+    </span>
 
+    <input *ngIf="!item.Marca?.toUpperCase().includes('SMC')" type="text"
+           placeholder="Ej. AVION 30%"
+           class="appearance-none w-full max-w-[120px] bg-transparent border border-transparent hover:bg-slate-100 focus:bg-white focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center py-1.5 transition-all cursor-pointer focus:cursor-text uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-300"
+           [(ngModel)]="item.origen">
+
+</div>
                                         <div class="flex justify-center items-center px-1">
                                             <input type="text" placeholder="Ej. 1-2 DÍAS"
                                                 class="appearance-none w-full max-w-[95px] bg-transparent border border-transparent hover:bg-slate-100 focus:bg-white focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center py-1.5 transition-all cursor-pointer focus:cursor-text uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-300"
@@ -301,7 +302,7 @@
                                             asesor</p>
                                         <select
                                             class="w-full border border-slate-200 rounded-lg p-2 text-[13px] text-slate-700 outline-none focus:border-[#003B8A]"
-                                           [(ngModel)]="cotizacion.id_asesor">
+                                            [(ngModel)]="cotizacion.id_asesor">
                                             <option value="">Seleccione un asesor...</option>
                                             <option *ngFor="let asesor of asesores" [value]="asesor.id">
                                                 {{ asesor.Nombre_completo }}
@@ -315,12 +316,12 @@
                                 <button
                                     class="w-full bg-[#003B8A] hover:bg-blue-800 text-white font-semibold py-3 rounded-lg shadow-sm transition text-sm"
                                     (click)="guardarCotizacion()">
-                                    Guardar cotización
+                                    {{ isEditMode ? 'Actualizar cotización' : 'Guardar cotización' }}
                                 </button>
 
                                 <button (click)="guardarYDescargar()"
                                     class="w-full bg-[#008f5d] hover:bg-green-700 text-white font-semibold py-3 rounded-lg shadow-sm transition text-sm">
-                                    Guardar y descargar PDF
+                                    {{ isEditMode ? 'Actualizar y descargar PDF' : 'Guardar y descargar PDF' }}
                                 </button>
                             </div>
 

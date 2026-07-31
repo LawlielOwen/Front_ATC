@@ -96,6 +96,24 @@ dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
       }
     });
 }
+abrirModalActualizarCsf(cliente: any) {
+    const dialogRef = this.dialog.open(ModalClientePage, {
+      data: {
+        modo: 'updateCsf',
+        width: '630px',
+        maxWidth: '105vw',
+      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      panelClass: [],
+        cliente: cliente
+      }
+    });
+
+  dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
+      if (necesitaRecargar) {
+        this.dialogRef.close(true);
+      }
+    });
+  }
 }
 
 

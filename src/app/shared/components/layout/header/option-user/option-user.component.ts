@@ -16,13 +16,21 @@ export class OptionUserComponent implements OnInit {
 public uniqueTriggerId = 'user-trigger-' + Math.random().toString(36).substring(2, 9);
   constructor(private router: Router) { }
 
-  ngOnInit() {
-    const userData = localStorage.getItem('user');
-    if (userData) {
-      this.usuario = JSON.parse(userData);
-      this.iniciales = this.usuario.Nombre.charAt(0) + this.usuario.app.charAt(0);
+ngOnInit() {
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        this.usuario = JSON.parse(atob(token.split('.')[1]));
+        
+        const letraNombre = this.usuario?.Nombre?.charAt(0) || '';
+        const letraApp = this.usuario?.app?.charAt(0) || '';
+        this.iniciales = letraNombre + letraApp;
+      } catch (error) {
+        console.error('Error al decodificar el token', error);
+      }
     }
-  } 
+  }
    async logOut() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

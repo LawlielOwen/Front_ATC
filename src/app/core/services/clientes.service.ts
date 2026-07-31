@@ -74,4 +74,9 @@ export class ClientesService {
   cantidadClientesActivos() {
     return this.http.get(`${this.apiUrl}/clientes/count`);
   }
+  subirCSF(id: number, archivo: File): Observable<any> {
+        const formData = new FormData();
+          formData.append('CSF', archivo);
+        return this.http.post<any>(`${this.apiUrl}/clientes/${id}/CSF`, formData);
+    }
 }

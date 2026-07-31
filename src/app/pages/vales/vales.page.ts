@@ -75,36 +75,52 @@ this.socketSub = this.notiService.escucharActualizacionTabla().subscribe(() => {
       this.cargarContador();
   });
   }
-  cargarContador() {
-    const userString = localStorage.getItem('user');
-    if (userString) {
-      const usuarioLogueado = JSON.parse(userString);
-      const myId = usuarioLogueado.id;
-      const myRol = usuarioLogueado.Rol;
+cargarContador() {
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        // Decodificamos el token
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        const myId = payload.id;
+        const myRol = payload.Rol;
 
-      this.vs.obtenerStatsVales(myId, myRol).subscribe({
-        next: (res: any) => {
-          this.Totalpendientes = res.pendientes;
-          this.Totalaceptados = res.aceptados;
-          this.Totalrechazados = res.rechazados;
-          this.Totalmensual = res.total;
-        },
-        error: (err) => console.error('Error cargando stats:', err)
-      });
-    }
-  }
-  cargarVal() {
-    const usuarioString = localStorage.getItem('user');
-    const usuario = usuarioString ? JSON.parse(usuarioString) : null;
-    let idAsesorFiltro = null;
-    if (usuario && usuario.Rol) {
-      const rol = usuario.Rol.toLowerCase().trim();
-
-      if (rol === 'asesor' || rol === 'cotizador') {
-        idAsesorFiltro = usuario.id;
+        this.vs.obtenerStatsVales(myId, myRol).subscribe({
+          next: (res: any) => {
+            this.Totalpendientes = res.pendientes;
+            this.Totalaceptados = res.aceptados;
+            this.Totalrechazados = res.rechazados;
+            this.Totalmensual = res.total;
+          },
+          error: (err) => console.error('Error cargando stats:', err)
+        });
+      } catch (error) {
+        console.error('Error decodificando el token en cargarContador:', error);
       }
     }
-    this.cargando = true
+  }
+
+  cargarVal() {
+    let idAsesorFiltro = null;
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        
+        if (payload && payload.Rol) {
+          const rol = payload.Rol.toLowerCase().trim();
+
+          if (rol === 'Asesor' || rol === 'Cotizador') {
+            idAsesorFiltro = payload.id;
+          }
+        }
+      } catch (error) {
+        console.error('Error decodificando el token en cargarVal:', error);
+      }
+    }
+
+    this.cargando = true;
     this.vs.buscarVal(
       idAsesorFiltro,
       this.terminoActual,
@@ -124,8 +140,7 @@ this.socketSub = this.notiService.escucharActualizacionTabla().subscribe(() => {
         console.error('Error al cargar', err);
         this.cargando = false;
       }
-    })
-
+    });
   }
   getBadgeText(estatus: number): string {
     switch (estatus) {
@@ -229,9 +244,9 @@ busquedaTexto(texto: string) {
     });
   }
   ionViewWillEnter() {
+    this.establecerMesActual();
     this.cargarContador();
     this.cargarVal();
-    this.establecerMesActual();
     const user = JSON.parse(localStorage.getItem('user') || '{}');
     this.rolUsuario = user.Rol || '';
     this.idUsuario = user.id || 0;

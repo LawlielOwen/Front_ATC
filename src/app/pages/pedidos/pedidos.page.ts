@@ -57,7 +57,8 @@ columnasPedidos: TableColumn[] = [];
     { label: 'Todos', value: null },
     { label: 'Pendientes', value: 1 },
     { label: 'Canceladas', value: 0 },
-    { label: 'Completadas', value: 2 }
+    { label: 'Completadas', value: 2 },
+     { label: 'Incompletos', value: 3 } 
   ];
   mostrarSidebarMobile() {
     if (this.sidebar) {
@@ -124,14 +125,26 @@ columnasPedidos: TableColumn[] = [];
   cargarPedidos() {
     this.cargando = true;
 
-    // El backend espera -1 para "Todos". Si estatusActual es null, mandamos -1.
     const estatus = this.estatusActual !== null ? this.estatusActual : -1;
+
+    // NUEVO: mismo patrón que cargarVal(), pero solo "Asesor" se restringe
+    const usuarioString = localStorage.getItem('user');
+    const usuario = usuarioString ? JSON.parse(usuarioString) : null;
+    let idAsesorFiltro: number | null = null;
+
+    if (usuario && usuario.Rol) {
+      const rol = usuario.Rol.toLowerCase().trim();
+      if (rol === 'asesor') {           // 👈 Cotizador y Administrador quedan fuera de esta condición
+        idAsesorFiltro = usuario.id;
+      }
+    }
 
     this.ps.obtenerPedidos(
       this.terminoActual,
       estatus,
-      this.fechaIni, // Pasamos la fecha de inicio
-      this.fechaFin, // Agregamos la fecha de fin
+      this.fechaIni,
+      this.fechaFin,
+      idAsesorFiltro,                    // NUEVO
       this.currentPage,
       this.limit
     ).subscribe({
@@ -156,7 +169,7 @@ columnasPedidos: TableColumn[] = [];
         this.cargando = false;
       }
     });
-  }
+}
 
   cargarEstadisticas() {
     this.ps.obtenerEstadisticas().subscribe({
@@ -172,14 +185,15 @@ columnasPedidos: TableColumn[] = [];
       }
     });
   }
-  obtenerTextoEstatus(estatus: number): string {
+ obtenerTextoEstatus(estatus: number): string {
     const mapaEstatus: Record<number, string> = {
       0: 'Cancelado',
       1: 'Pendiente',
-      2: 'Completado'
+      2: 'Completado',
+      3: 'Incompleto'   // NUEVO
     };
     return mapaEstatus[estatus] || 'Desconocido';
-  }
+}
   busquedaTexto(texto: string) {
     this.terminoActual = texto;
     this.currentPage = 1;

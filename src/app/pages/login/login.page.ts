@@ -1,52 +1,54 @@
 import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
-import {Router} from '@angular/router';
+import { Router } from '@angular/router';
 import { Login } from '../../core/services/login.service';
 import { toast, NgxSonnerToaster } from 'ngx-sonner';
 import { RouterModule } from '@angular/router';
+
 @Component({
   selector: 'app-login',
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [IonicModule, FormsModule,RouterModule],
+  imports: [IonicModule, FormsModule, RouterModule],
 })
-  
 export class LoginPage implements OnInit {
-username: string = '';
-password: string = '';
-mostrarContra: boolean = false;
+  username: string = '';
+  password: string = '';
+  mostrarContra: boolean = false;
+
   constructor(private router: Router, private loginService: Login) { }
 
-  ngOnInit() {
-  }
-login() {
+  ngOnInit() { }
+
+  login() {
     this.username = this.sanitizarUsername(this.username);
     
-    if(this.camposVacios(this.username, this.password)){
+    if (this.camposVacios(this.username, this.password)) {
       return;
     }
 
     this.loginService.loginUser(this.username, this.password).subscribe(
       (response: any) => {
-        const asesorData = response.asesor;
-        const rolUsuario = asesorData.rol || asesorData.Rol;
+        
+        localStorage.setItem('token', response.token); 
+
+        let payload;
+        try {
+          payload = JSON.parse(atob(response.token.split('.')[1]));
+        } catch (error) {
+          toast.error('Error al procesar la autenticación.');
+          return;
+        }
+
+        const rolUsuario = payload.Rol;
 
         if (!rolUsuario) {
+          localStorage.removeItem('token');
           toast.warning('Tu cuenta está en revisión. Un administrador debe activarla y asignarte un rol para poder ingresar.');
           return; 
         }
-
-        localStorage.setItem('token', response.token); 
-        localStorage.setItem('user', JSON.stringify({
-          id: asesorData.id,
-          Nombre: asesorData.nombre || asesorData.Nombre, 
-          app: asesorData.app,
-          apm: asesorData.apm,
-          Rol: rolUsuario,
-          Correo: asesorData.correo || asesorData.Correo 
-        }));
         
         switch (rolUsuario) {
           case 'Administrador':
@@ -74,25 +76,25 @@ login() {
       }
     );
   }
-ionViewWillEnter() {
+
+  ionViewWillEnter() {
     this.username = "";
     this.password = "";
   }
 
-camposVacios(username: string, password: string): boolean {
-  if(username === "" || password === ""){
-    toast.error('Por favor, completa todos los campos');
-    return true;
+  camposVacios(username: string, password: string): boolean {
+    if(username === "" || password === ""){
+      toast.error('Por favor, completa todos los campos');
+      return true;
+    }
+    return false; 
   }
-  
-  return false; 
-}
-sanitizarUsername(input: string): string {
-  if (!input) return '';
-  let limpio = input.trim();
-  limpio = limpio.replace(/<[^>]*>?/gm, '');
-  limpio = limpio.replace(/['";\\]/g, '');
 
-  return limpio;
-}
+  sanitizarUsername(input: string): string {
+    if (!input) return '';
+    let limpio = input.trim();
+    limpio = limpio.replace(/<[^>]*>?/gm, '');
+    limpio = limpio.replace(/['";\\]/g, '');
+    return limpio;
+  }
 }

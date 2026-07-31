@@ -37,6 +37,7 @@ export class ModalProductoPage implements OnInit {
     id: 0,
     Nombre: '',
     Descripcion: '',
+    ExtraDescripcion: '',
     Precio: null as any,
     Codigo_numeral: '',
     Codigo_japon: '',
@@ -44,6 +45,8 @@ export class ModalProductoPage implements OnInit {
     Estanteria: '',
     Caja: '',
     Stock: null as any,
+    Apartado: null as any,
+    origen:'',
     id_marca: null as any
   };
 
@@ -64,7 +67,7 @@ opcionesMarcas = [
     { label: 'EUCHNER', value: 14 },
     { label: 'CONTRINEX', value: 15 }
   ];
-
+esSMC: boolean = false;
   constructor(
     private ps: ProductoService,
     private dialogRef: MatDialogRef<ModalProductoPage>,
@@ -78,6 +81,26 @@ opcionesMarcas = [
   cerrar() {
     this.dialogRef.close(false)
   }
+verificarMarcaSMC(limpiarOrigen: boolean = true) {
+    if (!this.productoNuevo.id_marca) {
+      this.esSMC = false;
+      if (limpiarOrigen) this.productoNuevo.origen = ''; 
+      return;
+    }
+
+    const marcaSeleccionada = this.opcionesMarcas.find(
+      (m: any) => m.value == this.productoNuevo.id_marca
+    );
+
+    if (marcaSeleccionada && marcaSeleccionada.label.toUpperCase().includes('SMC')) {
+      this.esSMC = true;
+    } else {
+      this.esSMC = false;
+      if (limpiarOrigen) {
+        this.productoNuevo.origen = '';
+      }
+    }
+  }
   ngOnInit() {
   }
  procesarAccion() {
@@ -88,6 +111,7 @@ opcionesMarcas = [
 
     // Si llega hasta aquí, los datos son 100% seguros
     if (this.isEditMode) {
+      this.verificarMarcaSMC();
       this.actualizarProducto();
     } else {
       this.guardarNuevoProducto();
@@ -118,7 +142,8 @@ opcionesMarcas = [
       }
     });
   }
-  validarCampos(): boolean {
+validarCampos(): boolean {
+    // 1. Sanitizar campos de texto (Obligatorios)
     this.productoNuevo.Nombre = (this.productoNuevo.Nombre || '').toString().trim();
     this.productoNuevo.Descripcion = (this.productoNuevo.Descripcion || '').toString().trim();
     this.productoNuevo.Codigo_numeral = (this.productoNuevo.Codigo_numeral || '').toString().trim();
@@ -127,6 +152,11 @@ opcionesMarcas = [
     this.productoNuevo.Estanteria = (this.productoNuevo.Estanteria || '').toString().trim();
     this.productoNuevo.Caja = (this.productoNuevo.Caja || '').toString().trim();
 
+    // 1.1 Sanitizar campos de texto (Opcionales)
+    this.productoNuevo.ExtraDescripcion = (this.productoNuevo.ExtraDescripcion || '').toString().trim();
+    this.productoNuevo.origen = (this.productoNuevo.origen || '').toString().trim();
+
+    // 2. Validar que los obligatorios no estén vacíos
     if (
       !this.productoNuevo.Nombre ||
       !this.productoNuevo.Descripcion ||
@@ -137,24 +167,35 @@ opcionesMarcas = [
       !this.productoNuevo.Caja ||
       !this.productoNuevo.id_marca
     ) {
-      toast.error('Por favor, completa todos los campos del formulario.');
+      toast.error('Por favor, completa todos los campos obligatorios del formulario.');
       return false;
     }
-
 
     const precioNumerico = Number(this.productoNuevo.Precio);
     if (isNaN(precioNumerico) || precioNumerico <= 0) {
       toast.error('El precio debe ser un número válido mayor a 0.');
       return false;
     }
-    this.productoNuevo.Precio = precioNumerico; // Forzamos el tipo numérico limpio
+    this.productoNuevo.Precio = precioNumerico; 
 
     const stockNumerico = Number(this.productoNuevo.Stock);
     if (isNaN(stockNumerico) || !Number.isInteger(stockNumerico) || stockNumerico < 0) {
       toast.error('El stock debe ser un número entero válido (0 o mayor).');
       return false;
     }
-    this.productoNuevo.Stock = stockNumerico; // Forzamos el tipo numérico limpio
+    this.productoNuevo.Stock = stockNumerico; 
+
+
+    if (this.productoNuevo.Apartado === null || this.productoNuevo.Apartado === '' || this.productoNuevo.Apartado === undefined) {
+      this.productoNuevo.Apartado = 0;
+    } else {
+      const apartadoNumerico = Number(this.productoNuevo.Apartado);
+      if (isNaN(apartadoNumerico) || !Number.isInteger(apartadoNumerico) || apartadoNumerico < 0) {
+        toast.error('El stock en apartado debe ser un número entero válido (0 o mayor).');
+        return false;
+      }
+      this.productoNuevo.Apartado = apartadoNumerico; 
+    }
 
     return true; // Si superó todas las pruebas, los datos son perfectos
   }

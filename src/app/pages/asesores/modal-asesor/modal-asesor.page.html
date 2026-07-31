@@ -14,19 +14,19 @@
         <div class="flex flex-col gap-4 md:col-span-2 w-full">
           <div class="flex gap-4">
             <div class="w-1/3 flex flex-col gap-1.5">
-              <app-input tipo="text" placeholder="Nombre" label="Nombre(s)" [(value)]="asesorNuevo.Nombre"></app-input>
+              <app-input tipo="text" placeholder="Nombre" label="Nombre(s) *" [(value)]="asesorNuevo.Nombre"></app-input>
             </div>
             <div class="w-1/3 flex flex-col gap-1.5">
-              <app-input tipo="text" placeholder="Apellido paterno" label="Apellido Paterno" [(value)]="asesorNuevo.app"></app-input>
+              <app-input tipo="text" placeholder="Apellido paterno" label="Apellido Paterno *" [(value)]="asesorNuevo.app"></app-input>
             </div>
             <div class="w-1/3 flex flex-col gap-1.5">
-              <app-input tipo="text" placeholder="Apellido materno" label="Apellido Materno" [(value)]="asesorNuevo.apm"></app-input>
+              <app-input tipo="text" placeholder="Apellido materno" label="Apellido Materno *" [(value)]="asesorNuevo.apm"></app-input>
             </div>
           </div>
 
           <div class="flex gap-4">
             <div class="w-1/2 flex flex-col gap-1.5">
-              <app-date label="Fecha de Nacimiento" [(value)]="asesorNuevo.Fecha_nacimiento">
+              <app-date label="Fecha de Nacimiento *" [(value)]="asesorNuevo.Fecha_nacimiento">
             </app-date>
             </div>
              <div class="w-1/2">
@@ -53,7 +53,7 @@
 
           <div class="flex gap-4" *ngIf="!isEditMode">
              <div class="w-1/2 flex flex-col gap-1.5">
-                <app-input tipo="password" placeholder="Mínimo 8 caracteres" label="Contraseña" [(value)]="asesorNuevo.contra"></app-input>
+                <app-input tipo="password" placeholder="Mínimo 8 caracteres" label="Contraseña *" [(value)]="asesorNuevo.contra"></app-input>
              </div>
           </div>
         </div>
@@ -66,7 +66,7 @@
 
         <div class="flex gap-4 md:col-span-2 w-full">
           <div class="w-1/2 flex flex-col gap-y-1">
-            <app-select label="Rol dentro del sistema" [(value)]="asesorNuevo.Rol">
+            <app-select label="Rol dentro del sistema *" [(value)]="asesorNuevo.Rol">
               <option value="">Seleccionar rol...</option>
               <option value="Administrador">Administrador</option>
               <option value="Asesor">Asesor</option>
@@ -75,7 +75,7 @@
             </app-select>
           </div>
           <div class="w-1/2 flex flex-col gap-1.5">
-             <app-date label="Fecha de Contratacion" [(value)]="asesorNuevo.Fecha_contratacion">
+             <app-date label="Fecha de Contratacion *" [(value)]="asesorNuevo.Fecha_contratacion">
             </app-date>
           </div>
         </div>

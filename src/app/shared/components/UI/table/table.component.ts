@@ -5,7 +5,7 @@ export interface TableColumn {
   header: string;
   key: string;
   subKey?: string;
-  type: 'text' | 'currency' | 'status' | 'avatar-text' | 'actions' | 'stock' | 'pill-tipo' | 'pill-destino' | 'text-light' | 'cantidad-movimiento';
+  type: 'text' | 'currency' | 'status' | 'avatar-text' | 'actions' | 'stock' | 'pill-tipo' | 'pill-destino' | 'text-light' | 'cantidad-movimiento' | 'link';
   align?: 'left' | 'center' | 'right';
   menuOptions?: MenuOption[];
   omitirBase?: boolean;
@@ -25,7 +25,9 @@ export class TableComponent implements OnInit {
   constructor() { }
 
   ngOnInit() { }
- getStatusColors(status: string) {
+getStatusColors(status: string) {
+    if (!status) return 'bg-slate-50 text-slate-600 border-slate-200';
+    
     const s = status.toLowerCase();
     
     // --- Productos ---
@@ -39,17 +41,26 @@ export class TableComponent implements OnInit {
     // --- Cotizaciones ---
     if (s === 'aceptada' || s === 'aceptado') return 'bg-blue-50 text-blue-700 border-blue-200'; // Azul profesional
     if (s === 'cancelada' || s === 'cancelado') return 'bg-red-50 text-red-700 border-red-200'; // Rojo estándar
-        // --- Pedidos ---
-    if(s === 'completado' || s === 'completado') return 'bg-[#e8f5f0] text-[#0f6e56] border-[#bce3d4]';
-    if (s === 'Cancelado') return 'bg-red-50 text-red-700 border-red-200'; 
+
+    // --- Pedidos ---
+    if (s === 'completado' || s === 'completada') return 'bg-[#e8f5f0] text-[#0f6e56] border-[#bce3d4]';
+    if (s === 'incompleto' || s === 'incompleta') return 'bg-amber-50 text-amber-700 border-amber-200'; // Ámbar
+
+    // --- Tickets ---
+    if (s === 'asignado') return 'bg-violet-50 text-violet-700 border-violet-200'; // Violeta (Nuevo)
+    if (s === 'contactado') return 'bg-sky-50 text-sky-700 border-sky-200'; // Azul claro (En progreso)
+    if (s === 'cotizado') return 'bg-amber-50 text-amber-700 border-amber-200'; // Ámbar (Esperando respuesta)
+    if (s === 'cerrado') return 'bg-slate-100 text-slate-700 border-slate-300'; // Gris (Finalizado/Archivado)
 
     // --- Compartido (Por defecto o Pendiente) ---
     if (s === 'pendiente') return 'bg-slate-50 text-slate-600 border-slate-200'; // Gris
     
     return 'bg-slate-50 text-slate-600 border-slate-200'; // Inactivo o por defecto
-  }
+}
 
-  getStatusDot(status: string) {
+getStatusDot(status: string) {
+    if (!status) return 'bg-slate-400';
+    
     const s = status.toLowerCase();
     
     // --- Productos ---
@@ -64,14 +75,21 @@ export class TableComponent implements OnInit {
     if (s === 'aceptada' || s === 'aceptado') return 'bg-blue-500';
     if (s === 'cancelada' || s === 'cancelado') return 'bg-red-500';
 
-       // --- Pedidos ---
-    if(s === 'completado' || s === 'completada')  return 'bg-[#1D9E75]';
-    if (s === 'Cancelado') return 'bg-rose-600';
+    // --- Pedidos ---
+    if (s === 'completado' || s === 'completada') return 'bg-[#1D9E75]';
+    if (s === 'incompleto' || s === 'incompleta') return 'bg-amber-500'; // Ámbar
+
+    // --- Tickets ---
+    if (s === 'asignado') return 'bg-violet-500';
+    if (s === 'contactado') return 'bg-sky-500'; 
+    if (s === 'cotizado') return 'bg-amber-500'; 
+    if (s === 'cerrado') return 'bg-slate-500'; 
+
     // --- Compartido (Por defecto o Pendiente) ---
     if (s === 'pendiente') return 'bg-slate-400'; // Gris
 
     return 'bg-slate-400';
-  }
+}
   getStockColor(cantidad: number): string {
     if (cantidad === 0) return 'text-rose-600';
     if (cantidad > 0 && cantidad <= 5) return 'text-amber-500';

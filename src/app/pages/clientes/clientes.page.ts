@@ -48,6 +48,7 @@ export class ClientesPage implements OnInit {
   ngOnInit() {
     this.cargarClientes();
     this.obtenerTotalActivos();
+    
   }
   mostrarSidebarMobile() {
     if (this.sidebar) {

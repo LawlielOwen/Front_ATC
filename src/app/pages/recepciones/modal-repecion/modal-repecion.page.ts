@@ -7,44 +7,41 @@ import { FooterModalComponent } from "../../../shared/components/UI/modal/footer
 import { HeaderModalComponent } from "../../../shared/components/UI/modal/header-modal/header-modal.component";
 import { ButtonActionComponent } from "../../../shared/components/UI/buttons/button-action/button-action.component";
 import { DateComponent } from "../../../shared/components/UI/form/date/date.component";
-
+import { InputComponent } from "../../../shared/components/UI/form/input/input.component";
 import { CardFormComponent } from "../../../shared/components/UI/form/card-form/card-form.component";
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { ProveedorService } from '../../../core/services/Proveedores.service';
 import { SelectComponent } from "../../../shared/components/UI/form/select/select.component";
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material/core';
+import { MatAutocompleteModule } from '@angular/material/autocomplete';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { of } from 'rxjs';
 @Component({
   selector: 'app-modal-repecion',
   templateUrl: './modal-repecion.page.html',
   styleUrls: ['./modal-repecion.page.scss'],
   standalone: true,
-  imports: [
-    CommonModule,
-    IonicModule,
-    NgxSonnerToaster,
-    FooterModalComponent,
-    HeaderModalComponent,
-    ButtonActionComponent,
-     DateComponent,
-    CardFormComponent,
-    FormsModule,
-    SelectComponent,
-    MatDatepickerModule,
-    MatNativeDateModule
+ imports: [
+    CommonModule, IonicModule, NgxSonnerToaster, FooterModalComponent, HeaderModalComponent,
+    ButtonActionComponent, DateComponent, CardFormComponent, FormsModule, SelectComponent,
+    MatDatepickerModule, MatNativeDateModule,
+    ReactiveFormsModule, MatAutocompleteModule  
   ],
   providers: [
     provideNativeDateAdapter()
   ]
 })
 export class ModalRepecionPage implements OnInit {
-productosSolicitados: any[] = [
-    { codigo: '', id_producto: null, Nombre: '', pzas: 1, buscando: false, timeoutId: null }
-  ];  
+  productosSolicitados: any[] = [];
+
+  // NUEVO: buscador único, mismo patrón que POSPage
+  productoControl = new FormControl('');
+  productosFiltrados: any[] = [];
+ 
   pedidoNuevo = {
     id_asesor: null as any,
     id_proveedor: null as any,
-    destino: '',
     fecha_estimada: '',
   }
   opcionesProveedor = [
@@ -64,129 +61,161 @@ productosSolicitados: any[] = [
     { label: 'EUCHNER', value: 14 },
     { label: 'CONTRINEX', value: 15 }
   ];
+   opcionesDestino = [
+    { label: 'Almacén', value: 'Almacen' },
+    { label: 'Apartado (Pedido)', value: 'Pedido' }
+  ];
   constructor(private ps: ProveedorService,
     private dialogRef: MatDialogRef<ModalRepecionPage>) { }
 
-  ngOnInit() {
-  }
-buscarProductoBD(codigoEscrito: string, index: number) {
-    const fila = this.productosSolicitados[index];
-    
-    const codigoLimpio = (codigoEscrito || '').toString().trim();
-    fila.codigo = codigoLimpio; 
+ ngOnInit() {
+    this.productoControl.disable(); // arranca deshabilitado, sin proveedor elegido aún
 
-    if (!this.pedidoNuevo.id_proveedor) {
-      if (codigoLimpio.length > 0) {
-        toast.error('Primero debes seleccionar un proveedor en la parte superior.');
-        fila.codigo = '';
-      }
-      return;
-    }
-
-    if (!codigoLimpio || codigoLimpio.length < 3) {
-      fila.Nombre = ''; 
-      fila.id_producto = null;
-      return;
-    }
-
-    if (fila.timeoutId) {
-      clearTimeout(fila.timeoutId);
-    }
-
-    fila.buscando = true;
-    fila.timeoutId = setTimeout(() => {
-
-      this.ps.buscarProductos(codigoLimpio, this.pedidoNuevo.id_proveedor).subscribe({
-        next: (respuesta: any) => {
-          fila.buscando = false;
-          const productosEncontrados = respuesta.data || respuesta;
-
-          if (productosEncontrados && productosEncontrados.length > 0) {
-            const producto = productosEncontrados[0];
-            fila.id_producto = producto.id;
-            fila.Nombre = `${producto.Nombre} - ${producto.Modelo}`; 
-          } else {
-            fila.id_producto = null;
-            fila.Nombre = 'Producto no encontrado'; 
-            toast.warning(`No se encontró el código "${codigoLimpio}" para este proveedor.`);
-          }
-        },
-        error: (err) => {
-          console.error(err);
-          fila.buscando = false;
-          
-          if (err.status === 404) {
-            fila.id_producto = null;
-            fila.Nombre = 'Producto no encontrado';
-            toast.warning(`No se encontró el código "${codigoLimpio}" para este proveedor.`);
-          } else {
-            fila.id_producto = null;
-            fila.Nombre = 'Error de conexión'; 
-            toast.error('Hubo un problema al comunicarse con el servidor.');
-          }
+    this.productoControl.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap(termino => {
+        if (!this.pedidoNuevo.id_proveedor) {
+          this.productosFiltrados = [];
+          return of(null);
         }
-      });
-
-    }, 500);
-  }
-  agregarFila() {
-    this.productosSolicitados.push({
-      codigo: '', id_producto: null, Nombre: '', cantidad: 1, buscando: false, timeoutId: null
+        if (!termino || typeof termino !== 'string' || termino.trim().length < 2) {
+          this.productosFiltrados = [];
+          return of(null);
+        }
+        return this.ps.buscarProductos(termino.trim(), this.pedidoNuevo.id_proveedor);
+      })
+    ).subscribe({
+      next: (res: any) => {
+        if (res) {
+          this.productosFiltrados = res.data || res || [];
+        }
+      },
+      error: (err) => {
+        console.error('Error al buscar productos', err);
+        this.productosFiltrados = [];
+      }
     });
+}
+
+onCambiarProveedor() {
+    this.productoControl.setValue('', { emitEvent: false });
+    this.productosFiltrados = [];
+
+    if (this.pedidoNuevo.id_proveedor) {
+      this.productoControl.enable();
+    } else {
+      this.productoControl.disable();
+    }
+}
+
+  onEnterProducto(event: any) {
+    const termino = event.target.value?.trim();
+    if (!termino) return;
+
+    if (this.productosFiltrados.length === 1) {
+      this.seleccionarProducto(this.productosFiltrados[0]);
+    } else if (this.productosFiltrados.length > 1) {
+      toast.info('Selecciona un producto de la lista desplegada.');
+    }
   }
+  contarOcurrencias(idProducto: number): number {
+    return this.productosSolicitados.filter(p => p.id_producto === idProducto).length;
+}
+ seleccionarProducto(producto: any) {
+    const yaExiste = this.productosSolicitados.some(p => p.id_producto === producto.id);
+
+    if (yaExiste) {
+      toast.info(`"${producto.Nombre}" ya está en la lista. Se agregó una nueva partida para dividir cantidades entre Almacén y para Pedidos.`,{ duration: 8000 });
+    }
+
+    this.productosSolicitados.push({
+      id_producto: producto.id,
+      Nombre: producto.Nombre,
+      Codigo_japon: producto.Codigo_japon,
+      Codigo_numeral: producto.Codigo_numeral,
+      Stock: producto.Stock,
+      cantidad: 1,
+      destino: ''
+    });
+
+    this.productoControl.setValue('', { emitEvent: false });
+    this.productosFiltrados = [];
+}
+   eliminarFila(index: number) {
+    this.productosSolicitados.splice(index, 1);
+  }
+
   cerrar() {
     this.dialogRef.close();
   }
- guardarPedido() {
-    const usuarioString = localStorage.getItem('user');
-    let idAsesor = usuarioString ? JSON.parse(usuarioString).id : null;
+guardarPedido() {
+    let idAsesor = null;
+    const token = localStorage.getItem('token');
     
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        idAsesor = payload.id;
+      } catch (error) {
+        console.error('Error al decodificar el token:', error);
+      }
+    }
+
+    if (!idAsesor) {
+      toast.error('Error de sesión. Inicia sesión nuevamente.');
+      return;
+    }
+
     if (!this.pedidoNuevo.id_proveedor || !this.pedidoNuevo.fecha_estimada) {
       toast.error('Completa los datos del proveedor y la fecha.');
       return;
     }
 
+    const filasIncompletas = this.productosSolicitados
+      .filter(p => p.id_producto !== null && p.cantidad > 0)
+      .some(p => !p.destino);
+
+    if (filasIncompletas) {
+      toast.error('Selecciona el destino (Almacén o Apartado) para cada producto agregado.');
+      return;
+    }
+
     const productosValidos = this.productosSolicitados
-      .filter(p => p.id_producto !== null && p.cantidad > 0) 
+      .filter(p => p.id_producto !== null && p.cantidad > 0 && p.destino)
       .map(p => ({
         id_producto: p.id_producto,
-        cantidad: p.cantidad 
+        cantidad: p.cantidad,
+        destino: p.destino   // NUEVO: viaja por partida, ya no global
       }));
 
     if (productosValidos.length === 0) {
       toast.error('Agrega al menos un producto válido reconocido por el sistema');
       return;
     }
-     const fechaObj = new Date(this.pedidoNuevo.fecha_estimada);
+
+    const fechaObj = new Date(this.pedidoNuevo.fecha_estimada);
     const anio = fechaObj.getFullYear();
-    const mes = String(fechaObj.getMonth() + 1).padStart(2, '0'); // Añade un 0 si es menor a 10
+    const mes = String(fechaObj.getMonth() + 1).padStart(2, '0');
     const dia = String(fechaObj.getDate()).padStart(2, '0');
     const fechaMySQL = `${anio}-${mes}-${dia}`;
-     const payload = {
+
+    const payload = {
       id_asesor: idAsesor,
       id_proveedor: this.pedidoNuevo.id_proveedor,
-      destino: this.pedidoNuevo.destino,
       fecha: fechaMySQL,
-      productos: productosValidos // Esto se convertirá en p_productos_json en Node
+      productos: productosValidos
     };
 
-    // 3. Enviamos al servidor
     this.ps.registrarPedido(payload).subscribe({
       next: (response) => {
         toast.success('Pedido registrado exitosamente');
-        this.dialogRef.close(true); // Cerramos y enviamos true para actualizar la tabla padre
+        this.dialogRef.close(true);
       },
       error: (err) => {
         console.error(err);
         toast.error('Ocurrió un error al crear el pedido');
       }
     });
-  }
-  eliminarFila(index: number) {
-    if (this.productosSolicitados.length > 1) {
-      this.productosSolicitados.splice(index, 1);
-    } else {
-      toast.error('El pedido debe tener al menos un producto.');
-    }
   }
 }

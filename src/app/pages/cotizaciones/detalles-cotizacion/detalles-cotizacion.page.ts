@@ -10,7 +10,11 @@ import { ButtonActionComponent } from "../../../shared/components/UI/buttons/but
 import { DeleteComponent } from '../../../shared/components/UI/modal/delete/delete.component';
 import { AceptarComponent } from '../../../shared/components/UI/modal/aceptar/aceptar.component';
 import { toast } from 'ngx-sonner';
+import { ModalClientePage } from '../../clientes/modal-cliente/modal-cliente.page'
 import { CotizacionService } from '../../../core/services/Cotizaciones.service'
+import { NgxSonnerToaster } from 'ngx-sonner';
+import { Router } from '@angular/router';
+import { solicitarOrdenCompra, confirmarRegistroCliente } from '../../../shared/utils/cotizacion-alerts.util';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -24,7 +28,8 @@ import Swal from 'sweetalert2';
     HeaderModalComponent,
     FooterModalComponent,
     CardDetailsComponent,
-    ButtonActionComponent
+    ButtonActionComponent,
+    NgxSonnerToaster
   ]
 })
 export class DetallesCotizacionPage implements OnInit {
@@ -33,7 +38,7 @@ export class DetallesCotizacionPage implements OnInit {
   cargando: boolean = true;
 
   constructor(
-    private cs: CotizacionService,
+    private cs: CotizacionService, private router: Router,
     public dialogRef: MatDialogRef<DetallesCotizacionPage>,
     @Inject(MAT_DIALOG_DATA) public data: any, public dialog: MatDialog
   ) {
@@ -46,7 +51,7 @@ export class DetallesCotizacionPage implements OnInit {
   cerrar() {
     this.dialogRef.close(false);
   }
- cargarDetallesCot() {
+  cargarDetallesCot() {
     this.cargando = true;
     this.cs.obtenerCotizacionPorId(this.cot.id).subscribe({
       next: (res: any) => {
@@ -62,7 +67,7 @@ export class DetallesCotizacionPage implements OnInit {
         const formateador = new Intl.NumberFormat('es-MX', {
           style: 'currency',
           currency: this.cot.moneda === 'USD' ? 'USD' : 'MXN',
-          currencyDisplay: 'narrowSymbol' as any 
+          currencyDisplay: 'narrowSymbol' as any
         });
 
         // 1. Identificamos si es USD y obtenemos el tipo de cambio
@@ -72,7 +77,7 @@ export class DetallesCotizacionPage implements OnInit {
 
         this.cotizacionDetalle = detallesCrudos.map((item: any) => {
           const precioRaw = item.precio_unitario || item.precio_unitario_cotizado || 0;
-          
+
           // 2. Aplicamos la conversión matemática
           const precioConvertido = Number(precioRaw) / factorConversion;
           const importeConvertido = (item.cantidad_producto * precioConvertido) || 0;
@@ -87,11 +92,11 @@ export class DetallesCotizacionPage implements OnInit {
 
         this.cot.subtotal_formateado = formateador.format(this.cot.subtotal);
         this.cot.iva_formateado = formateador.format(this.cot.iva);
-        
+
         this.cot.total_formateado_completo = new Intl.NumberFormat('es-MX', {
           style: 'currency',
           currency: this.cot.moneda === 'USD' ? 'USD' : 'MXN',
-          currencyDisplay: 'code' 
+          currencyDisplay: 'code'
         }).format(this.cot.total);
 
         this.cargando = false;
@@ -132,32 +137,65 @@ export class DetallesCotizacionPage implements OnInit {
     });
   }
   aceptarCotizacion(cot: any) {
-    const dialogRef = this.dialog.open(AceptarComponent, {
-      width: '400px',
-      panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
-      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-      data: {
-        titulo: 'Aceptar Cotizacion',
-        mensaje: `¿Desear confirmar esta cotizacion como aceptada?`,
-        textoAceptar: 'Aceptar',
-        textoCancelar: 'Cancelar'
-      }
-    });
-
-    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
-      if (confirmado) {
-        this.cs.convertirAPedido(cot.id).subscribe({
-          next: (response: any) => {
-            toast.success('Cotizacion aceptada');
-
-            this.dialogRef.close(true);
-
-          },
-          error: (err) => {
-            console.error('Error al aceptar', err);
-            toast.error('No se pudo aceptar');
+    if (!cot.id_cliente) {
+      confirmarRegistroCliente(cot.nombre_prospecto || cot.Cliente).then((deseaRegistrar) => {
+        if (!deseaRegistrar) return;
+        const nombreCliente = cot.nombre_cliente_final && cot.nombre_cliente_final !== 'Sin Nombre'
+          ? cot.nombre_cliente_final
+          : (cot.nombre_prospecto || cot.Cliente || '');
+        const dialogRef = this.dialog.open(ModalClientePage, {
+          width: '630px',
+          maxWidth: '105vw',
+          panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+          backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+          data: {
+            nombrePrellenado: nombreCliente,
+            idAsesorPrellenado: cot.id_asesor
           }
         });
+
+        dialogRef.afterClosed().subscribe((nuevoIdCliente) => {
+          if (nuevoIdCliente && typeof nuevoIdCliente === 'number') {
+            solicitarOrdenCompra().then((ordenCompra) => {
+              if (ordenCompra !== null) {
+                this.vincularYConvertir(cot.id, nuevoIdCliente, ordenCompra);
+              }
+            });
+          }
+        });
+      });
+
+      return;
+    }
+
+    solicitarOrdenCompra().then((ordenCompra) => {
+      if (ordenCompra !== null) {
+        this.ejecutarConversionSp(cot.id, ordenCompra);
+      }
+    });
+  }
+
+  vincularYConvertir(idCotizacion: number, idNuevoCliente: number, orden_compra: string = '') {
+    this.cs.vincularClienteCotizacion(idCotizacion, idNuevoCliente).subscribe({
+      next: () => {
+        this.ejecutarConversionSp(idCotizacion, orden_compra);
+      },
+      error: (err) => {
+        toast.error('Error al vincular el cliente con la cotización.');
+        console.error(err);
+      }
+    });
+  }
+
+  ejecutarConversionSp(idCotizacion: number, oc: string = '') {
+    this.cs.convertirAPedido(idCotizacion, oc).subscribe({
+      next: (response: any) => {
+        toast.success('Cotización convertida a pedido exitosamente');
+        this.dialogRef.close(true);
+      },
+      error: (err) => {
+        console.error('Error al aceptar', err);
+        toast.error(err.error?.error || 'Error al convertir a pedido.');
       }
     });
   }
@@ -177,23 +215,18 @@ export class DetallesCotizacionPage implements OnInit {
       next: (blob: Blob) => {
         Swal.close();
 
-        // 1. Tipamos el PDF
         const pdfBlob = new Blob([blob], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(pdfBlob);
 
-        // 2. CREAMOS UN ENLACE INVISIBLE (Esto evita el bloqueo del navegador)
         const a = document.createElement('a');
         a.href = fileURL;
-        a.target = '_blank'; // Fuerza que se abra en otra pestaña
+        a.target = '_blank';
 
-        // IMPORTANTE: NO ponemos a.download para que se visualice en lugar de descargarse
         document.body.appendChild(a);
-        a.click(); // Simulamos el clic humano
+        a.click();
 
-        // 3. Limpieza de memoria
         document.body.removeChild(a);
 
-        // Liberamos la URL después de unos segundos para que el navegador no gaste RAM
         setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
       },
       error: (err) => {
@@ -206,5 +239,11 @@ export class DetallesCotizacionPage implements OnInit {
         });
       }
     });
+  }
+
+
+  modificarCotizacion(cot: any) {
+    this.cerrar();
+    this.router.navigate(['/cotizaciones/pos', cot.id], { state: { cotizacionData: cot } });
   }
 }

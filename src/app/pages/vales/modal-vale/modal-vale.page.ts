@@ -15,7 +15,9 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-import {ClientesService} from '../../../core/services/clientes.service';
+import { ClientesService } from '../../../core/services/clientes.service';
+import { CotizacionService } from '../../../core/services/Cotizaciones.service';
+
 @Component({
   selector: 'app-modal-vale',
   templateUrl: './modal-vale.page.html',
@@ -37,95 +39,149 @@ import {ClientesService} from '../../../core/services/clientes.service';
   ]
 })
 export class ModalValePage implements OnInit {
-clienteControl = new FormControl<any>('');
+  clienteControl = new FormControl<any>('');
   solicitud = {
     id_cliente: null,
     orden_compra: '',
     num_factura: ''
   };
+  pedidosDisponibles: any[] = [];
+  pedidoSeleccionado: any = null;
   productosSolicitados: any[] = [];
+  cargandoPedidos: boolean = false;
   clientesFiltrados: any[] = [];
+  cargandoProductosPedido: boolean = false;
+
   clientes: any[] = [];
   constructor(private dialogRef: MatDialogRef<ModalValePage>,
-    private valeService: ValeService, private cs: ClientesService) { }
+    private valeService: ValeService, private cs: ClientesService, private cotizacionService: CotizacionService,) { }
 
   ngOnInit() {
-    this.agregarFilaProducto();
-    this.clientesFiltrados = this.clientes;
-    this.clienteControl.valueChanges.subscribe(value => {
-            if (typeof value === 'object' && value !== null) {
-        this.solicitud.id_cliente = value.id; 
-      } else {
-        this.solicitud.id_cliente = null; 
-        this.clientesFiltrados = this._filtrarClientes(value);
+  this.clientesFiltrados = this.clientes;
+  this.clienteControl.valueChanges.subscribe(value => {
+    if (typeof value === 'object' && value !== null) {
+      this.solicitud.id_cliente = value.id;
+    } else {
+      this.solicitud.id_cliente = null;
+      this.clientesFiltrados = this._filtrarClientes(value);
+    }
+  });
+  this.cargarClientes();
+  this.cargarPedidosDisponibles();
+}
+  cargarPedidosDisponibles() {
+    const usuarioString = localStorage.getItem('user');
+    const idAsesor = usuarioString ? JSON.parse(usuarioString).id : null;
+    if (!idAsesor) return;
+
+    this.cargandoPedidos = true;
+    this.valeService.obtenerPedidosDisponiblesVale(idAsesor).subscribe({
+      next: (res: any) => {
+        this.pedidosDisponibles = res || [];
+        this.cargandoPedidos = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar pedidos disponibles', err);
+        this.cargandoPedidos = false;
       }
     });
-    this.cargarClientes();
   }
-  agregarFilaProducto() {
-    this.productosSolicitados.push({
-      id_producto: null,
-      Nombre: '',
-      codigo: '',
-      modelo: '',
-      descripcion: '',
-      piezas: 1,
-      buscando: false,
-      timeoutId: null
-    });
+seleccionarPedido(idPedidoStr: string) {
+  if (!idPedidoStr) {
+    this.pedidoSeleccionado = null;
+    this.clienteControl.enable();
+    this.clienteControl.setValue('');
+    this.solicitud.id_cliente = null;
+    this.solicitud.orden_compra = '';
+    this.productosSolicitados = [];
+    return;
   }
-  eliminarFila(index: number) {
-    this.productosSolicitados.splice(index, 1);
-    if (this.productosSolicitados.length === 0) {
-      this.agregarFilaProducto();
+
+  const idPedido = parseInt(idPedidoStr);
+  const pedido = this.pedidosDisponibles.find(p => p.id === idPedido);
+  if (!pedido) return;
+
+  this.pedidoSeleccionado = pedido;
+
+  this.clienteControl.setValue({ id: pedido.id_cliente, Nombre: pedido.nombre_cliente });
+  this.clienteControl.disable();
+  this.solicitud.id_cliente = pedido.id_cliente;
+  this.solicitud.orden_compra = pedido.orden_compra || '';
+
+  this.cargarProductosDelPedido(pedido.id_cotizacion);
+}
+cargarProductosDelPedido(idCotizacion: number) {
+  this.cargandoProductosPedido = true;
+  this.cotizacionService.obtenerCotizacionPorId(idCotizacion).subscribe({
+    next: (res: any) => {
+      let detallesCrudos = [];
+      if (Array.isArray(res)) {
+        detallesCrudos = res;
+      } else if (res.data && Array.isArray(res.data)) {
+        detallesCrudos = res.data;
+      } else {
+        detallesCrudos = Object.values(res).find(Array.isArray) || [];
+      }
+
+      this.productosSolicitados = detallesCrudos.map((item: any) => ({
+        id_producto: item.id_producto,   
+        Nombre: item.nombre_producto,
+        codigo: item.Codigo_numeral || item.Codigo_japon || '',
+        piezas: item.cantidad_producto
+      }));
+
+      this.cargandoProductosPedido = false;
+    },
+    error: (err) => {
+      console.error('Error al cargar productos del pedido', err);
+      toast.error('No se pudieron cargar los productos del pedido.');
+      this.cargandoProductosPedido = false;
     }
-  }
+  });
+}
+
   cerrar() {
     this.dialogRef.close();
   }
-guardarSolicitud() {
-    // ✦ 1. VALIDACIÓN DE SESIÓN (Asesor responsable)
-    const usuarioString = localStorage.getItem('user');
-    let idAsesor = usuarioString ? JSON.parse(usuarioString).id : null;
+  guardarSolicitud() {
+    let idAsesor = null;
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        idAsesor = payload.id;
+      } catch (error) {
+        console.error('Error al decodificar el token:', error);
+      }
+    }
+    // --------------------------------------------------------
 
     if (!idAsesor) {
       toast.error('Error de sesión. Inicia sesión nuevamente.');
       return;
     }
 
-    // ✦ 2. VALIDACIÓN DE CLIENTE DESTINO
+    if (!this.pedidoSeleccionado) {
+      toast.error('Selecciona el pedido del cual deseas generar el vale.');
+      return;
+    }
+
     if (!this.solicitud.id_cliente) {
       toast.error('Selecciona un cliente destino');
       return;
     }
 
-    // ✦ 3. VALIDACIÓN ESTRICTA DE ORDEN DE COMPRA
-    const ordenLimpia = (this.solicitud.orden_compra || '').toString().trim();
-    if (!ordenLimpia) {
-      toast.error('La Orden de Compra es obligatoria.');
-      return;
-    }
-    this.solicitud.orden_compra = ordenLimpia;
-    
-    this.solicitud.num_factura = (this.solicitud.num_factura || '').toString().trim();
-
     const productosValidos = [];
-
     for (let i = 0; i < this.productosSolicitados.length; i++) {
       const p = this.productosSolicitados[i];
-
       if (p.id_producto) {
         const cantidadNum = Number(p.piezas);
-
         if (isNaN(cantidadNum) || !Number.isInteger(cantidadNum) || cantidadNum <= 0) {
           toast.error(`Error en la fila ${i + 1}: La cantidad debe ser un número entero mayor a 0.`);
-          return; 
+          return;
         }
-
-        productosValidos.push({
-          id_producto: p.id_producto,
-          piezas: cantidadNum
-        });
+        productosValidos.push({ id_producto: p.id_producto, piezas: cantidadNum });
       }
     }
 
@@ -137,9 +193,8 @@ guardarSolicitud() {
     const payload = {
       id_asesor: idAsesor,
       id_cliente: parseInt(this.solicitud.id_cliente),
-      orden_compra: this.solicitud.orden_compra,
-      num_factura: this.solicitud.num_factura,
-      productos: productosValidos 
+      id_pedido: this.pedidoSeleccionado.id,   // NUEVO
+      productos: productosValidos
     };
 
     this.valeService.crearVale(payload).subscribe({
@@ -153,67 +208,8 @@ guardarSolicitud() {
       }
     });
   }
-buscarProductoBD(codigoEscrito: string, index: number) {
-    const fila = this.productosSolicitados[index];
-    
-    // Limpieza de espacios en blanco
-    const codigoLimpio = (codigoEscrito || '').toString().trim();
-    fila.codigo = codigoLimpio;
 
-    if (!codigoLimpio || codigoLimpio.length < 3) {
-      fila.Nombre = '';
-      fila.Modelo = '';
-      fila.id_producto = null;
-      return;
-    }
-
-    if (fila.timeoutId) {
-      clearTimeout(fila.timeoutId);
-    }
-
-    fila.buscando = true;
-    fila.timeoutId = setTimeout(() => {
-
-      this.valeService.buscarProductos(codigoLimpio).subscribe({
-        next: (respuesta: any) => {
-          fila.buscando = false;
-          const productosEncontrados = respuesta.data || respuesta;
-
-          if (productosEncontrados && productosEncontrados.length > 0) {
-            const producto = productosEncontrados[0];
-            fila.id_producto = producto.id;
-            fila.Nombre = producto.Nombre;
-            fila.Modelo = producto.Modelo;
-          } else {
-            // CASO: La BD responde correctamente pero no hay coincidencias
-            fila.id_producto = null;
-            fila.Nombre = 'Producto no encontrado';
-            fila.Modelo = '';
-            toast.warning(`No se encontró el código "${codigoLimpio}".`);
-          }
-        },
-        error: (err) => {
-          console.error(err);
-          fila.buscando = false;
-          
-          // CASO: El backend arroja un error 404
-          if (err.status === 404) {
-            fila.id_producto = null;
-            fila.Nombre = 'Producto no encontrado';
-            fila.Modelo = '';
-            toast.warning(`No se encontró el código "${codigoLimpio}".`);
-          } else {
-            fila.id_producto = null;
-            fila.Nombre = 'Error de conexión';
-            fila.Modelo = '';
-            toast.error('Hubo un problema al comunicarse con el servidor.');
-          }
-        }
-      });
-
-    }, 500);
-  }
-cargarClientes() {
+  cargarClientes() {
     this.cs.getClientes(1, 1000).subscribe({
       next: (response: any) => {
         const datosCrudos = response.clientes || response.data || response || [];

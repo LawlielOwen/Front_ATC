@@ -218,7 +218,7 @@ filtroFecha(rango: { inicio: any, fin: any }) {
   ionViewWillEnter() {
     this.cargarMov();
     this.cargarContador();
-    this.establecerMesActual();
+    this.establecerRangoMesActual();
   }
   detallesMov(movSeleccionado: any) {
     const dialogRef = this.dialog.open(DetallesPage, {
@@ -229,21 +229,19 @@ filtroFecha(rango: { inicio: any, fin: any }) {
       data: { m: movSeleccionado }
     });
   }
-  establecerMesActual() {
-    const hoy = new Date();
-    const año = hoy.getFullYear();
-    const mes = hoy.getMonth(); 
-    const primerDia = new Date(año, mes, 1);
-    const ultimoDia = new Date(año, mes + 1, 0);
+private establecerRangoMesActual() {
+  const hoy = new Date();
+  const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+  const ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
 
-    const formatear = (fecha: Date) => {
-      const y = fecha.getFullYear();
-      const m = (fecha.getMonth() + 1).toString().padStart(2, '0');
-      const d = fecha.getDate().toString().padStart(2, '0');
-      return `${y}-${m}-${d}`;
-    };
+  this.fechaIni = this.formatearFechaISO(primerDia);
+  this.fechaFin = this.formatearFechaISO(ultimoDia);
+}
 
-    this.fechaIni = formatear(primerDia);
-    this.fechaFin = formatear(ultimoDia);
-  }
+private formatearFechaISO(fecha: Date): string {
+  const anio = fecha.getFullYear();
+  const mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+  const dia = fecha.getDate().toString().padStart(2, '0');
+  return `${anio}-${mes}-${dia}`;
+}
 }

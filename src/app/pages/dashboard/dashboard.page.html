@@ -13,56 +13,39 @@
 
         <div class="p-6 max-w-7xl mx-auto w-full animate-fade-in">
 
-          <div class="mb-6">
-            <h1 class="text-2xl font-extrabold text-[#0d1f38]">Tablero de Métricas</h1>
+          <!-- ===================== HEADER ===================== -->
+          <div class="mb-7">
+            <h1 class="text-[26px] font-extrabold text-[#0d1f38] tracking-tight">Tablero de Métricas</h1>
+            <div class="w-10 h-1 rounded-full bg-gradient-to-r from-[#003B8A] to-[#3b6ba5] mt-2 mb-2"></div>
             <p class="text-sm text-slate-500">Resumen de ventas y comportamiento de productos</p>
           </div>
-          <div class="mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
 
-              <app-stat-card label="TOTAL COTIZADO"
-                [count]="cargandoEstadisticas ? '...' : (estadisticas?.cotizado_global_pesos | currency:'MXN':'symbol-narrow':'1.2-2') || '$0.00'"
-                [accentColor]="'#10b981'"
-                [tooltipText]="'<div class=\'flex flex-col gap-1\'><span class=\'font-bold text-slate-500 uppercase text-[9px] tracking-wider\'>Desglose por moneda</span><div class=\'flex justify-between mt-1\'><span class=\'text-slate-600 font-medium\'>MXN:</span><span class=\'font-bold text-emerald-600\'>' + (estadisticas?.cotizado_mxn_puro | currency:'MXN':'symbol-narrow':'1.2-2') + '</span></div><div class=\'flex justify-between\'><span class=\'text-slate-600 font-medium\'>USD:</span><span class=\'font-bold text-blue-600\'>' + (estadisticas?.cotizado_usd_puro | currency:'USD':'symbol-narrow':'1.2-2') + '</span></div></div>'">
-              </app-stat-card>
-
-              <app-stat-card label="COTIZACIONES REGISTRADAS"
-                [count]="cargandoEstadisticas ? '...' : (estadisticas?.total_cotizaciones_mes || 0)"
-                [accentColor]="'#ef4444'">
-              </app-stat-card>
-
-              <app-stat-card label="TOTAL DE PEDIDOS"
-                [count]="cargandoEstadisticas ? '...' : (estadisticas?.total_pedidos_mes || 0)"
-                [accentColor]="'#8b5cf6'">
-              </app-stat-card>
-
-              <app-stat-card label="TOTAL VENDIDO"
-                [count]="cargandoEstadisticas ? '...' : (estadisticas?.vendido_global_pesos | currency:'MXN':'symbol-narrow':'1.2-2') || '$0.00'"
-                [accentColor]="'#003B8A'">
-              </app-stat-card>
-
-            </div>
-          </div>
-
+          <!-- ===================== TOP / BOTTOM PRODUCTOS ===================== -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3">
+            <!-- TOP 5 PRODUCTOS -->
+            <div class="relative bg-white p-5 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col gap-4 overflow-hidden">
+              <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
 
               <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
-                <div class="w-8 h-8 rounded-md bg-emerald-50 text-[#1D9E75] flex items-center justify-center">
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-emerald-100 flex items-center justify-center shrink-0">
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
                 </div>
-                <div>
-                  <h3 class="text-sm font-extrabold text-[#0d1f38] uppercase tracking-wider">Top 5 Productos</h3>
-                  <p class="text-[11px] text-slate-400">Productos más pedidos del mes</p>
+                <div class="min-w-0">
+                  <h3 class="text-[13px] font-bold text-[#0d1f38] uppercase tracking-wider">Top 5 Productos</h3>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Productos más pedidos del trimestre</p>
                 </div>
               </div>
 
-              <div *ngIf="cargandoTopProductos" class="flex justify-center items-center h-[220px]">
-                <span class="text-slate-400 text-sm font-semibold animate-pulse">Cargando gráfica...</span>
+              <!-- Loading skeleton -->
+              <div *ngIf="cargandoTopProductos" class="flex flex-col justify-center gap-4 h-[190px] py-2">
+                <div class="flex items-center gap-3" *ngFor="let w of [92, 78, 55, 38, 22]">
+                  <div class="h-2.5 w-24 bg-slate-100 rounded-full animate-pulse shrink-0"></div>
+                  <div class="h-2.5 bg-slate-100 rounded-full animate-pulse" [style.width.%]="w"></div>
+                </div>
               </div>
 
               <div *ngIf="!cargandoTopProductos" class="w-full">
@@ -70,30 +53,36 @@
                   [dataLabels]="chartOptionsTopProductos.dataLabels"
                   [plotOptions]="chartOptionsTopProductos.plotOptions" [xaxis]="chartOptionsTopProductos.xaxis"
                   [colors]="chartOptionsTopProductos.colors" [legend]="chartOptionsTopProductos.legend"
+                  [fill]="chartOptionsTopProductos.fill"
                   [tooltip]="chartOptionsTopProductos.tooltip" [yaxis]="chartOptionsTopProductos.yaxis"
                   [grid]="chartOptionsTopProductos.grid">
                 </apx-chart>
               </div>
-
             </div>
 
-            <div class="bg-white p-5 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-3">
+            <!-- PRODUCTOS REZAGADOS -->
+            <div class="relative bg-white p-5 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col gap-4 overflow-hidden">
+              <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 to-orange-600"></div>
 
               <div class="flex items-center gap-3 border-b border-slate-100 pb-3">
-                <div class="w-8 h-8 rounded-md bg-orange-50 text-orange-600 flex items-center justify-center">
+                <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 ring-1 ring-orange-100 flex items-center justify-center shrink-0">
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M13 17h8m0 0v-8m0 8l-8-8-4 4-6-6" />
                   </svg>
                 </div>
-                <div>
-                  <h3 class="text-sm font-extrabold text-[#0d1f38] uppercase tracking-wider">Productos Rezagados</h3>
-                  <p class="text-[11px] text-slate-400">Menos pedidos del mes</p>
+                <div class="min-w-0">
+                  <h3 class="text-[13px] font-bold text-[#0d1f38] uppercase tracking-wider">Productos Rezagados</h3>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Menos pedidos del trimestre</p>
                 </div>
               </div>
 
-              <div *ngIf="cargandoBottomProductos" class="flex justify-center items-center h-[220px]">
-                <span class="text-slate-400 text-sm font-semibold animate-pulse">Cargando gráfica...</span>
+              <!-- Loading skeleton -->
+              <div *ngIf="cargandoBottomProductos" class="flex flex-col justify-center gap-4 h-[190px] py-2">
+                <div class="flex items-center gap-3" *ngFor="let w of [92, 78, 55, 38, 22]">
+                  <div class="h-2.5 w-24 bg-slate-100 rounded-full animate-pulse shrink-0"></div>
+                  <div class="h-2.5 bg-slate-100 rounded-full animate-pulse" [style.width.%]="w"></div>
+                </div>
               </div>
 
               <div *ngIf="!cargandoBottomProductos" class="w-full">
@@ -101,108 +90,124 @@
                   [dataLabels]="chartOptionsBottomProductos.dataLabels"
                   [plotOptions]="chartOptionsBottomProductos.plotOptions" [xaxis]="chartOptionsBottomProductos.xaxis"
                   [colors]="chartOptionsBottomProductos.colors" [legend]="chartOptionsBottomProductos.legend"
+                  [fill]="chartOptionsBottomProductos.fill"
                   [tooltip]="chartOptionsBottomProductos.tooltip" [yaxis]="chartOptionsBottomProductos.yaxis"
                   [grid]="chartOptionsBottomProductos.grid">
                 </apx-chart>
               </div>
-
             </div>
 
           </div>
-          <div class="mt-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-4 mb-8">
+
+          <!-- ===================== CONVERSIÓN POR CLIENTE ===================== -->
+          <div class="relative mt-6 bg-white p-6 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col gap-4 mb-8 overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#3b6ba5] to-[#003B8A]"></div>
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-4">
 
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-md bg-blue-50 text-[#003B8A] flex items-center justify-center">
+                <div class="w-10 h-10 rounded-xl bg-blue-50 text-[#003B8A] ring-1 ring-blue-100 flex items-center justify-center shrink-0">
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                 </div>
-                <div>
-                  <h3 class="text-sm font-extrabold text-[#0d1f38] uppercase tracking-wider">Conversión por Cliente</h3>
-                  <p class="text-[11px] text-slate-400">Relación entre monto cotizado y facturado (Mes actual)</p>
+                <div class="min-w-0">
+                  <h3 class="text-[13px] font-bold text-[#0d1f38] uppercase tracking-wider">Conversión por Cliente</h3>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Relación entre monto cotizado y facturado (Mes actual)</p>
                 </div>
               </div>
 
-              <div
-                class="flex flex-col xl:flex-row xl:items-center justify-between border-b border-slate-100 pb-3 gap-4">
+              <div class="flex flex-col sm:flex-row gap-3 w-full sm:w-auto shrink-0">
 
+                <div class="w-full sm:w-64 relative">
+                  <button (click)="mostrarDropdownConversion = !mostrarDropdownConversion"
+                    class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg block w-full p-2.5 text-left flex justify-between items-center gap-2 shadow-sm hover:bg-slate-100 hover:border-slate-300 focus:ring-2 focus:ring-blue-100 transition-all outline-none">
+                    <span class="truncate">{{ clienteSeleccionadoNombreConversion }}</span>
+                    <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0"
+                      [ngClass]="{'rotate-180': mostrarDropdownConversion}" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
 
-                <div class="flex flex-col sm:flex-row gap-3 w-full xl:w-auto">
+                  <div *ngIf="mostrarDropdownConversion"
+                    class="absolute right-0 mt-2 w-full sm:w-72 bg-white border border-slate-200 rounded-xl shadow-xl ring-1 ring-black/5 z-50 p-2 flex flex-col gap-2 animate-fade-in">
 
-                  <div class="w-full sm:w-64 relative">
-                    <button (click)="mostrarDropdownConversion = !mostrarDropdownConversion"
-                      class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg block w-full p-2.5 text-left flex justify-between items-center shadow-sm hover:bg-slate-100 transition-all outline-none">
-                      <span class="truncate">{{ clienteSeleccionadoNombreConversion }}</span>
-                      <svg class="w-4 h-4 text-slate-400 transition-transform duration-200"
-                        [ngClass]="{'rotate-180': mostrarDropdownConversion}" fill="none" viewBox="0 0 24 24"
+                    <div class="relative flex items-center">
+                      <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3" fill="none" viewBox="0 0 24 24"
                         stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                       </svg>
-                    </button>
-
-                    <div *ngIf="mostrarDropdownConversion"
-                      class="absolute right-0 mt-2 w-full sm:w-72 bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-2 flex flex-col gap-2 animate-fade-in">
-
-                      <div class="relative flex items-center">
-                        <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3" fill="none" viewBox="0 0 24 24"
-                          stroke="currentColor">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      <input type="text" [(ngModel)]="busquedaClienteConversion"
+                        (input)="filtrarClientesLocalConversion()" placeholder="Escribe para buscar cliente..."
+                        class="bg-slate-50 text-slate-600 text-xs rounded-lg block w-full pl-9 pr-8 p-2 outline-none border border-slate-100 focus:border-[#003B8A]/40 focus:bg-white transition-all" />
+                      <button *ngIf="busquedaClienteConversion" (click)="busquedaClienteConversion=''; filtrarClientesLocalConversion()"
+                        class="absolute right-2.5 text-slate-300 hover:text-slate-500 transition-colors" aria-label="Limpiar búsqueda">
+                        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
                         </svg>
-                        <input type="text" [(ngModel)]="busquedaClienteConversion"
-                          (input)="filtrarClientesLocalConversion()" placeholder="Escribe para buscar cliente..."
-                          class="bg-slate-50 text-slate-600 text-xs rounded-md block w-full pl-9 p-2 outline-none border border-slate-100 focus:border-blue-500 transition-all" />
-                      </div>
-
-                      <ul class="max-h-56 overflow-y-auto divide-y divide-slate-50 pr-1 pl-0 m-0 list-none mt-2">
-                        <li>
-                          <button (click)="seleccionarClienteConversion(null, 'Vista Global (Todos)')"
-                            class="bg-transparent w-full text-left text-xs px-3 py-2.5 rounded-md font-bold text-blue-700 hover:bg-blue-50 transition-colors">
-                            Vista Global (Todos los clientes)
-                          </button>
-                        </li>
-                        <li *ngFor="let cliente of clientesFiltradosSelectConversion">
-                          <button (click)="seleccionarClienteConversion(cliente.id, cliente.Nombre)"
-                            class="bg-transparent w-full text-left text-xs px-3 py-2.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-[#0d1f38] font-medium transition-colors truncate">
-                            {{ cliente.Nombre }}
-                          </button>
-                        </li>
-                        <li *ngIf="clientesFiltradosSelectConversion.length === 0"
-                          class="text-center py-4 text-xs text-slate-400">
-                          No se encontró ningún cliente coincidente
-                        </li>
-                      </ul>
+                      </button>
                     </div>
-                  </div>
 
-                  <div class="flex bg-slate-100 p-1 rounded-lg self-start sm:self-auto shrink-0">
-                    <button (click)="cambiarFiltroConversion('GLOBAL')"
-                      [ngClass]="filtroMonedaConversion === 'GLOBAL' ? 'bg-white shadow-sm text-slate-800' : 'bg-transparent text-slate-500 hover:text-slate-700'"
-                      class="px-3 py-1.5 text-[11px] font-bold rounded-md transition-all uppercase tracking-wider border-none outline-none">Global</button>
-                    <button (click)="cambiarFiltroConversion('MXN')"
-                      [ngClass]="filtroMonedaConversion === 'MXN' ? 'bg-white shadow-sm text-emerald-700' : 'bg-transparent text-slate-500 hover:text-slate-700'"
-                      class="px-3 py-1.5 text-[11px] font-bold rounded-md transition-all uppercase tracking-wider border-none outline-none">MXN</button>
-                    <button (click)="cambiarFiltroConversion('USD')"
-                      [ngClass]="filtroMonedaConversion === 'USD' ? 'bg-white shadow-sm text-blue-700' : 'bg-transparent text-slate-500 hover:text-slate-700'"
-                      class="px-3 py-1.5 text-[11px] font-bold rounded-md transition-all uppercase tracking-wider border-none outline-none">USD</button>
+                    <ul class="max-h-56 overflow-y-auto divide-y divide-slate-50 pr-1 pl-0 m-0 list-none mt-1">
+                      <li>
+                        <button (click)="seleccionarClienteConversion(null, 'Vista Global (Todos)')"
+                          class="bg-transparent w-full text-left text-xs px-3 py-2.5 rounded-lg font-bold text-[#003B8A] hover:bg-blue-50 transition-colors flex items-center justify-between gap-2">
+                          <span>Vista Global (Todos los clientes)</span>
+                          <svg *ngIf="idClienteFiltroConversion === null" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </button>
+                      </li>
+                      <li *ngFor="let cliente of clientesFiltradosSelectConversion">
+                        <button (click)="seleccionarClienteConversion(cliente.id, cliente.Nombre)"
+                          class="bg-transparent w-full text-left text-xs px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-[#0d1f38] font-medium transition-colors flex items-center justify-between gap-2">
+                          <span class="truncate">{{ cliente.Nombre }}</span>
+                          <svg *ngIf="idClienteFiltroConversion === cliente.id" class="w-3.5 h-3.5 shrink-0 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                          </svg>
+                        </button>
+                      </li>
+                      <li *ngIf="clientesFiltradosSelectConversion.length === 0"
+                        class="text-center py-4 text-xs text-slate-400">
+                        No se encontró ningún cliente coincidente
+                      </li>
+                    </ul>
                   </div>
-
                 </div>
+
+                <div class="flex bg-slate-100 p-1 rounded-full self-start sm:self-auto shrink-0">
+                  <button (click)="cambiarFiltroConversion('GLOBAL')"
+                    [ngClass]="filtroMonedaConversion === 'GLOBAL' ? 'bg-white shadow-sm text-slate-800' : 'bg-transparent text-slate-500 hover:text-slate-700'"
+                    class="px-3.5 py-1.5 text-[11px] font-bold rounded-full transition-all uppercase tracking-wider border-none outline-none">Global</button>
+                  <button (click)="cambiarFiltroConversion('MXN')"
+                    [ngClass]="filtroMonedaConversion === 'MXN' ? 'bg-white shadow-sm text-emerald-700' : 'bg-transparent text-slate-500 hover:text-slate-700'"
+                    class="px-3.5 py-1.5 text-[11px] font-bold rounded-full transition-all uppercase tracking-wider border-none outline-none">MXN</button>
+                  <button (click)="cambiarFiltroConversion('USD')"
+                    [ngClass]="filtroMonedaConversion === 'USD' ? 'bg-white shadow-sm text-[#003B8A]' : 'bg-transparent text-slate-500 hover:text-slate-700'"
+                    class="px-3.5 py-1.5 text-[11px] font-bold rounded-full transition-all uppercase tracking-wider border-none outline-none">USD</button>
+                </div>
+
               </div>
 
             </div>
 
-            <div *ngIf="cargandoConversion" class="flex justify-center items-center h-[200px]">
-              <span class="text-slate-400 text-sm font-semibold animate-pulse">Calculando métricas financieras...</span>
+            <!-- Loading skeleton -->
+            <div *ngIf="cargandoConversion" class="flex flex-col gap-3 py-2">
+              <div class="flex items-center gap-4" *ngFor="let r of [1,2,3,4,5]">
+                <div class="h-3 w-32 bg-slate-100 rounded-full animate-pulse"></div>
+                <div class="h-3 w-20 bg-slate-100 rounded-full animate-pulse ml-auto"></div>
+                <div class="h-3 w-20 bg-slate-100 rounded-full animate-pulse"></div>
+                <div class="h-3 w-24 bg-slate-100 rounded-full animate-pulse"></div>
+              </div>
             </div>
 
             <div *ngIf="!cargandoConversion" class="w-full overflow-x-auto">
-              <table class="w-full text-left text-sm whitespace-nowrap">
+              <table class="w-full text-left text-sm whitespace-nowrap border-separate border-spacing-0">
 
-                <thead class="text-xs text-slate-500 bg-slate-50 uppercase font-semibold">
+                <thead class="text-[11px] text-slate-500 bg-slate-50 uppercase font-bold tracking-wider">
                   <tr>
                     <th class="px-4 py-3 rounded-l-lg">Cliente</th>
                     <th class="px-4 py-3 text-right">Cotizado</th>
@@ -214,46 +219,56 @@
                 <tbody class="divide-y divide-slate-100">
 
                   <tr *ngIf="datosConversion.length === 0">
-                    <td colspan="4" class="px-4 py-8 text-center text-slate-400 text-sm">
-                      No hay registros para la moneda seleccionada en este mes.
+                    <td colspan="4" class="px-4 py-10 text-center">
+                      <div class="flex flex-col items-center gap-2 text-slate-400">
+                        <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                        </svg>
+                        <span class="text-sm">No hay registros para la moneda seleccionada en este mes.</span>
+                      </div>
                     </td>
                   </tr>
 
-                  <tr *ngFor="let item of datosConversion" class="hover:bg-slate-50 transition-colors">
+                  <tr *ngFor="let item of datosConversion" class="hover:bg-slate-50/70 transition-colors group">
 
-                    <td class="px-4 py-3 font-semibold text-[#0d1f38]">
-                      {{ item.cliente }}
+                    <td class="px-4 py-3.5">
+                      <div class="flex items-center gap-2.5">
+                        <div class="w-7 h-7 rounded-full bg-blue-50 text-[#003B8A] text-[10px] font-extrabold flex items-center justify-center shrink-0 ring-1 ring-blue-100">
+                          {{ item.cliente.charAt(0).toUpperCase() }}
+                        </div>
+                        <span class="font-semibold text-[#0d1f38] truncate">{{ item.cliente }}</span>
+                      </div>
                     </td>
 
-                    <td class="px-4 py-3 text-right text-slate-500 font-medium">
+                    <td class="px-4 py-3.5 text-right text-slate-500 font-medium">
                       {{ item.cotizado | currency:(filtroMonedaConversion === 'USD' ? 'USD' :
                       'MXN'):'symbol-narrow':'1.2-2' }}
                     </td>
 
-                    <td class="px-4 py-3 text-right font-bold text-[#1D9E75]">
+                    <td class="px-4 py-3.5 text-right font-bold text-emerald-600">
                       <span *ngIf="item.vendido > 0">
                         {{ item.vendido | currency:(filtroMonedaConversion === 'USD' ? 'USD' :
                         'MXN'):'symbol-narrow':'1.2-2' }}
                       </span>
-                      <span *ngIf="item.vendido === 0" class="text-slate-300">-</span>
+                      <span *ngIf="item.vendido === 0" class="text-slate-300 font-normal">Sin ventas aún</span>
                     </td>
 
-                    <td class="px-4 py-3">
+                    <td class="px-4 py-3.5">
                       <div class="flex items-center justify-end gap-3">
 
-                        <span class="font-extrabold w-10 text-right" [ngClass]="{
+                        <span class="font-extrabold w-10 text-right text-[13px]" [ngClass]="{
                   'text-red-500': item.porcentaje === 0,
                   'text-orange-500': item.porcentaje > 0 && item.porcentaje < 50,
-                  'text-[#1D9E75]': item.porcentaje >= 50
+                  'text-emerald-600': item.porcentaje >= 50
                 }">
                           {{ item.porcentaje }}%
                         </span>
 
-                        <div class="w-24 h-2 bg-slate-200 rounded-full overflow-hidden">
-                          <div class="h-full rounded-full transition-all duration-500" [ngClass]="{
-                    'bg-red-500': item.porcentaje === 0,
-                    'bg-orange-500': item.porcentaje > 0 && item.porcentaje < 50,
-                    'bg-[#1D9E75]': item.porcentaje >= 50
+                        <div class="w-24 h-2 bg-slate-100 rounded-full overflow-hidden">
+                          <div class="h-full rounded-full transition-all duration-500 ease-out" [ngClass]="{
+                    'bg-red-400': item.porcentaje === 0,
+                    'bg-orange-400': item.porcentaje > 0 && item.porcentaje < 50,
+                    'bg-emerald-500': item.porcentaje >= 50
                   }" [style.width]="item.porcentajeVisual + '%'">
                           </div>
                         </div>
@@ -267,45 +282,50 @@
             </div>
 
           </div>
-          <div class="mt-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-4 mb-8">
+
+          <!-- ===================== TENDENCIA DE COTIZACIONES ===================== -->
+          <div class="relative mt-6 bg-white p-6 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col gap-4 mb-8 overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-400 to-indigo-600"></div>
 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-4">
 
               <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-md bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 ring-1 ring-indigo-100 flex items-center justify-center shrink-0">
                   <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                       d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
                   </svg>
                 </div>
-                <div>
-                  <h3 class="text-sm font-extrabold text-[#0d1f38] uppercase tracking-wider">Tendencia de Cotizaciones
-                  </h3>
-                  <p class="text-[11px] text-slate-400">Evolución de los montos cotizados en los últimos 3 meses</p>
+                <div class="min-w-0">
+                  <h3 class="text-[13px] font-bold text-[#0d1f38] uppercase tracking-wider">Tendencia de Cotizaciones</h3>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Evolución de los montos cotizados en los últimos 3 meses</p>
                 </div>
               </div>
 
-              <div class="flex bg-slate-100 p-1 rounded-lg self-start sm:self-auto">
+              <div class="flex bg-slate-100 p-1 rounded-full self-start sm:self-auto shrink-0">
                 <button (click)="cambiarFiltroTendencia('GLOBAL')"
                   [ngClass]="filtroMonedaTendencia === 'GLOBAL' ? 'bg-white shadow-sm text-slate-800' : 'bg-transparent text-slate-500 hover:text-slate-700'"
-                  class="px-3 py-1.5 text-[11px] font-bold rounded-md transition-all uppercase tracking-wider border-none outline-none">
+                  class="px-3.5 py-1.5 text-[11px] font-bold rounded-full transition-all uppercase tracking-wider border-none outline-none">
                   Global
                 </button>
                 <button (click)="cambiarFiltroTendencia('MXN')"
                   [ngClass]="filtroMonedaTendencia === 'MXN' ? 'bg-white shadow-sm text-emerald-700' : 'bg-transparent text-slate-500 hover:text-slate-700'"
-                  class="px-3 py-1.5 text-[11px] font-bold rounded-md transition-all uppercase tracking-wider border-none outline-none">
+                  class="px-3.5 py-1.5 text-[11px] font-bold rounded-full transition-all uppercase tracking-wider border-none outline-none">
                   MXN
                 </button>
                 <button (click)="cambiarFiltroTendencia('USD')"
-                  [ngClass]="filtroMonedaTendencia === 'USD' ? 'bg-white shadow-sm text-blue-700' : 'bg-transparent text-slate-500 hover:text-slate-700'"
-                  class="px-3 py-1.5 text-[11px] font-bold rounded-md transition-all uppercase tracking-wider border-none outline-none">
+                  [ngClass]="filtroMonedaTendencia === 'USD' ? 'bg-white shadow-sm text-[#003B8A]' : 'bg-transparent text-slate-500 hover:text-slate-700'"
+                  class="px-3.5 py-1.5 text-[11px] font-bold rounded-full transition-all uppercase tracking-wider border-none outline-none">
                   USD
                 </button>
               </div>
             </div>
 
-            <div *ngIf="cargandoTendencia" class="flex justify-center items-center h-[320px]">
-              <span class="text-slate-400 text-sm font-semibold animate-pulse">Analizando tendencias...</span>
+            <!-- Loading skeleton -->
+            <div *ngIf="cargandoTendencia" class="flex items-end gap-6 h-[280px] px-6 pb-2">
+              <div class="flex-1 bg-slate-100 rounded-t-lg animate-pulse" style="height: 45%;"></div>
+              <div class="flex-1 bg-slate-100 rounded-t-lg animate-pulse" style="height: 85%;"></div>
+              <div class="flex-1 bg-slate-100 rounded-t-lg animate-pulse" style="height: 68%;"></div>
             </div>
 
             <div *ngIf="!cargandoTendencia" class="w-full">
@@ -314,84 +334,132 @@
                 [dataLabels]="chartOptionsTendencia.dataLabels" [stroke]="chartOptionsTendencia.stroke"
                 [xaxis]="chartOptionsTendencia.xaxis" [yaxis]="chartOptionsTendencia.yaxis"
                 [colors]="chartOptionsTendencia.colors" [states]="chartOptionsTendencia.states"
+                [fill]="chartOptionsTendencia.fill"
                 [tooltip]="chartOptionsTendencia.tooltip" [legend]="chartOptionsTendencia.legend"
                 [grid]="chartOptionsTendencia.grid">
               </apx-chart>
             </div>
 
           </div>
-          <div class="mt-6 bg-white p-6 rounded-2xl border border-slate-200 shadow-sm flex flex-col gap-4 mb-8">
 
-            <div class="w-full sm:w-72 relative">
+          <!-- ===================== PRODUCTOS ESTRELLA POR CLIENTE ===================== -->
+          <div class="relative mt-6 bg-white p-6 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col gap-4 mb-8 overflow-hidden">
+            <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600"></div>
 
-              <button (click)="mostrarDropdown = !mostrarDropdown"
-                class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg block w-full p-2.5 text-left flex justify-between items-center shadow-sm hover:bg-slate-100 transition-all outline-none">
-                <span class="truncate">{{ clienteSeleccionadoNombre }}</span>
-                <svg class="w-4 h-4 text-slate-400 transition-transform duration-200"
-                  [ngClass]="{'rotate-180': mostrarDropdown}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-slate-100 pb-3 gap-4">
 
-              <div *ngIf="mostrarDropdown"
-                class="absolute right-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl z-50 p-2 flex flex-col gap-2 animate-fade-in">
-
-                <div class="relative flex items-center">
-                  <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3" fill="none" viewBox="0 0 24 24"
-                    stroke="currentColor">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 ring-1 ring-amber-100 flex items-center justify-center shrink-0">
+                  <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                      d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.196-1.539-1.118l1.519-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
                   </svg>
-                  <input type="text" [(ngModel)]="busquedaCliente" (input)="filtrarClientesLocal()"
-                    placeholder="Escribe para buscar cliente..."
-                    class="bg-slate-50 text-slate-600 text-xs rounded-md block w-full pl-9 p-2 outline-none border border-slate-100 focus:border-blue-500 focus:bg-white transition-all" />
+                </div>
+                <div class="min-w-0">
+                  <h3 class="text-[13px] font-bold text-[#0d1f38] uppercase tracking-wider">Productos Estrella por Cliente</h3>
+                  <p class="text-[11px] text-slate-400 mt-0.5">Producto más solicitado por cada cliente</p>
+                </div>
+              </div>
+
+              <div class="w-full sm:w-72 relative shrink-0">
+
+                <button (click)="mostrarDropdown = !mostrarDropdown"
+                  class="bg-slate-50 border border-slate-200 text-slate-700 text-xs font-semibold rounded-lg block w-full p-2.5 text-left flex justify-between items-center gap-2 shadow-sm hover:bg-slate-100 hover:border-slate-300 focus:ring-2 focus:ring-amber-100 transition-all outline-none">
+                  <span class="truncate">{{ clienteSeleccionadoNombre }}</span>
+                  <svg class="w-4 h-4 text-slate-400 transition-transform duration-200 shrink-0"
+                    [ngClass]="{'rotate-180': mostrarDropdown}" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+
+                <div *ngIf="mostrarDropdown"
+                  class="absolute right-0 mt-2 w-full bg-white border border-slate-200 rounded-xl shadow-xl ring-1 ring-black/5 z-50 p-2 flex flex-col gap-2 animate-fade-in">
+
+                  <div class="relative flex items-center">
+                    <svg class="w-3.5 h-3.5 text-slate-400 absolute left-3" fill="none" viewBox="0 0 24 24"
+                      stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <input type="text" [(ngModel)]="busquedaCliente" (input)="filtrarClientesLocal()"
+                      placeholder="Escribe para buscar cliente..."
+                      class="bg-slate-50 text-slate-600 text-xs rounded-lg block w-full pl-9 pr-8 p-2 outline-none border border-slate-100 focus:border-amber-400/50 focus:bg-white transition-all" />
+                    <button *ngIf="busquedaCliente" (click)="busquedaCliente=''; filtrarClientesLocal()"
+                      class="absolute right-2.5 text-slate-300 hover:text-slate-500 transition-colors" aria-label="Limpiar búsqueda">
+                      <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+
+                  <ul class="max-h-56 overflow-y-auto divide-y divide-slate-50 pr-1 pl-0 m-0 list-none mt-1">
+
+                    <li>
+                      <button (click)="seleccionarCliente(null, 'Vista Global (Todos)')"
+                        class="bg-transparent w-full text-left text-xs px-3 py-2.5 rounded-lg font-bold text-[#003B8A] hover:bg-blue-50 transition-colors flex items-center justify-between gap-2">
+                        <span>Vista Global (Todos los clientes)</span>
+                        <svg *ngIf="idClienteFiltroEstrella === null" class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </button>
+                    </li>
+
+                    <li *ngFor="let cliente of clientesFiltradosSelect">
+                      <button (click)="seleccionarCliente(cliente.id, cliente.Nombre)"
+                        class="bg-transparent w-full text-left text-xs px-3 py-2.5 rounded-lg text-slate-600 hover:bg-slate-50 hover:text-[#0d1f38] font-medium transition-colors flex items-center justify-between gap-2">
+                        <span class="truncate">{{ cliente.Nombre }}</span>
+                        <svg *ngIf="idClienteFiltroEstrella === cliente.id" class="w-3.5 h-3.5 shrink-0 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+                        </svg>
+                      </button>
+                    </li>
+
+                    <li *ngIf="clientesFiltradosSelect.length === 0" class="text-center py-4 text-xs text-slate-400">
+                      No se encontró ningún cliente coincidente
+                    </li>
+
+                  </ul>
                 </div>
 
-                <ul class="max-h-56 overflow-y-auto divide-y divide-slate-50 pr-1 pl-0 m-0 list-none mt-2">
-
-                  <li>
-                    <button (click)="seleccionarCliente(null, 'Vista Global (Todos)')"
-                      class="bg-transparent w-full text-left text-xs px-3 py-2.5 rounded-md font-bold text-blue-700 hover:bg-blue-50 transition-colors">
-                      Vista Global (Todos los clientes)
-                    </button>
-                  </li>
-
-                  <li *ngFor="let cliente of clientesFiltradosSelect">
-                    <button (click)="seleccionarCliente(cliente.id, cliente.Nombre)"
-                      class="bg-transparent w-full text-left text-xs px-3 py-2.5 rounded-md text-slate-600 hover:bg-slate-50 hover:text-[#0d1f38] font-medium transition-colors truncate">
-                      {{ cliente.Nombre }}
-                    </button>
-                  </li>
-
-                  <li *ngIf="clientesFiltradosSelect.length === 0" class="text-center py-4 text-xs text-slate-400">
-                    No se encontró ningún cliente coincidente
-                  </li>
-
-                </ul>
               </div>
 
             </div>
 
-            <div *ngIf="cargandoProductosEstrella" class="flex justify-center items-center h-[200px]">
-              <span class="text-slate-400 text-sm font-semibold animate-pulse">Analizando preferencias
-                comerciales...</span>
+            <!-- Loading skeleton -->
+            <div *ngIf="cargandoProductosEstrella" class="flex flex-col gap-3 py-2">
+              <div class="flex items-center gap-4" *ngFor="let r of [1,2,3,4,5]">
+                <div class="h-3 w-28 bg-slate-100 rounded-full animate-pulse"></div>
+                <div class="h-5 w-32 bg-slate-100 rounded-full animate-pulse"></div>
+                <div class="h-5 w-16 bg-slate-100 rounded-full animate-pulse ml-auto"></div>
+              </div>
             </div>
 
             <div *ngIf="!cargandoProductosEstrella" class="w-full overflow-x-auto">
-              <table class="w-full text-left text-sm whitespace-nowrap">
+              <table class="w-full text-left text-sm whitespace-nowrap border-separate border-spacing-0">
 
-                <thead class="text-xs text-slate-500 bg-slate-50 uppercase font-semibold">
+                <thead class="text-[11px] text-slate-500 bg-slate-50 uppercase font-bold tracking-wider">
                   <tr>
-                    <th class="px-4 py-3 rounded-l-lg">Cliente</th>
+                    <th class="px-4 py-3 rounded-l-lg w-12">#</th>
+                    <th class="px-4 py-3">Cliente</th>
                     <th class="px-4 py-3">Producto Favorito</th>
                     <th class="px-4 py-3 text-center w-36 rounded-r-lg">Volumen Solicitado</th>
                   </tr>
                 </thead>
 
                 <tbody class="divide-y divide-slate-100">
-                  <tr *ngFor="let item of datosProductosEstrella" class="hover:bg-slate-50 transition-colors">
+                  <tr *ngFor="let item of datosProductosEstrella; let i = index" class="hover:bg-slate-50/70 transition-colors">
 
-                    <td class="px-4 py-3.5 font-medium text-slate-500">
+                    <td class="px-4 py-3.5">
+                      <span class="w-6 h-6 rounded-full text-[11px] font-extrabold flex items-center justify-center" [ngClass]="
+                        i === 0 ? 'bg-amber-100 text-amber-700' :
+                        i === 1 ? 'bg-slate-200 text-slate-600' :
+                        i === 2 ? 'bg-orange-100 text-orange-700' :
+                        'bg-slate-50 text-slate-300'">
+                        {{ i + 1 }}
+                      </span>
+                    </td>
+
+                    <td class="px-4 py-3.5 font-medium text-slate-600">
                       {{ item.Cliente }}
                     </td>
 
@@ -412,8 +480,13 @@
                   </tr>
 
                   <tr *ngIf="datosProductosEstrella.length === 0">
-                    <td colspan="3" class="px-4 py-8 text-center text-slate-400 text-sm">
-                      No se encontraron registros de compras para este criterio.
+                    <td colspan="4" class="px-4 py-10 text-center">
+                      <div class="flex flex-col items-center gap-2 text-slate-400">
+                        <svg class="w-8 h-8 text-slate-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                        <span class="text-sm">No se encontraron registros de compras para este criterio.</span>
+                      </div>
                     </td>
                   </tr>
                 </tbody>

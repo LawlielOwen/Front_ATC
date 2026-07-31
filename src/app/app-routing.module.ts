@@ -1,13 +1,9 @@
 import { NgModule } from '@angular/core';
 import { PreloadAllModules, RouterModule, Routes } from '@angular/router';
-import { authGuard } from './core/guard/auth.guard';
+import { authGuard, roleGuard } from './core/guard/Role.guard';
 import { noAuthGuard } from './core/guard/no-auth.guard';
-import { AdminGuard } from './core/guard/admin.guard';
+
 const routes: Routes = [
-  {
-    path: 'login',
-    loadChildren: () => import('./pages/login/login.module').then( m => m.LoginPageModule)
-  },
   {
     path: '',
     redirectTo: 'login',
@@ -19,10 +15,23 @@ const routes: Routes = [
     canActivate: [noAuthGuard]
   },
   {
+    path: 'registro',
+    loadChildren: () => import('./pages/registro/registro.module').then( m => m.RegistroPageModule)
+   
+  },
+
+  {
     path: 'dashboard',
     loadChildren: () => import('./pages/dashboard/dashboard.module').then( m => m.DashboardPageModule),
-    canActivate: [authGuard, AdminGuard]
+    canActivate: [authGuard]
   },
+  {
+    path: 'asesores',
+    loadChildren: () => import('./pages/asesores/asesores.module').then( m => m.AsesoresPageModule),
+    canActivate: [roleGuard(['Administrador'])]
+  },
+
+
   {
     path: 'productos',
     loadChildren: () => import('./pages/productos/productos.module').then( m => m.ProductosPageModule),
@@ -30,34 +39,42 @@ const routes: Routes = [
   },
   {
     path: 'clientes',
-    loadChildren: () => import('./pages/clientes/clientes.module').then( m => m.ClientesPageModule)
+    loadChildren: () => import('./pages/clientes/clientes.module').then( m => m.ClientesPageModule),
+    canActivate: [authGuard]
   },
   {
     path: 'cotizaciones',
-    loadChildren: () => import('./pages/cotizaciones/cotizaciones.module').then( m => m.CotizacionesPageModule)
+    loadChildren: () => import('./pages/cotizaciones/cotizaciones.module').then( m => m.CotizacionesPageModule),
+    canActivate: [authGuard]
   },
   {
     path: 'historial-es',
-    loadChildren: () => import('./pages/historial-es/historial-es.module').then( m => m.HistorialESPageModule)
+    loadChildren: () => import('./pages/historial-es/historial-es.module').then( m => m.HistorialESPageModule),
+    canActivate: [authGuard]
   },
   {
     path: 'vales',
-    loadChildren: () => import('./pages/vales/vales.module').then( m => m.ValesPageModule)
+    loadChildren: () => import('./pages/vales/vales.module').then( m => m.ValesPageModule),
+    canActivate: [authGuard]
   },
   {
     path: 'recepciones',
-    loadChildren: () => import('./pages/recepciones/recepciones.module').then( m => m.RecepcionesPageModule)
-  },  {
+    loadChildren: () => import('./pages/recepciones/recepciones.module').then( m => m.RecepcionesPageModule),
+    canActivate: [authGuard]
+  },
+  {
     path: 'pedidos',
-    loadChildren: () => import('./pages/pedidos/pedidos.module').then( m => m.PedidosPageModule)
+    loadChildren: () => import('./pages/pedidos/pedidos.module').then( m => m.PedidosPageModule),
+    canActivate: [authGuard]
   },
   {
-    path: 'asesores',
-    loadChildren: () => import('./pages/asesores/asesores.module').then( m => m.AsesoresPageModule)
+    path: 'tickets',
+    loadChildren: () => import('./pages/tickets/tickets.module').then( m => m.TicketsPageModule),
+    canActivate: [authGuard]
   },
   {
-    path: 'registro',
-    loadChildren: () => import('./pages/registro/registro.module').then( m => m.RegistroPageModule)
+    path: 'no-autorizado',
+    loadChildren: () => import('./pages/no-autorizado/no-autorizado.module').then( m => m.NoAutorizadoPageModule)
   },
 
 ];

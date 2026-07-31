@@ -101,8 +101,19 @@ confirmarMovimiento() {
     this.cantidad = cantidadNumerica;
 
     const codigoP = this.productoEncontrado.Codigo_japon || this.productoEncontrado.Codigo_numeral;
-    const usuarioString = localStorage.getItem('user');
-    let idAsesor = usuarioString ? JSON.parse(usuarioString).id : null;
+    
+    let idAsesor = null;
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        idAsesor = payload.id; 
+      } catch (error) {
+        console.error('Error al decodificar el token para el movimiento:', error);
+      }
+    }
+    // --------------------------------------------------------
 
     if (!this.esEntrada) {
       if (this.cantidad > this.productoEncontrado.Stock) {

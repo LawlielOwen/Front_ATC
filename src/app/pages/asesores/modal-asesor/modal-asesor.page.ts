@@ -84,10 +84,7 @@ export class ModalAsesorPage implements OnInit {
   }
 private formatearParaBD(fecha: any): string {
     if (!fecha) return '';
-    // Si ya es un string (ej. YYYY-MM-DD), lo devolvemos tal cual
     if (typeof fecha === 'string') return fecha.substring(0, 10);
-    
-    // Si es un objeto Date de Material, extraemos año, mes y día
     const d = new Date(fecha);
     const mes = '' + (d.getMonth() + 1);
     const dia = '' + d.getDate();

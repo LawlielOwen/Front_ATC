@@ -1,0 +1,45 @@
+:host {
+  ::ng-deep .ticket-cliente-field {
+    width: 100%;
+
+    .mat-mdc-text-field-wrapper {
+      border-radius: 8px;
+      background-color: #ffffff;
+    }
+
+    .mdc-notched-outline__leading,
+    .mdc-notched-outline__notch,
+    .mdc-notched-outline__trailing {
+      border-color: #e2e8f0 !important;
+    }
+
+    &.mat-focused {
+      .mdc-notched-outline__leading,
+      .mdc-notched-outline__notch,
+      .mdc-notched-outline__trailing {
+        border-color: #003b8a !important;
+      }
+    }
+
+    .mat-mdc-form-field-infix {
+      padding: 10px 0;
+      min-height: unset;
+    }
+
+    /* NUEVO: color real del texto que escribes */
+    input,
+    .mat-mdc-input-element,
+    .mat-input-element {
+      font-size: 0.875rem;
+      color: #0d1f38 !important;
+      caret-color: #003b8a;
+    }
+
+    input::placeholder,
+    .mat-mdc-input-element::placeholder,
+    .mat-input-element::placeholder {
+      color: #94a3b8 !important;
+      opacity: 1;
+    }
+  }
+}

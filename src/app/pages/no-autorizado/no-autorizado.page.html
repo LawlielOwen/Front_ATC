@@ -1,0 +1,40 @@
+<div class="min-h-screen w-full bg-[#eef1f5] flex items-center justify-center px-4">
+  <div class="w-full max-w-sm">
+
+    <!-- Card -->
+    <div class="bg-white rounded-2xl border border-gray-200 overflow-hidden animate-fade-in">
+      <div class="h-1 bg-amber-500"></div>
+
+      <div class="px-8 py-10 text-center">
+        <div class="mx-auto mb-5 w-14 h-14 rounded-full bg-amber-50 flex items-center justify-center">
+          <svg class="w-7 h-7 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
+          </svg>
+        </div>
+
+        <p class="text-xs font-semibold tracking-widest text-amber-600 uppercase mb-2">Error 403</p>
+        <h1 class="text-xl font-bold text-[#003B8A] mb-3">Acceso no autorizado</h1>
+        <p class="text-sm text-gray-500 mb-8 leading-relaxed">
+          No cuentas con los permisos necesarios para ver este recurso.
+        </p>
+
+        <button
+          (click)="volverAlLogin()"
+          class="w-full inline-flex items-center justify-center gap-2 bg-[#003B8A] hover:bg-[#002d69] text-white font-semibold py-3 rounded-xl transition-colors duration-200">
+          Volver al inicio de sesión
+          <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <p class="text-center text-xs text-gray-400 mt-6 flex items-center justify-center gap-1.5">
+      <svg class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12c0 4.556-3.32 8.333-7.5 9.712C9.32 20.333 6 16.556 6 12V6.5l6-2.5 6 2.5V12z" />
+      </svg>
+      Conexión segura · ATC ©
+    </p>
+  </div>
+</div>

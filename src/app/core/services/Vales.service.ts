@@ -71,4 +71,9 @@ export class ValeService {
     getValId(id: number) {
         return this.http.get<ValeSalida>(`${this.apiUrl}/vales/${id}`);
     }
+    obtenerPedidosDisponiblesVale(idAsesor: number): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/vales/pedidos/disponibles-vale`, {
+    params: { id_asesor: idAsesor.toString() }
+  });
+}
 }

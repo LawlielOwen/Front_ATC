@@ -23,7 +23,8 @@ export class PedidoService {
         busqueda: string = '', 
         estatus: number = -1, 
         fechaInicio: string = '', 
-        fechaFin: string = '', 
+        fechaFin: string = '',
+        idAsesor: number | null,
         pagina: number = 1, 
         limite: number = 10
     ): Observable<RespuestaPaginada> {
@@ -48,6 +49,7 @@ export class PedidoService {
         if (fechaFin) {
             params = params.set('fechaFin', fechaFin);
         }
+       if (idAsesor !== null) params = params.set('id_asesor', idAsesor.toString());  // NUEVO
 
         return this.http.get<RespuestaPaginada>(`${this.apiUrl}/pedido`, { params });
     }

@@ -4,11 +4,10 @@
 
     <div class="sidebar-header">
       <div class="logo-box"><img src="../../../../../assets/img/logo_atc.png" alt="ATC Logo"></div>
-
     </div>
 
     <ion-tab-button  layout="icon-start" routerLink="/dashboard" routerLinkActive="tab-selected"
-      *ngIf="authService.tieneAcceso(['Administrador'])">
+      *ngIf="authService.tieneAcceso(['Administrador','Asesor'])">
       <ion-icon name="grid-outline"></ion-icon>
       <ion-label>Dashboard</ion-label>
     </ion-tab-button>
@@ -39,6 +38,12 @@
       <ion-label>Pedidos</ion-label>
     </ion-tab-button>
 
+    <ion-tab-button layout="icon-start" routerLink="/tickets" routerLinkActive="tab-selected"
+      *ngIf="authService.tieneAcceso(['Administrador', 'Asesor'])">
+      <ion-icon name="ticket-outline"></ion-icon>
+      <ion-label>Tickets</ion-label>
+    </ion-tab-button>
+
     <div class="nav-category" *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Asesor'])">Control</div>
 
     <ion-tab-button  layout="icon-start" routerLink="/historial-es" routerLinkActive="tab-selected"
@@ -52,7 +57,7 @@
       <ion-label>Vales salida</ion-label>
     </ion-tab-button>
    <ion-tab-button  layout="icon-start" routerLink="/recepciones" routerLinkActive="tab-selected"
-      *ngIf="authService.tieneAcceso(['Administrador', 'Almacen'])">
+      *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Cotizador','Asesor'])">
       <ion-icon name="archive-outline"></ion-icon>
       <ion-label>Recepción</ion-label>
     </ion-tab-button>

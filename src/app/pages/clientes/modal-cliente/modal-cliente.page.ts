@@ -32,6 +32,7 @@ export class ModalClientePage implements OnInit {
   uploadMode: boolean = true;
   archivoGuardado: File | null = null;
   isEditMode: boolean = false;
+  isUpdateCsfMode: boolean = false;
   constructor(private service: AsesoresService, private clienteService: ClientesService,
     private dialogRef: MatDialogRef<ModalClientePage>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any
@@ -50,16 +51,28 @@ export class ModalClientePage implements OnInit {
     asesor_tipo: ''
   };
 
-  ngOnInit() {
-    if (this.data && this.data.id) {
-      this.isEditMode = true;
-      this.uploadMode = false;
+ngOnInit() {
 
-      this.clienteNuevo = { ...this.data };
-      this.clienteNuevo.id_asesor = '';
-    }
-    this.cargarAsesores();
+  if (this.data && this.data.id) {
+    this.isEditMode = true;
+    this.uploadMode = false;
+    this.clienteNuevo = { ...this.data };
+    this.clienteNuevo.id_asesor = '';
   }
+
+  this.cargarAsesores();
+
+  if (this.data && this.data.modo === 'updateCsf') {
+    this.isUpdateCsfMode = true;
+    this.uploadMode = true;
+    this.clienteNuevo.id = this.data.cliente.id;
+  }
+
+  if (this.data && this.data.nombrePrellenado) {
+    this.uploadMode = false;
+    this.clienteNuevo.Nombre = this.data.nombrePrellenado; 
+  }
+}
 
 
   cerrar() {
@@ -68,22 +81,28 @@ export class ModalClientePage implements OnInit {
   recibirArchivo(archivo: File | undefined) {
     this.archivoActual = archivo;
   }
-  cargarAsesores() {
-    this.service.getAsesores().subscribe({
-      next: (response: any) => {
+ cargarAsesores() {
+  this.service.getAsesores().subscribe({
+    next: (response: any) => {
+      this.asesores = response.filter((asesor: Asesor) =>
+        ['Asesor', 'Administrador'].includes(asesor.Rol)
+      );
 
-        this.asesores = response.filter((asesor: Asesor) => 
-  ['Asesor', 'Administrador'].includes(asesor.Rol)
-);
-        if (this.isEditMode && this.data.id_asesor) {
-          setTimeout(() => {
-            this.clienteNuevo.id_asesor = this.data.id_asesor.toString();
-          }, 50);
-        }
-      },
-      error: (err) => console.error('Error al cargar asesores', err)
-    });
-  }
+      if (this.isEditMode && this.data.id_asesor) {
+        setTimeout(() => {
+          this.clienteNuevo.id_asesor = this.data.id_asesor.toString();
+        }, 50);
+      }
+
+      if (!this.isEditMode && this.data?.idAsesorPrellenado) {
+        setTimeout(() => {
+          this.clienteNuevo.id_asesor = this.data.idAsesorPrellenado.toString();
+        }, 50);
+      }
+    },
+    error: (err) => console.error('Error al cargar asesores', err)
+  });
+}
   agregarCliente() {
     const formData = new FormData();
 
@@ -103,9 +122,9 @@ export class ModalClientePage implements OnInit {
     }
 
     this.clienteService.addCliente(formData).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         toast.success('Cliente agregado correctamente');
-        this.dialogRef.close(true);
+        this.dialogRef.close(response.id);
       },
       error: (err) => {
         toast.error('Error al guardar el cliente');
@@ -137,18 +156,19 @@ export class ModalClientePage implements OnInit {
       this.agregarCliente();
     }
   }
- procesarAccion() {
+procesarAccion() {
+    // Si estamos en el modo especial de actualizar CSF
+    if (this.isUpdateCsfMode) {
+      this.actualizarSoloCsf();
+      return;
+    }
+
+    // Tu lógica original se queda intacta
     if (this.uploadMode) {
       this.procesarPDF();
     } else {
-      
-      if (!this.validarCamposObligatorios()) {
-        return; 
-      }
-
-      if (!this.validarYSanitizarOpcionales()) {
-        return; 
-      }
+      if (!this.validarCamposObligatorios()) return; 
+      if (!this.validarYSanitizarOpcionales()) return; 
 
       if (this.isEditMode) {
         this.actualizarClienteExistente();
@@ -235,5 +255,21 @@ export class ModalClientePage implements OnInit {
     }
 
     return true; // Todos los campos obligatorios están listos
+  }
+  actualizarSoloCsf() {
+    if (!this.archivoActual) {
+      toast.error('Por favor, selecciona un archivo PDF primero.');
+      return;
+    }
+
+    this.clienteService.subirCSF(this.clienteNuevo.id, this.archivoActual).subscribe({
+      next: (res) => {
+        toast.success(res.mensaje || 'Constancia subida correctamente');
+        this.dialogRef.close(true); 
+      },
+      error: (err) => {
+        toast.error(err.error?.error || 'Error al actualizar la constancia');
+      }
+    });
   }
 }

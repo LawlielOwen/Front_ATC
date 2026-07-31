@@ -69,13 +69,35 @@ export class DashboardPage implements OnInit {
     this.cargarConversion(); // Volvemos a pedir los datos al hacer clic
   }
 cargarClientes() {
+    let idUsuarioActual = null;
+    let rolUsuario = '';
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        idUsuarioActual = payload.id;
+        rolUsuario = payload.Rol;
+      } catch (error) {
+        console.error('Error al decodificar token en cargarClientes', error);
+      }
+    }
+
     this.cs.getClientes(1, 1000).subscribe({
       next: (response: any) => {
         const datosCrudos = response.clientes || response.data || response || [];
+        
         if (Array.isArray(datosCrudos)) {
-          this.listaClientes = datosCrudos.filter((c: any) => c.estatus === 1 || c.Estatus === 1);
-          // Inicialmente, la lista filtrada es igual a la lista completa
+          let clientesActivos = datosCrudos.filter((c: any) => c.estatus === 1 || c.Estatus === 1);
+
+          if (rolUsuario === 'Asesor' && idUsuarioActual) {
+            clientesActivos = clientesActivos.filter((c: any) => c.id_asesor === idUsuarioActual);
+          }
+
+          this.listaClientes = clientesActivos;
           this.clientesFiltradosSelect = this.listaClientes;
+          
+          this.clientesFiltradosSelectConversion = this.listaClientes; 
         }
       },
       error: (err) => console.error('Error al cargar clientes', err)
@@ -106,7 +128,6 @@ cargarClientes() {
     this.cargarTopProductos();
     this.cargarBottomProductos();
     this.cargarConversion();
-    this.cargarEstadisticasGenerales();
     this.cargarTendencia();
     this.cargarProductosEstrella();
     this.cargarClientes();
@@ -126,7 +147,7 @@ cargarClientes() {
       }],
       chart: {
         type: "bar",
-        height: 190,
+        height: 216,
         toolbar: { show: false },
         fontFamily: 'Inter, sans-serif'
       },
@@ -134,8 +155,8 @@ cargarClientes() {
         bar: {
           horizontal: true,
           distributed: true,
-          barHeight: '70%', // Grosor perfecto para las barras
-          borderRadius: 4
+          barHeight: '62%', // Grosor perfecto para las barras
+          borderRadius: 6
         }
       },
       // 1. APAGAMOS LOS NÚMEROS FIJOS
@@ -155,7 +176,7 @@ cargarClientes() {
 
           // Dibujamos nuestra propia caja con HTML y CSS en línea para evitar conflictos con Tailwind/Ionic
           return `
-            <div style="background-color: #ffffff; color: #0d1f38; padding: 8px 12px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <div style="background-color: #ffffff; color: #0d1f38; padding: 8px 12px; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
               <span style="color: #64748b; font-weight: 500; margin-right: 4px;">${producto}:</span> 
               <span style="color: #003B8A;">${cantidad} piezas</span>
             </div>
@@ -174,7 +195,7 @@ cargarClientes() {
         labels: {
           style: { colors: '#64748b' }
         },
-        axisBorder: { show: false },
+        axisBorder: { show: true, color: '#e2e8f0' },
         axisTicks: { show: false }
       },
       yaxis: {
@@ -198,33 +219,69 @@ cargarClientes() {
       }
     };
   }
+cargarTopProductos(meses: number = 3) {
+  this.cargandoTopProductos = true;
+  this.ms.getProductosTop(meses).subscribe({
+    next: (data) => {
+      const nombres = data.map(item => item.Nombre);
+      const cantidades = data.map(item => Number(item.total_piezas));
+      const maxValor = cantidades.length ? Math.max(...cantidades) : 1;
 
-  cargarTopProductos() {
-    this.cargandoTopProductos = true;
-    this.ms.getProductosTop().subscribe({
-      next: (data) => {
-        const nombres = data.map(item => item.Nombre);
+      this.chartOptionsTopProductos.series = [{
+        name: 'Vendidas',
+        data: cantidades
+      }];
+      this.chartOptionsTopProductos.xaxis = {
+        ...this.chartOptionsTopProductos.xaxis,
+        categories: nombres,
+        min: 0,
+        tickAmount: Math.max(1, Math.min(5, maxValor)),
+        labels: {
+          style: { colors: '#64748b' },
+          formatter: (val: number) => Math.round(val).toString()
+        }
+      };
 
-        // ¡LA CLAVE AQUÍ! Forzamos a que sea un Número válido para ApexCharts
-        const cantidades = data.map(item => Number(item.total_piezas));
+      this.cargandoTopProductos = false;
+    },
+    error: (err) => {
+      console.error("Error al cargar el Top de Productos", err);
+      this.cargandoTopProductos = false;
+    }
+  });
+}
 
-        this.chartOptionsTopProductos.series = [{
-          name: 'Vendidas',
-          data: cantidades
-        }];
-        this.chartOptionsTopProductos.xaxis = {
-          categories: nombres
-        };
+cargarBottomProductos(meses: number = 3) {
+  this.cargandoBottomProductos = true;
+  this.ms.getProductosMenosVendidos(meses).subscribe({
+    next: (data) => {
+      const nombres = data.map(item => item.Nombre);
+      const cantidades = data.map(item => Number(item.total_piezas));
+      const maxValor = cantidades.length ? Math.max(...cantidades) : 1;
 
-        this.cargandoTopProductos = false;
-      },
-      error: (err) => {
-        console.error("Error al cargar el Top de Productos", err);
-        this.cargandoTopProductos = false;
-      }
-    });
-  }
+      this.chartOptionsBottomProductos.series = [{
+        name: 'Vendidas',
+        data: cantidades
+      }];
+      this.chartOptionsBottomProductos.xaxis = {
+        ...this.chartOptionsBottomProductos.xaxis,
+        categories: nombres,
+        min: 0,
+        tickAmount: Math.max(1, Math.min(5, maxValor)),
+        labels: {
+          style: { colors: '#64748b' },
+          formatter: (val: number) => Math.round(val).toString()
+        }
+      };
 
+      this.cargandoBottomProductos = false;
+    },
+    error: (err) => {
+      console.error("Error al cargar el Bottom de Productos", err);
+      this.cargandoBottomProductos = false;
+    }
+  });
+}
   mostrarSidebarMobile() {
     if (this.sidebar) {
       this.sidebar.toggleMenu();
@@ -238,7 +295,7 @@ cargarClientes() {
       }],
       chart: {
         type: "bar",
-        height: 190,
+        height: 216,
         toolbar: { show: false },
         fontFamily: 'Inter, sans-serif'
       },
@@ -246,8 +303,8 @@ cargarClientes() {
         bar: {
           horizontal: true,
           distributed: true,
-          barHeight: '70%',
-          borderRadius: 4
+          barHeight: '62%',
+          borderRadius: 6
         }
       },
       dataLabels: { enabled: false },
@@ -259,7 +316,7 @@ cargarClientes() {
           const cantidad = series[seriesIndex][dataPointIndex];
 
           return `
-            <div style="background-color: #ffffff; color: #0d1f38; padding: 8px 12px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <div style="background-color: #ffffff; color: #0d1f38; padding: 8px 12px; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
               <span style="color: #64748b; font-weight: 500; margin-right: 4px;">${producto}:</span> 
               <span style="color: #ea580c;">${cantidad} piezas</span>
             </div>
@@ -277,7 +334,7 @@ cargarClientes() {
       xaxis: {
         categories: [],
         labels: { style: { colors: '#64748b' } },
-        axisBorder: { show: false },
+        axisBorder: { show: true, color: '#e2e8f0' },
         axisTicks: { show: false }
       },
       yaxis: {
@@ -297,30 +354,6 @@ cargarClientes() {
     };
   }
 
-  cargarBottomProductos() {
-    this.cargandoBottomProductos = true;
-    this.ms.getProductosMenosVendidos().subscribe({
-      next: (data) => {
-        const nombres = data.map(item => item.Nombre);
-        // Forzamos el tipo Number
-        const cantidades = data.map(item => Number(item.total_piezas));
-
-        this.chartOptionsBottomProductos.series = [{
-          name: 'Vendidas',
-          data: cantidades
-        }];
-        this.chartOptionsBottomProductos.xaxis = {
-          categories: nombres
-        };
-
-        this.cargandoBottomProductos = false;
-      },
-      error: (err) => {
-        console.error("Error al cargar el Bottom de Productos", err);
-        this.cargandoBottomProductos = false;
-      }
-    });
-  }
   cargarConversion() {
     this.cargandoConversion = true;
     this.ms.getTasaConversion(this.filtroMonedaConversion, this.idClienteFiltroConversion).subscribe({
@@ -356,19 +389,7 @@ cargarClientes() {
       }
     });
   }
-  cargarEstadisticasGenerales() {
-    this.cargandoEstadisticas = true;
-    this.ms.getEstadisticasGenerales().subscribe({
-      next: (data) => {
-        this.estadisticas = data;
-        this.cargandoEstadisticas = false;
-      },
-      error: (err) => {
-        console.error("Error al cargar las estadísticas generales del mes", err);
-        this.cargandoEstadisticas = false;
-      }
-    });
-  }
+
   inicializarGraficaTendencia() {
     this.chartOptionsTendencia = {
       series: [
@@ -400,8 +421,8 @@ cargarClientes() {
       },
       plotOptions: {
         bar: {
-          columnWidth: '40%',
-          borderRadius: 4
+          columnWidth: '38%',
+          borderRadius: 6
         }
       },
 
@@ -462,7 +483,7 @@ cargarClientes() {
           const divisa = this.filtroMonedaTendencia === 'USD' ? 'USD' : 'MXN';
 
           return `
-            <div style="background-color: #ffffff; color: #0d1f38; padding: 10px 14px; border-radius: 8px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
+            <div style="background-color: #ffffff; color: #0d1f38; padding: 10px 14px; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
               <span style="color: #64748b; font-weight: 500; display: block; margin-bottom: 4px;">Período: ${mes}</span> 
               <span style="color: #003B8A; font-size: 14px;">$${monto.toLocaleString('es-MX')} ${divisa}</span>
             </div>

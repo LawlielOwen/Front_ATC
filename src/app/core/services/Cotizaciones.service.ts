@@ -61,9 +61,11 @@ buscarCotizacion(
     modificarCotizacion(id: number, payload: any): Observable<any> {
         return this.http.put<any>(`${this.apiUrl}/cotizaciones/${id}`, payload);
     }
-    convertirAPedido(idCotizacion: number): Observable<any> {
-        return this.http.post<any>(`${this.apiUrl}/cotizaciones/${idCotizacion}/convertir`, {});
-    }
+convertirAPedido(idCotizacion: number, ordenCompra: string): Observable<any> {
+    return this.http.post<any>(`${this.apiUrl}/cotizaciones/${idCotizacion}/convertir`, { 
+        orden_compra: ordenCompra 
+    });
+}
     cancelarCotizacion(id: number): Observable<any> {
         return this.http.delete<any>(`${this.apiUrl}/cotizaciones/${id}`);
     }
@@ -78,4 +80,9 @@ verPdfCotizacion(idCotizacion: number) {
       responseType: 'blob'
     });
   }
+  vincularClienteCotizacion(idCotizacion: number, idNuevoCliente: number) {
+  return this.http.put(`${this.apiUrl}/cotizaciones/${idCotizacion}/vincular-cliente`, {
+    id_cliente: idNuevoCliente
+  });
+}
 }

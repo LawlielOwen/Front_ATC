@@ -139,8 +139,22 @@ calcularBuenas(item: any) {
   }
 
 confirmarRecepcion() {
-    const usuarioString = localStorage.getItem('user');
-    const idAsesor = usuarioString ? JSON.parse(usuarioString).id : null;
+    let idAsesor = null;
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        idAsesor = payload.id;
+      } catch (error) {
+        console.error('Error decodificando el token:', error);
+      }
+    }
+
+    if (!idAsesor) {
+      toast.error('Sesión inválida. No se pudo identificar al usuario.');
+      return;
+    }
     const idPedido = this.pedido.id_pedido;
 
     if (this.estadoRecepcion === 'completo') {

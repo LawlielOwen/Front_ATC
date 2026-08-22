@@ -105,7 +105,10 @@ export class AsesoresPage implements OnInit {
   constructor(private asesoresService: AsesoresService, public dialog: MatDialog) { }
 
   ngOnInit() {
-    this.cargarAsesores();
+ 
+  }
+  ionViewWillEnter(){
+     this.cargarAsesores();
     this.cargarTotalActivos();
   }
   mostrarSidebarMobile() {

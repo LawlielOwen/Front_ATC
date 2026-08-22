@@ -247,14 +247,14 @@
         <ng-container *ngIf="(ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente') && authService.tieneAcceso(['Administrador', 'Cotizador'])">
 
             <app-button-action 
-                *ngIf="monedaActual === 'MXN'"
+                 *ngIf="monedaActual !== 'USD'"
                 [label]="'Cobrar con Crédito'" 
                 [claseCss]="'btn-aceptar'" 
                 (click)="pagarConCredito()">
             </app-button-action>
 
             <button
-                *ngIf="monedaActual !== 'MXN'"
+                 *ngIf="monedaActual !== 'USD'"
                 type="button"
                 disabled
                 title="El pago con línea de crédito solo está disponible para pedidos en MXN. Este pedido está en dólares; usa 'Subir Recibo' para registrarlo."

@@ -18,7 +18,6 @@ export class notificacionService {
         this.socket = io(serverUrl);
         
         this.socket.on('nueva_notificacion', (datos) => {
-            // 2. Pasamos el dato al canal para que la campanita suba su número
             this.notificacionSubject.next(datos); 
             
             const audio = new Audio('/assets/Sound/notificacion.mp3'); 

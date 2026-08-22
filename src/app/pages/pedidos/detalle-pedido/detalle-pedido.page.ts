@@ -218,11 +218,11 @@ export class DetallePedidoPage implements OnInit {
   }
 pagarConCredito() {
 
-    if (this.monedaActual !== 'MXN') {
+    if (this.monedaActual !== 'USD') {
       Swal.fire({
         icon: 'warning',
         title: 'No disponible en esta moneda',
-        text: 'El pago con línea de crédito solo aplica para pedidos en MXN. Usa "Subir Recibo" para este pedido.',
+        text: 'El pago con línea de crédito solo aplica para pedidos en USD. Usa "Subir Recibo" para este pedido.',
         confirmButtonColor: '#003B8A',
         heightAuto: false
       });

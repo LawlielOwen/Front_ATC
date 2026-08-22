@@ -41,7 +41,6 @@ archivoSeleccionado: File | undefined = undefined;
   }
 
   subirRecibo() {
-    // 1. Validar que exista un archivo y un ID de pedido
     if (!this.archivoSeleccionado) {
       toast.error('Por favor, selecciona un archivo PDF primero.');
       return;
@@ -54,11 +53,9 @@ archivoSeleccionado: File | undefined = undefined;
 
     this.guardando = true;
 
-    // 2. Llamar al servicio, pasándole el ID y el archivo
     this.ps.subirFactura(this.data.idPedido, this.archivoSeleccionado).subscribe({
       next: (res) => {
         this.guardando = false;
-        // Cerramos el modal enviando "true" para que la tabla sepa que debe recargarse
 this.dialogRef.close({ subido: true, mensaje: res.mensaje });      },
       error: (err) => {
         console.error('Error al subir el recibo:', err);

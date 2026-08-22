@@ -1,0 +1,124 @@
+import { Component, OnInit, Inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { IonicModule } from '@ionic/angular';
+import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
+import { toast } from 'ngx-sonner';
+
+import { VisitaService } from '../../../core/services/Visitas.service';
+import { AuthService } from '../../../core/services/auth.service';
+import { HeaderModalComponent } from "../../../shared/components/UI/modal/header-modal/header-modal.component";
+import { FooterModalComponent } from "../../../shared/components/UI/modal/footer-modal/footer-modal.component";
+import { CardDetailsComponent } from "../../../shared/components/UI/modal/card-details/card-details.component";
+import { ButtonActionComponent } from "../../../shared/components/UI/buttons/button-action/button-action.component";
+
+// Importa los componentes de tus modales de acción (Ajusta las rutas según tu proyecto)
+import { DeleteComponent } from '../../../shared/components/UI/modal/delete/delete.component';
+import { CompletarVisitaPage } from '../completar-visita/completar-visita.page'; 
+
+@Component({
+  selector: 'app-detalle-visita',
+  templateUrl: './detalle-visita.page.html',
+  styleUrls: ['./detalle-visita.page.scss'],
+  standalone: true,
+  imports: [
+    CommonModule,
+    IonicModule,
+    HeaderModalComponent,
+    FooterModalComponent,
+    CardDetailsComponent,
+    ButtonActionComponent
+  ]
+})
+export class DetalleVisitaPage implements OnInit {
+  visita: any;
+  demosDetalle: any[] = [];
+  cargando: boolean = true;
+
+  constructor(
+    private vs: VisitaService,
+    public dialogRef: MatDialogRef<DetalleVisitaPage>,
+    @Inject(MAT_DIALOG_DATA) public data: any, 
+    public dialog: MatDialog,
+    public authService: AuthService // <--- Inyectamos el AuthService para validar permisos
+  ) {
+    this.visita = data.visita;
+  }
+
+  ngOnInit() {
+    this.cargarDemosDeVisita();
+  }
+
+  cargarDemosDeVisita() {
+    this.cargando = true;
+    const idVisita = this.visita.id_visita || this.visita.id; 
+
+    this.vs.obtenerDetallesVisita(idVisita).subscribe({
+      next: (res: any) => {
+        if (Array.isArray(res)) this.demosDetalle = res;
+        else if (res.data && Array.isArray(res.data)) this.demosDetalle = res.data;
+        else this.demosDetalle = Object.values(res).find(Array.isArray) || [];
+        this.cargando = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar los detalles', err);
+        this.cargando = false;
+      }
+    });
+  }
+
+  cerrarModal() {
+    this.dialogRef.close(false);
+  }
+
+  getTotalPiezas(): number {
+    return this.demosDetalle.reduce((total, item) => total + (Number(item.cantidad) || 0), 0);
+  }
+
+  // --- NUEVAS FUNCIONES DE ACCIÓN ---
+
+  completarVisita() {
+    const dialogRef = this.dialog.open(CompletarVisitaPage, {
+      width: '600px',
+      maxWidth: '95vw',
+      panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      data: { visita: this.visita }
+    });
+
+    dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
+      if (necesitaRecargar) {
+        // Cierra este modal de detalles y devuelve true para que la tabla principal recargue
+        this.dialogRef.close(true); 
+      }
+    });
+  }
+
+  cancelarVisita() {
+    const dialogRef = this.dialog.open(DeleteComponent, {
+      width: '400px',
+      panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      data: {
+        titulo: 'Cancelar Visita',
+        mensaje: `¿Estás seguro de que deseas cancelar la visita a "${this.visita.empresa_destino}"? Esta acción no se puede deshacer.`,
+        textoAceptar: 'Cancelar Visita',
+        textoCancelar: 'Regresar'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
+      if (confirmado) {
+        const idVisita = this.visita.id_visita || this.visita.id;
+        
+        this.vs.cancelarVisita(idVisita).subscribe({
+          next: () => {
+            toast.success('Visita cancelada correctamente');
+            // Cierra este modal de detalles y devuelve true para que la tabla principal recargue
+            this.dialogRef.close(true);
+          },
+          error: () => toast.error('Error al cancelar la visita')
+        });
+      }
+    });
+  }
+}

@@ -123,7 +123,6 @@ export class AsesoresPage implements OnInit {
         next: (response) => {
           this.asesores = response.a.map(asesor => ({
             ...asesor,
-            // ¡OJO AQUÍ! Cambiamos la 'f' y la 'e' por mayúsculas para que coincidan con la BD
             fecha_formato: this.formatearFecha(asesor.Fecha_contratacion),
             EstatusTexto: this.obtenerTextoEstatus(asesor.Estatus)
           }));
@@ -244,13 +243,11 @@ export class AsesoresPage implements OnInit {
       maxWidth: '105vw',
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
       panelClass: [],
-      // Le mandamos el objeto asesorAEditar directamente, sin envolverlo en otra variable
       data: asesorAEditar 
     });
 
     dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
       if (necesitaRecargar) {
-        // Si el modal devolvió 'true' (porque guardó con éxito), recargamos la tabla
         this.cargarAsesores();
         this.cargarTotalActivos();
       }

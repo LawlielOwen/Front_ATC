@@ -54,7 +54,7 @@ export class HistorialESPage implements OnInit {
 
   columnasMov: TableColumn[] = [
     { header: 'Fecha y Hora', key: 'Fecha', type: 'text-light' },
-    { header: 'Producto', key: 'Nombre', subKey: 'Modelo', type: 'text' },
+    { header: 'Producto', key: 'Nombre',  type: 'text' },
     { header: 'Tipo', key: 'Tipo', type: 'pill-tipo', align: 'center' },
     { header: 'Cantidad', key: 'cantidad', type: 'cantidad-movimiento', align: 'center' },
     { header: 'Destino', key: 'destino', type: 'pill-destino', align: 'center' },
@@ -69,7 +69,8 @@ export class HistorialESPage implements OnInit {
   opcionesTipo = [
     { label: 'Todas', value: '' },
     { label: 'Almacen', value: 'Almacen' },
-    { label: 'Pedido', value: 'Pedido' }
+    { label: 'Pedido', value: 'Pedido' },
+    {label:'Demostracion', value:'Demostracion'},
   ]
   mostrarSidebarMobile() {
     if (this.sidebar) {
@@ -103,7 +104,6 @@ export class HistorialESPage implements OnInit {
           let mes = f.toLocaleString('es-MX', { month: 'long' }).replace('.', '');
           mes = mes.charAt(0).toUpperCase() + mes.slice(1);
 
-          // 3. Usar getHours() y getMinutes() normales
           let horas = f.getHours();
           const minutos = f.getMinutes().toString().padStart(2, '0');
           const ampm = horas >= 12 ? 'p.m.' : 'a.m.';
@@ -116,7 +116,7 @@ export class HistorialESPage implements OnInit {
             ...ms,
             Fecha: fechaFormateada,
             Nombre: ms.nombre_producto,
-            Modelo: `${ms.marca_producto} · Mod: ${ms.modelo_producto}`,
+            Marca: `${ms.marca_producto}`,
             Tipo: ms.tipo_movimiento,
             cantidad: `${ms.cantidad} pz`,
             destino: ms.destino,
@@ -215,11 +215,11 @@ filtroFecha(rango: { inicio: any, fin: any }) {
       }
     });
   }
-  ionViewWillEnter() {
+ionViewWillEnter() {
+    this.establecerRangoMesActual();
     this.cargarMov();
     this.cargarContador();
-    this.establecerRangoMesActual();
-  }
+}
   detallesMov(movSeleccionado: any) {
     const dialogRef = this.dialog.open(DetallesPage, {
       width: '750px',

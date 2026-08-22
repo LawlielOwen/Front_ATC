@@ -30,13 +30,21 @@ export class DetallesValePage implements OnInit {
 
   constructor(private dialogRef: MatDialogRef<DetallesValePage>, @Inject(MAT_DIALOG_DATA) public data: any,
     private valeService: ValeService) { }
-  ngOnInit() {
+ngOnInit() {
     if (this.data && this.data.vale) {
       this.vale = { ...this.data.vale };
       this.cargarProductos(this.vale.id_vale);
     }
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    this.rolUsuario = user.Rol || '';
+    
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        this.rolUsuario = payload.Rol || '';
+      } catch (error) {
+        console.error('Error al decodificar el token en DetallesValePage:', error);
+      }
+    }
   }
   getColorEstatus(estatus: number): string {
     switch (estatus) {
@@ -75,19 +83,42 @@ export class DetallesValePage implements OnInit {
     if (!this.vale || !this.vale.productos) return 0;
     return this.vale.productos.reduce((total: number, prod: any) => total + (prod.piezas || 0), 0);
   }
-  aceptarVale() {
-    const comentarios = this.comentarioResolucion.trim() || 'Sin comentarios o observaciones';
-        this.valeService.aceptarVal(this.vale.id_vale, comentarios, this.vale.id_asesor).subscribe({
-      next: () => {
-        toast.success('Vale aceptado exitosamente');
-        this.dialogRef.close(true);
-      },
-      error: (err) => { toast.error('Error al aceptar el vale.'); }
-    });
+aceptarVale() {
+    const comentarios = this.comentarioResolucion.trim() || 'Sin comentarios u observaciones';
+    
+    const tipo = this.vale.tipo_vale ? this.vale.tipo_vale.toString().toLowerCase() : 'indefinido';
+    
+    if (tipo === 'demostracion' || tipo === 'demo') {
+      
+      this.valeService.aceptarValeDemo(this.vale.id_vale, comentarios, this.vale.id_asesor).subscribe({
+        next: () => {
+          toast.success('Vale de demostración aceptado y equipos descontados.');
+          this.dialogRef.close(true);
+        },
+        error: (err) => { 
+          toast.error(err.error?.error || 'Error al aceptar el vale de demostración.'); 
+        }
+      });
+      
+    } else {
+      
+      this.valeService.aceptarVal(this.vale.id_vale, comentarios, this.vale.id_asesor).subscribe({
+        next: () => {
+          toast.success('Vale de salida aceptado exitosamente.');
+          this.dialogRef.close(true);
+        },
+        error: (err) => { 
+          toast.error(err.error?.error || 'Error al aceptar el vale.'); 
+        }
+      });
+      
+    }
   }
-rechazarVale() {
-    const comentarios = this.comentarioResolucion.trim() || 'Sin comentarios o observaciones';
-        this.valeService.rechazarVal(this.vale.id_vale, comentarios, this.vale.id_asesor).subscribe({
+
+  rechazarVale() {
+    const comentarios = this.comentarioResolucion.trim() || 'Sin comentarios u observaciones';
+
+    this.valeService.rechazarVal(this.vale.id_vale, comentarios, this.vale.id_asesor).subscribe({
       next: () => {
         toast.success('Vale rechazado exitosamente');
         this.dialogRef.close(true);

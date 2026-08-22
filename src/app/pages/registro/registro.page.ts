@@ -43,7 +43,6 @@ private formatearParaBD(fecha: any): string {
     return [anio, mes.padStart(2, '0'), dia.padStart(2, '0')].join('-');
   }
 registrar() {
-  // 1. Limpieza de textos estándar
   this.registro.Nombre = (this.registro.Nombre || '').toString().trim();
   this.registro.app = (this.registro.app || '').toString().trim();
   this.registro.apm = (this.registro.apm || '').toString().trim();

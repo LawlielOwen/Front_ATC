@@ -24,7 +24,7 @@ import { ProveedorService } from '../../../core/services/Proveedores.service';
     HeaderModalComponent,
     FooterModalComponent,
     ButtonActionComponent,
-    StepItemComponent, // Asegúrate de que este es el nombre de tu componente Stepper
+    StepItemComponent, 
     CardSelectComponent,
     NgxSonnerToaster
   ]
@@ -144,7 +144,6 @@ confirmarRecepcion() {
     const idPedido = this.pedido.id_pedido;
 
     if (this.estadoRecepcion === 'completo') {
-      // Lógica de pedido completo
       this.ps.recibirPedido(idPedido, idAsesor).subscribe({
         next: (res) => {
           this.paso = 3; 
@@ -155,33 +154,31 @@ confirmarRecepcion() {
 
     } else if (this.estadoRecepcion === 'incidencia') {
       
-      // ✦ 1. VALIDAR DESCRIPCIÓN GENERAL
       const descLimpia = (this.descripcionGeneral || '').toString().trim();
       if (!descLimpia) {
         toast.error('Debes ingresar una descripción detallada de la incidencia.');
         return;
       }
-      this.descripcionGeneral = descLimpia; // Guardamos el texto sin espacios extra
+      this.descripcionGeneral = descLimpia;
 
       let totalAfectadasPedido = 0;
 
       for (let i = 0; i < this.productosDetalle.length; i++) {
         const p = this.productosDetalle[i];
 
-        // Validar piezas buenas (Entero puro, 0 o mayor)
         const buenasNum = Number(p.buenas || 0);
         if (isNaN(buenasNum) || !Number.isInteger(buenasNum) || buenasNum < 0) {
           toast.error(`Error en la fila ${i + 1}: Las piezas buenas deben ser un número entero (0 o mayor).`);
           return;
         }
-        p.buenas = buenasNum; // Forzamos formato numérico
+        p.buenas = buenasNum; 
 
         const afectadasNum = Number(p.afectadas || 0);
         if (isNaN(afectadasNum) || !Number.isInteger(afectadasNum) || afectadasNum < 0) {
           toast.error(`Error en la fila ${i + 1}: Las piezas afectadas deben ser un número entero (0 o mayor).`);
           return;
         }
-        p.afectadas = afectadasNum; // Forzamos formato numérico
+        p.afectadas = afectadasNum; 
 
         totalAfectadasPedido += afectadasNum;
 

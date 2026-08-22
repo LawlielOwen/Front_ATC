@@ -98,8 +98,7 @@
                 </div>
             </app-card-details>
         </div>
-
-        <app-card-details titulo="Productos Cotizados">
+<app-card-details titulo="Productos Cotizados">
             <svg icono class="w-3.5 h-3.5 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
             </svg>
@@ -108,8 +107,8 @@
 
                 <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2 px-4 items-center">
                     <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
-                    <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest">Código</span>
-                    <span class="col-span-4 text-[9px] font-bold text-white uppercase tracking-widest">Nombre</span>
+                    <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest">Nombre/Modelo</span>
+                    <span class="col-span-4 text-[9px] font-bold text-white uppercase tracking-widest">Descripción</span>
                     <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">Cant.</span>
                     <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-right">P. Unitario</span>
                     <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-right">Importe</span>
@@ -129,7 +128,9 @@
                     <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
 
                     <div class="col-span-2 flex flex-col">
-                        <span class="text-[11px] font-bold text-[#0d1f38] truncate">{{ item.Codigo_numeral || item.Codigo_japon || 'S/C' }}</span>
+                        <span class="text-[11px] font-bold text-[#0d1f38] truncate" [title]="item.modelo_producto || 'N/A'">
+                            {{ item.modelo_producto || 'N/A' }}
+                        </span>
                     </div>
 
                     <div class="col-span-4 flex flex-col truncate pr-2">
@@ -141,17 +142,21 @@
                         <span class="text-[13px] font-black text-[#003B8A]">{{ item.cantidad_producto }}</span>
                     </div>
 
-                   <div class="col-span-2 flex justify-end">
+                  <div class="col-span-2 flex justify-end flex-col items-end">
                         <span class="text-[11px] font-semibold text-slate-600">
-                            {{ item.precio_formateado }}
+                            {{ item.precio_formateado || (item.precio_unitario_cotizado | currency: (cot?.moneda === 'USD' ? 'USD' : 'MXN') : '$') }}
                         </span>
+                        
+<span *ngIf="item.costo_flete > 0" class="text-[9px] font-bold text-emerald-600 mt-0.5">
+    + {{ item.flete_formateado }} Flete
+</span>
                     </div>
 
-                    <div class="col-span-2 flex justify-end">
-                        <span class="text-[11px] font-bold text-[#0d1f38]">
-                            {{ item.importe_formateado }}
-                        </span>
-                    </div>
+<div class="col-span-2 flex justify-end items-start mt-0.5">
+    <span class="text-[11px] font-bold text-[#0d1f38]">
+        {{ item.importe_formateado }}
+    </span>
+</div>
                 </div>
 
                <div class="bg-slate-50 py-2.5 px-5 flex flex-col items-end gap-1 border-t border-slate-200">
@@ -180,7 +185,7 @@
                             </div>
                         </div>
                     </div>
-                    </div>
+                </div>
             </div>
         </app-card-details>
     </div>

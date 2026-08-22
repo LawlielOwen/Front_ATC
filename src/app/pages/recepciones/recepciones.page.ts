@@ -1,7 +1,5 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ProveedorService } from '../../core/services/Proveedores.service';
-import { PedidoTabla } from '../../shared/model/proveedor.model';
-import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import {ModalRepecionPage} from './modal-repecion/modal-repecion.page'
 import {DetallesRecepcionPage} from './detalles-recepcion/detalles-recepcion.page'
@@ -77,12 +75,6 @@ timeoutBusqueda: any;
       key: 'resumen_modelos',
       subKey: 'resumen_piezas',
       type: 'text-light'
-    },
-    {
-      header: 'Destino',
-      key: 'destino',
-      type: 'pill-destino',
-      align: 'center'
     },
     {
       header: 'Fechas',
@@ -176,7 +168,6 @@ timeoutBusqueda: any;
           resumen_modelos: `${pedido.total_modelos_diferentes} Modelos`,
           resumen_piezas: `${pedido.total_piezas} piezas en total`,
           
-          // Las llaves ahora coinciden exactamente con el arreglo de arriba
           fecha_estimada_formateada: `Estimada: ${this.formatearFecha(pedido.fecha_estimada)}`,
           fecha_solicitud_formateada: `Solicitada: ${this.formatearFecha(pedido.fecha_solicitud)}`
         }));

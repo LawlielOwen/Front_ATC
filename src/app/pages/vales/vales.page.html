@@ -40,12 +40,19 @@
           </app-search-layout>
         </div>
         <div body>
-         <app-etiqueta [cargando]="cargando" *ngFor="let vale of vales" [titulo]="vale.folio_vale + ' — ' + vale.nombre_cliente"
-            [subtitulo]="'Solicita: ' + vale.nombre_asesor + ' · OC-' + vale.orden_compra + ' · ' + formatearFecha(vale.fecha)"
-            [badge]="getBadgeText(vale.estatus)" [tipoBorde]="getTipoBorde(vale.estatus)" [mostrarCuadro]="true"
-            [mostrarBotones]="vale.estatus === 0 && (rolUsuario === 'Administrador' || rolUsuario === 'Almacen')"
-            (click)="abrirDetalles(vale)" (aprobar)="aceptarValeDirecto(vale)" (rechazar)="rechazarValeDirecto(vale)">
-          </app-etiqueta>
+         <app-etiqueta 
+  [cargando]="cargando" 
+  *ngFor="let vale of vales" 
+  [titulo]="vale.folio_vale + ' — ' + (vale.nombre_cliente || 'Sin cliente')"
+  [subtitulo]="'Solicita: ' + vale.nombre_asesor + ' · ' + (vale.orden_compra ? 'OC-' + vale.orden_compra : 'Sin orden') + ' · ' + formatearFecha(vale.fecha)"
+  [badge]="getBadgeText(vale.estatus)" 
+  [tipoBorde]="getTipoBorde(vale.estatus)" 
+  [mostrarCuadro]="true"
+  [mostrarBotones]="vale.estatus === 0 && (rolUsuario === 'Administrador' || rolUsuario === 'Almacen')"
+  (click)="abrirDetalles(vale)" 
+  (aprobar)="aceptarValeDirecto(vale)" 
+  (rechazar)="rechazarValeDirecto(vale)">
+</app-etiqueta>
         </div>
         <div footer>
           <app-pagination [paginaActual]="currentPage" [totalPaginas]="totalPages"

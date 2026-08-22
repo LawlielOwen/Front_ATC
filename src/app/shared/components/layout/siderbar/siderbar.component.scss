@@ -6,7 +6,7 @@ $text-active: #0F172A; // Un tono casi negro para el texto del módulo activo
 $hover-bg: rgba(0, 0, 0, 0.04); // Fondo gris muy sutil al pasar el cursor
 $active-bg: rgba(0, 82, 204, 0.08); // Fondo azul muy translúcido para el botón seleccionado
 $separator: rgba(0, 0, 0, 0.08);
- 
+
 ion-tab-bar.erp-sidebar {
   position: relative;
   --background: #{$sidebar-bg} !important;
@@ -24,8 +24,7 @@ ion-tab-bar.erp-sidebar {
   z-index: auto;
   overflow-y: auto;
   overflow-x: hidden;
- 
-  // Scrollbar sutil
+
   &::-webkit-scrollbar {
     width: 4px;
   }
@@ -36,7 +35,7 @@ ion-tab-bar.erp-sidebar {
     background: rgba(255,255,255,0.1);
     border-radius: 4px;
   }
- 
+
   @media (max-width: 768px) {
     position: fixed;
     top: 0;
@@ -46,37 +45,35 @@ ion-tab-bar.erp-sidebar {
     transform: translateX(-100%);
     box-shadow: 4px 0 20px rgba(0, 0, 0, 0.35);
     z-index: 1010;
- 
+
     &.show-mobile-menu {
       transform: translateX(0);
     }
   }
 }
- 
-// ── Encabezado (Logo ATC) ──
+
 .sidebar-header {
   display: flex;
   align-items: center;
   padding: 1.25rem 1.25rem 1rem;
   margin-bottom: 0.75rem;
   flex-shrink: 0;
- 
+
   img, .logo {
     max-width: 55%;
     height: auto;
     object-fit: contain;
   }
- 
+
   @media (max-width: 768px) {
     padding: 1rem;
- 
+
     img, .logo {
       max-width: 75%;
     }
   }
 }
- 
-// ── Títulos de Categorías (GESTIÓN, CONTROL, ADMIN) ──
+
 .nav-category {
   color: black;
   font-size: 0.7rem;
@@ -85,25 +82,23 @@ ion-tab-bar.erp-sidebar {
   padding: 1rem 1.25rem 0.35rem;
   width: 100%;
   text-align: left;
- 
-  // Línea separadora encima de la categoría (excepto la primera)
+
   & + ion-tab-button {
     margin-top: 0;
   }
 }
- 
+
 @media (max-width: 768px) {
   .nav-category {
     display: none;
   }
 }
- 
-// ── Botones del Menú (Tabs) ──
+
 ion-tab-button {
   --color: #{$text-inactive};
   --color-selected: #{$text-active};
   --background-focused: #{$hover-bg};
-flex: none;
+  flex: none;
   height: 40px;
   min-height: 40px;
   max-width: 100%;
@@ -157,15 +152,11 @@ flex: none;
     }
   }
 
-  // ───────── RESPONSIVE ─────────
-@media (max-width: 768px) {
-  ion-tab-button {
+  @media (max-width: 768px) {
     width: calc(100% - 0.5rem);
     align-self: center;
-
     height: 32px;
     min-height: 32px;
-
     padding: 0 0.4rem;
     margin: 2px 0;
 
@@ -178,12 +169,9 @@ flex: none;
       font-size: 0.9rem;
     }
   }
-}
 
-  // EXTRA compacto para móviles pequeños
   @media (max-width: 480px) {
     justify-content: center;
-
     padding: 0 0.35rem;
 
     ion-label {
@@ -195,11 +183,92 @@ flex: none;
     }
   }
 }
- 
-// ── Backdrop móvil ──
+
+// ── Botón padre con submenú (Productos) ──
+ion-tab-button.has-submenu {
+  // Todo (icono + label + chevron) vive dentro de un solo div hijo.
+  // Así ion-tab-button no encuentra ningún ion-icon/ion-label "suelto"
+  // que reordenar internamente, y el flex lo maneja nuestro propio CSS.
+  .submenu-btn-main {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    min-width: 0;
+
+    > ion-icon:first-child {
+      font-size: 1.05rem;
+      flex-shrink: 0;
+    }
+
+    ion-label {
+      margin-left: 10px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      flex: 1 1 auto;
+    }
+  }
+
+  ion-icon.chevron {
+    margin-left: auto;
+    flex-shrink: 0;
+    font-size: 0.85rem;
+    color: $text-inactive;
+    transition: transform 0.2s ease, color 0.15s ease;
+
+    &.rotated {
+      transform: rotate(180deg);
+    }
+  }
+
+  &:hover:not(.tab-selected) ion-icon.chevron {
+    color: $text-active;
+  }
+
+  &.tab-selected ion-icon.chevron {
+    color: $accent-green;
+  }
+
+  @media (max-width: 480px) {
+    ion-icon.chevron {
+      display: none;
+    }
+  }
+}
+
+// ── Ítems del submenú (Productos > Catálogo / Demos) ──
+ion-tab-button.submenu-item {
+  height: 34px;
+  min-height: 34px;
+  margin-left: 1.5rem;
+  margin-right: 0.625rem;
+
+  ion-label {
+    font-size: 0.75rem;
+  }
+
+  ion-icon {
+    font-size: 0.9rem;
+  }
+
+  &.tab-selected::before {
+    left: -1.875rem;
+  }
+
+  @media (max-width: 768px) {
+    margin-left: 0.5rem;
+  }
+
+  @media (max-width: 480px) {
+    ion-label {
+      display: none;
+    }
+  }
+}
+
 .mobile-backdrop {
   display: none;
- 
+
   @media (max-width: 768px) {
     display: block;
     position: fixed;
@@ -212,7 +281,7 @@ flex: none;
     opacity: 0;
     transition: opacity 0.3s ease;
     pointer-events: none;
- 
+
     &.show-backdrop {
       opacity: 1;
       pointer-events: auto;

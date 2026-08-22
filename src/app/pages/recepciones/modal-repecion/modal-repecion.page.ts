@@ -35,7 +35,6 @@ import { of } from 'rxjs';
 export class ModalRepecionPage implements OnInit {
   productosSolicitados: any[] = [];
 
-  // NUEVO: buscador único, mismo patrón que POSPage
   productoControl = new FormControl('');
   productosFiltrados: any[] = [];
  
@@ -69,7 +68,7 @@ export class ModalRepecionPage implements OnInit {
     private dialogRef: MatDialogRef<ModalRepecionPage>) { }
 
  ngOnInit() {
-    this.productoControl.disable(); // arranca deshabilitado, sin proveedor elegido aún
+    this.productoControl.disable(); 
 
     this.productoControl.valueChanges.pipe(
       debounceTime(300),
@@ -186,7 +185,7 @@ guardarPedido() {
       .map(p => ({
         id_producto: p.id_producto,
         cantidad: p.cantidad,
-        destino: p.destino   // NUEVO: viaja por partida, ya no global
+        destino: p.destino 
       }));
 
     if (productosValidos.length === 0) {

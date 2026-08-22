@@ -1,34 +1,54 @@
-<div
-  class="bg-[#f1f5f9] rounded-[10px] overflow-hidden shadow-2xl w-full max-w-3xl mx-auto max-h-[90vh] flex flex-col border border-gray-100">
+<div class="bg-[#f1f5f9] rounded-[10px] overflow-hidden shadow-2xl w-full max-w-3xl mx-auto max-h-[90vh] flex flex-col border border-gray-100">
   <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
 
-  <app-header-modal label="Solicitar Vale de Salida"></app-header-modal>
+  <app-header-modal [label]="isSoporteTecnico ? 'Solicitar Vale de Demostración' : 'Solicitar Vale de Salida'"></app-header-modal>
 
   <div class="p-6 overflow-y-auto flex-1">
     <div class="flex flex-col gap-5 animate-fade-in">
-      <app-card-form title="Selecciona el Pedido a Surtir">
-  <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-  </svg>
+      
+      <!-- TARJETA 1: SELECCIONAR ORIGEN (PEDIDO O VISITA) -->
+      <app-card-form [title]="isSoporteTecnico ? 'Selecciona la Visita Programada' : 'Selecciona el Pedido a Surtir'">
+        <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
 
-  <div class="flex flex-col gap-2 md:col-span-2">
-    <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Pedido</label>
-    <select
-      class="w-full border border-gray-300 rounded-md px-3 py-[9px] text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-      (change)="seleccionarPedido($any($event.target).value)">
-      <option value="">Selecciona un pedido...</option>
-      <option *ngFor="let p of pedidosDisponibles" [value]="p.id">
-        Pedido de {{ p.nombre_cliente }} — OC: {{ p.orden_compra || 'N/A' }}
-      </option>
-    </select>
-    <p *ngIf="cargandoPedidos" class="text-xs text-slate-400">Cargando tus pedidos disponibles...</p>
-    <p *ngIf="!cargandoPedidos && pedidosDisponibles.length === 0" class="text-xs text-slate-400">
-      No tienes pedidos listos para generar un vale.
-    </p>
-    <p *ngIf="cargandoProductosPedido" class="text-xs text-[#003B8A]">Cargando productos del pedido...</p>
-  </div>
-</app-card-form>
+        <div class="flex flex-col gap-2 md:col-span-2">
+          
+          <!-- DROPDOWN PARA PEDIDOS (NO ES SOPORTE TECNICO) -->
+          <ng-container *ngIf="!isSoporteTecnico">
+            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Pedido</label>
+            <select
+              class="w-full border border-gray-300 rounded-md px-3 py-[9px] text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              (change)="seleccionarPedido($any($event.target).value)">
+              <option value="">Selecciona un pedido...</option>
+              <option *ngFor="let p of pedidosDisponibles" [value]="p.id">
+                Pedido de {{ p.nombre_cliente }} — OC: {{ p.orden_compra || 'Sin orden' }}
+              </option>
+            </select>
+            <p *ngIf="cargandoPedidos" class="text-xs text-slate-400">Cargando tus pedidos disponibles...</p>
+            <p *ngIf="!cargandoPedidos && pedidosDisponibles.length === 0" class="text-xs text-slate-400">No tienes pedidos listos para generar un vale.</p>
+          </ng-container>
 
+          <!-- DROPDOWN PARA VISITAS (SI ES SOPORTE TECNICO) -->
+          <ng-container *ngIf="isSoporteTecnico">
+            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Visita Asignada</label>
+            <select
+              class="w-full border border-gray-300 rounded-md px-3 py-[9px] text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              (change)="seleccionarVisita($any($event.target).value)">
+              <option value="">Selecciona una visita...</option>
+              <option *ngFor="let v of visitasDisponibles" [value]="v.id_visita || v.id">
+                Visita a {{ v.empresa_destino || v.empresa_no_registrada }} — Fecha: {{ (v.fecha_visita | date:'shortDate') }}
+              </option>
+            </select>
+            <p *ngIf="cargandoVisitas" class="text-xs text-slate-400">Cargando tus visitas programadas...</p>
+            <p *ngIf="!cargandoVisitas && visitasDisponibles.length === 0" class="text-xs text-slate-400">No tienes visitas programadas pendientes de demostración.</p>
+          </ng-container>
+
+          <p *ngIf="cargandoProductos" class="text-xs text-[#003B8A]">Cargando productos/equipos...</p>
+        </div>
+      </app-card-form>
+
+      <!-- TARJETA 2: INFORMACIÓN DEL DESTINO -->
       <app-card-form title="Información del Destino">
         <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -41,68 +61,69 @@
               Empresa / Cliente Destino
             </label>
 
-           <input type="text" [formControl]="clienteControl" [matAutocomplete]="auto"  [class.bg-gray-100]="clienteControl.disabled"
-  placeholder="Ingresa nombre del cliente..."
-  class="w-full border border-gray-300 rounded-md px-3 py-[9px] text-sm text-gray-700 bg-white placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
+            <input type="text" [formControl]="clienteControl" [matAutocomplete]="auto" [class.bg-gray-100]="clienteControl.disabled"
+              placeholder="Ingresa nombre del cliente..."
+              class="w-full border border-gray-300 rounded-md px-3 py-[9px] text-sm text-gray-700 bg-white placeholder:text-gray-400 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all">
 
-          <mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente">
-  <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
-    {{ c.nombre || c.Nombre }}
-  </mat-option>
-</mat-autocomplete>
+            <mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente">
+              <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
+                {{ c.nombre || c.Nombre }}
+              </mat-option>
+            </mat-autocomplete>
           </div>
         </div>
       </app-card-form>
 
-     <app-card-form title="Productos a Solicitar">
-  <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-      d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-  </svg>
+      <!-- TARJETA 3: TABLA DE PRODUCTOS/DEMOS -->
+      <app-card-form [title]="isSoporteTecnico ? 'Equipos Demo a Solicitar' : 'Productos a Solicitar'">
+        <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
 
-  <div class="flex flex-col md:col-span-2 mt-2">
-    <div class="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm">
+        <div class="flex flex-col md:col-span-2 mt-2">
+          <div class="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm">
 
-      <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2 px-4 items-center">
-        <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
-        <span class="col-span-3 text-[9px] font-bold text-white uppercase tracking-widest">Código</span>
-        <span class="col-span-6 text-[9px] font-bold text-white uppercase tracking-widest">Descripción</span>
-        <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center">Cant.</span>
-      </div>
+            <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2 px-4 items-center">
+              <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+              <span class="col-span-3 text-[9px] font-bold text-white uppercase tracking-widest">{{ isSoporteTecnico ? 'N. Serie' : 'Código' }}</span>
+              <span class="col-span-6 text-[9px] font-bold text-white uppercase tracking-widest">{{ isSoporteTecnico ? 'Modelo' : 'Descripción' }}</span>
+              <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center">Cant.</span>
+            </div>
 
-      <div *ngIf="cargandoProductosPedido" class="flex justify-center items-center py-8">
-        <div class="w-6 h-6 border-2 border-[#003B8A] border-t-transparent rounded-full animate-spin"></div>
-      </div>
+            <div *ngIf="cargandoProductos" class="flex justify-center items-center py-8">
+              <div class="w-6 h-6 border-2 border-[#003B8A] border-t-transparent rounded-full animate-spin"></div>
+            </div>
 
-      <div *ngIf="!cargandoProductosPedido && !pedidoSeleccionado" class="py-6 text-center text-slate-400 text-xs font-medium">
-        Selecciona un pedido para visualizar los productos a surtir.
-      </div>
+            <div *ngIf="!cargandoProductos && !pedidoSeleccionado && !visitaSeleccionada" class="py-6 text-center text-slate-400 text-xs font-medium">
+              Selecciona {{ isSoporteTecnico ? 'una visita' : 'un pedido' }} para visualizar los artículos a surtir.
+            </div>
 
-      <div *ngIf="!cargandoProductosPedido && pedidoSeleccionado && productosSolicitados.length === 0" class="py-6 text-center text-slate-400 text-xs font-medium">
-        Este pedido no tiene productos registrados.
-      </div>
+            <div *ngIf="!cargandoProductos && (pedidoSeleccionado || visitaSeleccionada) && productosSolicitados.length === 0" class="py-6 text-center text-slate-400 text-xs font-medium">
+              No hay artículos registrados para esta selección.
+            </div>
 
-      <div *ngFor="let item of productosSolicitados; let i = index"
-        class="grid grid-cols-12 gap-3 py-2 px-4 border-b border-slate-100 last:border-0 items-center">
+            <div *ngFor="let item of productosSolicitados; let i = index"
+              class="grid grid-cols-12 gap-3 py-2 px-4 border-b border-slate-100 last:border-0 items-center">
 
-        <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
+              <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
 
-        <div class="col-span-3 flex flex-col">
-          <span class="text-[11px] font-bold text-[#0d1f38] truncate">{{ item.codigo || 'S/C' }}</span>
+              <div class="col-span-3 flex flex-col">
+                <span class="text-[11px] font-bold text-[#0d1f38] truncate">{{ item.codigo_producto || 'S/N' }}</span>
+              </div>
+
+              <div class="col-span-6 flex flex-col truncate pr-2">
+                <span class="text-[12px] font-bold text-[#0d1f38] truncate" [title]="item.Nombre">{{ item.Nombre }}</span>
+              </div>
+
+              <div class="col-span-2 flex justify-center">
+                <span class="text-[13px] font-black text-[#003B8A]">{{ item.piezas }}</span>
+              </div>
+            </div>
+
+          </div>
         </div>
-
-        <div class="col-span-6 flex flex-col truncate pr-2">
-          <span class="text-[12px] font-bold text-[#0d1f38] truncate" [title]="item.Nombre">{{ item.Nombre }}</span>
-        </div>
-
-        <div class="col-span-2 flex justify-center">
-          <span class="text-[13px] font-black text-[#003B8A]">{{ item.piezas }}</span>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</app-card-form>
+      </app-card-form>
 
     </div>
   </div>

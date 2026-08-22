@@ -12,6 +12,7 @@ export interface ValeSalida {
   alerta_enviada: number | boolean;
   estatus:number;
   comentario: string;
+  tipo_vale?: string;
   detalles?: DetalleVale[]; 
 }
 

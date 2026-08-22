@@ -28,56 +28,61 @@ export class TableComponent implements OnInit {
 getStatusColors(status: string) {
     if (!status) return 'bg-slate-50 text-slate-600 border-slate-200';
     
-    const s = status.toLowerCase();
+    // Normalizamos el texto: minúsculas y sin acentos para evitar errores de tipeo
+    const s = status.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     
     // --- Productos ---
     if (s === 'activo') return 'bg-emerald-50 text-emerald-700 border-emerald-200';
     if (s === 'sin stock') return 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse';
 
     // --- Almacén ---
-    if (s === 'recibido') return 'bg-[#e8f5f0] text-[#0f6e56] border-[#bce3d4]'; // Verde corporativo claro
-    if (s === 'con incidencia') return 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse'; // Rojo alerta
+    if (s === 'recibido') return 'bg-[#e8f5f0] text-[#0f6e56] border-[#bce3d4]'; 
+    if (s === 'con incidencia') return 'bg-rose-50 text-rose-700 border-rose-200 animate-pulse'; 
 
     // --- Cotizaciones ---
-    if (s === 'aceptada' || s === 'aceptado') return 'bg-blue-50 text-blue-700 border-blue-200'; // Azul profesional
-    if (s === 'cancelada' || s === 'cancelado') return 'bg-red-50 text-red-700 border-red-200'; // Rojo estándar
-
+    if (s === 'aceptada' || s === 'aceptado') return 'bg-blue-50 text-blue-700 border-blue-200'; 
+    
     // --- Pedidos ---
-    if (s === 'completado' || s === 'completada') return 'bg-[#e8f5f0] text-[#0f6e56] border-[#bce3d4]';
-    if (s === 'incompleto' || s === 'incompleta') return 'bg-amber-50 text-amber-700 border-amber-200'; // Ámbar
+    if (s === 'incompleto' || s === 'incompleta') return 'bg-amber-50 text-amber-700 border-amber-200'; 
 
     // --- Tickets ---
-    if (s === 'asignado') return 'bg-violet-50 text-violet-700 border-violet-200'; // Violeta (Nuevo)
-    if (s === 'contactado') return 'bg-sky-50 text-sky-700 border-sky-200'; // Azul claro (En progreso)
-    if (s === 'cotizado') return 'bg-amber-50 text-amber-700 border-amber-200'; // Ámbar (Esperando respuesta)
-    if (s === 'cerrado') return 'bg-slate-100 text-slate-700 border-slate-300'; // Gris (Finalizado/Archivado)
+    if (s === 'asignado') return 'bg-violet-50 text-violet-700 border-violet-200'; 
+    if (s === 'contactado') return 'bg-sky-50 text-sky-700 border-sky-200'; 
+    if (s === 'cotizado') return 'bg-amber-50 text-amber-700 border-amber-200'; 
+    if (s === 'cerrado') return 'bg-slate-100 text-slate-700 border-slate-300'; 
 
-    // --- Compartido (Por defecto o Pendiente) ---
-    if (s === 'pendiente') return 'bg-slate-50 text-slate-600 border-slate-200'; // Gris
+    // --- Proyectos ---
+    if (s === 'en progreso') return 'bg-blue-50 text-[#003B8A] border-blue-200'; // Azul corporativo ATC
+    if (s === 'revision cliente') return 'bg-indigo-50 text-indigo-700 border-indigo-200'; // Índigo para revisión
+    if (s === 'ejecucion') return 'bg-cyan-50 text-cyan-700 border-cyan-200'; // Cian para proceso activo
+    if (s === 'en pausa') return 'bg-amber-50 text-amber-700 border-amber-200'; // Ámbar alerta
     
-    return 'bg-slate-50 text-slate-600 border-slate-200'; // Inactivo o por defecto
+    // --- Compartidos (Cancelado, Completado, Pendiente) ---
+    if (s === 'completado' || s === 'completada') return 'bg-[#e8f5f0] text-[#1D9E75] border-[#bce3d4]'; // Verde ATC
+    if (s === 'cancelada' || s === 'cancelado') return 'bg-rose-50 text-rose-700 border-rose-200'; // Rojo
+    if (s === 'pendiente') return 'bg-slate-50 text-slate-600 border-slate-200'; 
+    
+    return 'bg-slate-50 text-slate-600 border-slate-200'; 
 }
 
 getStatusDot(status: string) {
     if (!status) return 'bg-slate-400';
     
-    const s = status.toLowerCase();
+    const s = status.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     
     // --- Productos ---
     if (s === 'activo') return 'bg-emerald-500';
     if (s === 'sin stock') return 'bg-rose-500';
 
     // --- Almacén ---
-    if (s === 'recibido') return 'bg-[#1D9E75]'; // Verde
-    if (s === 'con incidencia') return 'bg-rose-600'; // Rojo
+    if (s === 'recibido') return 'bg-[#1D9E75]'; 
+    if (s === 'con incidencia') return 'bg-rose-600'; 
     
     // --- Cotizaciones ---
     if (s === 'aceptada' || s === 'aceptado') return 'bg-blue-500';
-    if (s === 'cancelada' || s === 'cancelado') return 'bg-red-500';
 
     // --- Pedidos ---
-    if (s === 'completado' || s === 'completada') return 'bg-[#1D9E75]';
-    if (s === 'incompleto' || s === 'incompleta') return 'bg-amber-500'; // Ámbar
+    if (s === 'incompleto' || s === 'incompleta') return 'bg-amber-500'; 
 
     // --- Tickets ---
     if (s === 'asignado') return 'bg-violet-500';
@@ -85,8 +90,16 @@ getStatusDot(status: string) {
     if (s === 'cotizado') return 'bg-amber-500'; 
     if (s === 'cerrado') return 'bg-slate-500'; 
 
-    // --- Compartido (Por defecto o Pendiente) ---
-    if (s === 'pendiente') return 'bg-slate-400'; // Gris
+    // --- Proyectos ---
+    if (s === 'en progreso') return 'bg-[#003B8A]'; 
+    if (s === 'revision cliente') return 'bg-indigo-500';
+    if (s === 'ejecucion') return 'bg-cyan-500';
+    if (s === 'en pausa') return 'bg-amber-500';
+
+    // --- Compartidos ---
+    if (s === 'completado' || s === 'completada') return 'bg-[#1D9E75]';
+    if (s === 'cancelada' || s === 'cancelado') return 'bg-rose-600';
+    if (s === 'pendiente') return 'bg-slate-400'; 
 
     return 'bg-slate-400';
 }

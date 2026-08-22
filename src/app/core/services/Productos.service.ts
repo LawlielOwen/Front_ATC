@@ -53,8 +53,8 @@ export class ProductoService {
         return this.http.get<RespuestaPaginada>(`${this.apiUrl}/productos/buscar`, { params });
     }
     buscarProductoCodigo(codigo: string) {
-        return this.http.get<Productos>(`${this.apiUrl}/productos/codigo/${codigo}`);
-    }
+  return this.http.get<any>(`${this.apiUrl}/productos/codigo?termino=${codigo}`);
+}
     entradaProducto(codigo: string, cantidad: number, destino: string, id_asesor: number) {
         const payload = {
             codigo: codigo,

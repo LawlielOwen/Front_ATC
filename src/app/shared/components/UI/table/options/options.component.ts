@@ -22,9 +22,6 @@ export class MenuOpcionesComponent implements OnDestroy {
   @Output() accionSeleccionada = new EventEmitter<string>();
   @Input() omitirBase: boolean = false;
   @Input() filaDatos: any = null;
-
-  // Se conserva por compatibilidad con lo que ya le pasas desde table.component.html,
-  // pero ya no se usa para decidir la dirección: ahora se calcula en tiempo real.
   @Input() abrirHaciaArriba: boolean = false;
 
   menuAbierto = false;

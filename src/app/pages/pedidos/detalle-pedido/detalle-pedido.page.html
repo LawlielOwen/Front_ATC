@@ -47,41 +47,64 @@
     </div>
 </app-card-details>
 
-                <app-card-details titulo="Recibo de Pago Adjunto">
-                    <svg icono class="w-3.5 h-3.5 text-[#1D9E75] -rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
-                    </svg>
+             <app-card-details titulo="Recibo de Pago Adjunto">
+    <svg icono class="w-3.5 h-3.5 text-[#1D9E75] -rotate-45" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
+    </svg>
 
-                    <div *ngIf="ped?.factura_ruta; else sinArchivo" class="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg p-1.5 w-full overflow-hidden mt-3">
-                        <div class="w-8 h-8 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
-                            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
-                        </div>
+    <!-- ESTADO 1: PAGADO CON LÍNEA DE CRÉDITO -->
+    <div *ngIf="ped?.factura_ruta === 'SISTEMA_INTERNO'" class="flex items-center gap-2.5 bg-emerald-50 border border-emerald-200 rounded-lg p-2 w-full overflow-hidden mt-3">
+        <div class="w-8 h-8 rounded-md bg-emerald-100 flex items-center justify-center flex-shrink-0">
+            <svg class="w-5 h-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7" />
+            </svg>
+        </div>
+        <div class="flex flex-col justify-center flex-1 min-w-0 overflow-hidden">
+            <p class="text-[10px] font-bold text-emerald-800 leading-none mb-1 block truncate w-full">
+                Pagado con Línea de Crédito
+            </p>
+            <p class="text-[9px] text-emerald-600 font-medium leading-none block truncate w-full">
+                Validación automática completada
+            </p>
+        </div>
+    </div>
 
-                        <div class="flex flex-col justify-center pl-1 pr-2 flex-1 min-w-0 overflow-hidden">
-                            <p class="text-[10px] font-bold text-[#0d1f38] leading-none mb-0.5 block truncate w-full" [title]="ped?.nombre_factura || 'Recibo_Pago.pdf'">
-                                {{ ped?.nombre_factura || 'Recibo_Pago.pdf' }} 
-                            </p>
-                            <p class="text-[10px] text-[#94a3b8] font-medium leading-none block truncate w-full">
-                                PDF • {{ ped?.fecha_factura | date:'dd MMM yyyy' }}
-                            </p>
-                        </div>
+    <!-- ESTADO 2: RECIBO DE PAGO PDF -->
+    <div *ngIf="ped?.factura_ruta && ped?.factura_ruta !== 'SISTEMA_INTERNO'" class="flex items-center gap-2 bg-slate-50 border border-slate-100 rounded-lg p-1.5 w-full overflow-hidden mt-3">
+        <div class="w-8 h-8 rounded-lg bg-red-50 border border-red-100 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+            </svg>
+        </div>
 
-                        <button (click)="verFactura()" class="bg-white border border-slate-200 hover:bg-slate-50 p-1.5 rounded-md transition-colors shadow-sm flex-shrink-0">
-                            <svg class="w-3.5 h-3.5 text-[#0d1f38]" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
-                        </button>
-                    </div>
+        <div class="flex flex-col justify-center pl-1 pr-2 flex-1 min-w-0 overflow-hidden">
+            <p class="text-[10px] font-bold text-[#0d1f38] leading-none mb-0.5 block truncate w-full" [title]="ped?.nombre_factura || 'Recibo_Pago.pdf'">
+                {{ ped?.nombre_factura || 'Recibo_Pago.pdf' }} 
+            </p>
+            <p class="text-[10px] text-[#94a3b8] font-medium leading-none block truncate w-full">
+                PDF • {{ ped?.fecha_factura | date:'dd MMM yyyy' }}
+            </p>
+        </div>
 
-                    <ng-template #sinArchivo>
-                        <div class="flex items-center gap-2 bg-slate-50/50 border border-slate-200 border-dashed rounded-lg p-1.5 w-full overflow-hidden mt-3">
-                            <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            </div>
-                            <p class="text-[10px] text-slate-500 font-medium pr-3 leading-none">
-                                Sin recibo de pago adjunto
-                            </p>
-                        </div>
-                    </ng-template>
-                </app-card-details>
+        <button (click)="verFactura()" class="bg-white border border-slate-200 hover:bg-slate-50 p-1.5 rounded-md transition-colors shadow-sm flex-shrink-0">
+            <svg class="w-3.5 h-3.5 text-[#0d1f38]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- ESTADO 3: SIN ARCHIVO ADJUNTO -->
+    <div *ngIf="!ped?.factura_ruta" class="flex items-center gap-2 bg-slate-50/50 border border-slate-200 border-dashed rounded-lg p-1.5 w-full overflow-hidden mt-3">
+        <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
+            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+        </div>
+        <p class="text-[10px] text-slate-500 font-medium pr-3 leading-none">
+            Sin recibo de pago adjunto
+        </p>
+    </div>
+</app-card-details>
             </div>
 
             <app-card-details titulo="Fechas y Estatus">
@@ -212,29 +235,51 @@
         
     </div>
 <app-footer-modal [paddingClass]="'p-4 px-6 rounded-b-2xl'">
-        <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+    <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
 
-        <div class="flex gap-2.5">
-    
-    <ng-container *ngIf="ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente'">
-        <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cancelar'" *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador'])"
-            (click)="cancelarPedido()"></app-button-action>
-    </ng-container>
+    <div class="flex gap-2.5 items-center">
 
-    <ng-container *ngIf="ped?.Estatus === 3">
-    <app-button-action [label]="'Reintentar apartado'" [claseCss]="'btn-pdf'"
-        *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])"
-        (click)="validarYCompletar()"></app-button-action>
-</ng-container>
+        <ng-container *ngIf="ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente'">
+            <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cancelar'" *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador'])"
+                (click)="cancelarPedido()"></app-button-action>
+        </ng-container>
 
-    <ng-container *ngIf="ped?.Estatus !== 0 && ped?.estatusTexto !== 'Cancelado'">
-        <app-button-action 
-            [label]="ped?.factura_ruta ? 'Cambiar Recibo' : 'Subir Recibo'" 
-            [claseCss]="'btn-aceptar'"
-            (click)="subirPDF()">
-        </app-button-action>
-    </ng-container>
-    
-</div>
-    </app-footer-modal>
+        <ng-container *ngIf="(ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente') && authService.tieneAcceso(['Administrador', 'Cotizador'])">
+
+            <app-button-action 
+                *ngIf="monedaActual === 'MXN'"
+                [label]="'Cobrar con Crédito'" 
+                [claseCss]="'btn-aceptar'" 
+                (click)="pagarConCredito()">
+            </app-button-action>
+
+            <button
+                *ngIf="monedaActual !== 'MXN'"
+                type="button"
+                disabled
+                title="El pago con línea de crédito solo está disponible para pedidos en MXN. Este pedido está en dólares; usa 'Subir Recibo' para registrarlo."
+                class="px-4 py-2 rounded-lg text-xs font-bold bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed flex items-center gap-1.5">
+                <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Cobrar con Crédito
+            </button>
+        </ng-container>
+
+        <ng-container *ngIf="ped?.Estatus === 3">
+            <app-button-action [label]="'Reintentar apartado'" [claseCss]="'btn-pdf'"
+                *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])"
+                (click)="validarYCompletar()"></app-button-action>
+        </ng-container>
+
+        <ng-container *ngIf="ped?.Estatus !== 0 && ped?.estatusTexto !== 'Cancelado' && ped?.factura_ruta !== 'SISTEMA_INTERNO'">
+            <app-button-action 
+                [label]="ped?.factura_ruta ? 'Cambiar Recibo' : 'Subir Recibo'" 
+                [claseCss]="'btn-aceptar'"
+                (click)="subirPDF()">
+            </app-button-action>
+        </ng-container>
+
+    </div>
+</app-footer-modal>
 </div>

@@ -22,7 +22,7 @@ export class LoginPage implements OnInit {
 
   ngOnInit() { }
 
-  login() {
+ login() {
     this.username = this.sanitizarUsername(this.username);
     
     if (this.camposVacios(this.username, this.password)) {
@@ -63,6 +63,10 @@ export class LoginPage implements OnInit {
           case 'Asesor':
             this.router.navigate(['/productos']);
             break; 
+            
+          case 'Soporte Tecnico': 
+            this.router.navigate(['/clientes']);
+            break;
             
           default:
             toast.error('Tu rol no tiene una pantalla asignada. Contacta a soporte.'); 

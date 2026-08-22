@@ -15,7 +15,7 @@ import { Asesor } from "../../../shared/model/asesor.model"
 import { ClientesService } from "../../../core/services/clientes.service"
 import { Cliente } from '../../../shared/model/clientes.model';
 import { NgxSonnerToaster } from 'ngx-sonner';
-
+import { FormsModule } from '@angular/forms';
 @Component({
   selector: 'app-modal-cliente',
   templateUrl: './modal-cliente.page.html',
@@ -24,7 +24,7 @@ import { NgxSonnerToaster } from 'ngx-sonner';
   imports: [IonicModule,
     CommonModule, FooterModalComponent, HeaderModalComponent, ButtonActionComponent,
     UploadModalComponent, InputComponent, SelectComponent, CardFormComponent,
-    NgxSonnerToaster],
+    NgxSonnerToaster, FormsModule],
 })
 export class ModalClientePage implements OnInit {
   asesores: Asesor[] = [];
@@ -37,7 +37,7 @@ export class ModalClientePage implements OnInit {
     private dialogRef: MatDialogRef<ModalClientePage>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) { }
-  clienteNuevo = {
+clienteNuevo: any = {
     id: 0,
     Nombre: '',
     RFC: '',
@@ -47,33 +47,97 @@ export class ModalClientePage implements OnInit {
     contacto_principal: '',
     correo_contacto: '',
     CP: '',
-    id_asesor: '',
-    asesor_tipo: ''
+    tiene_credito: false,
+    limite_credito: null,
+    asesoresAsignados: [
+      { id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' }
+    ]
   };
+opcionesMarcas = [
+    { label: 'SMC', value: 1 },
+    { label: 'OMRON', value: 2 },
+    { label: 'PATLITE', value: 3 },
+    { label: 'WAGO', value: 4 },
+    { label: 'RWV', value: 5 },
+    { label: 'KLINGSPOR', value: 6 },
+    { label: 'KING TONY', value: 7 },
+    { label: 'Mighty Seven (m7)', value: 8 },
+    { label: 'Fuji Electric', value: 9 },
+    { label: 'Sumitomo Drive Technologies', value: 10 },
+    { label: 'Wenglor', value: 11 },
+    { label: 'PHOENIX CONTACT', value: 12 },
+    { label: 'PILZ', value: 13 },
+    { label: 'EUCHNER', value: 14 },
+    { label: 'CONTRINEX', value: 15 }
+  ];
+  agregarAsesor() {
+    this.clienteNuevo.asesoresAsignados.push({ 
+      id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' 
+    });
+  }
 
+  removerAsesor(index: number) {
+    if (this.clienteNuevo.asesoresAsignados.length > 1) {
+      this.clienteNuevo.asesoresAsignados.splice(index, 1);
+    }
+  }
+
+  toggleMarca(event: any, marcaLabel: string, indexAsesor: number) {
+  const asesor = this.clienteNuevo.asesoresAsignados[indexAsesor];
+  const yaEsta = asesor.marcasArray.includes(marcaLabel);
+
+  asesor.marcasArray = event.target.checked
+    ? [...asesor.marcasArray, marcaLabel]
+    : asesor.marcasArray.filter((m: string) => m !== marcaLabel);
+
+  asesor.marcas_asignadas = asesor.marcasArray.join(', ');
+}
 ngOnInit() {
+  this.cargarAsesores(() => {
 
-  if (this.data && this.data.id) {
-    this.isEditMode = true;
-    this.uploadMode = false;
-    this.clienteNuevo = { ...this.data };
-    this.clienteNuevo.id_asesor = '';
-  }
+    if (this.data && this.data.id) {
+        this.isEditMode = true;
+        this.uploadMode = false;
+        this.clienteNuevo = { ...this.data };
 
-  this.cargarAsesores();
+        if (!Array.isArray(this.clienteNuevo.asesoresAsignados) || this.clienteNuevo.asesoresAsignados.length === 0) {
+          this.clienteNuevo.asesoresAsignados = [
+            { id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' }
+          ];
+        }
+    }
 
-  if (this.data && this.data.modo === 'updateCsf') {
-    this.isUpdateCsfMode = true;
-    this.uploadMode = true;
-    this.clienteNuevo.id = this.data.cliente.id;
-  }
+    if (this.data && this.data.modo === 'updateCsf') {
+      this.isUpdateCsfMode = true;
+      this.uploadMode = true;
+      this.clienteNuevo.id = this.data.cliente.id;
+    }
 
-  if (this.data && this.data.nombrePrellenado) {
-    this.uploadMode = false;
-    this.clienteNuevo.Nombre = this.data.nombrePrellenado; 
-  }
+    if (this.data && this.data.nombrePrellenado) {
+      this.uploadMode = false;
+      this.clienteNuevo.Nombre = this.data.nombrePrellenado;
+    }
+
+    if (!this.isEditMode && this.data?.idAsesorPrellenado) {
+      this.clienteNuevo.asesoresAsignados[0].id_asesor = this.data.idAsesorPrellenado.toString();
+    }
+  });
 }
 
+cargarAsesores(callback?: () => void) {
+  this.service.getAsesores().subscribe({
+    next: (response: any) => {
+      this.asesores = response.filter((asesor: Asesor) =>
+        ['Asesor', 'Administrador'].includes(asesor.Rol) && asesor.Estatus === 1
+      );
+      if (callback) callback();
+    },
+    error: (err) => {
+      console.error('Error al cargar asesores', err);
+      if (callback) callback();
+    }
+  });
+}
 
   cerrar() {
     this.dialogRef.close();
@@ -81,29 +145,8 @@ ngOnInit() {
   recibirArchivo(archivo: File | undefined) {
     this.archivoActual = archivo;
   }
- cargarAsesores() {
-  this.service.getAsesores().subscribe({
-    next: (response: any) => {
-      this.asesores = response.filter((asesor: Asesor) =>
-        ['Asesor', 'Administrador'].includes(asesor.Rol)
-      );
 
-      if (this.isEditMode && this.data.id_asesor) {
-        setTimeout(() => {
-          this.clienteNuevo.id_asesor = this.data.id_asesor.toString();
-        }, 50);
-      }
-
-      if (!this.isEditMode && this.data?.idAsesorPrellenado) {
-        setTimeout(() => {
-          this.clienteNuevo.id_asesor = this.data.idAsesorPrellenado.toString();
-        }, 50);
-      }
-    },
-    error: (err) => console.error('Error al cargar asesores', err)
-  });
-}
-  agregarCliente() {
+agregarCliente() {
     const formData = new FormData();
 
     formData.append('Nombre', this.clienteNuevo.Nombre);
@@ -111,11 +154,17 @@ ngOnInit() {
     formData.append('Razon_social', this.clienteNuevo.Razon_social);
     formData.append('Regimen_fiscal', this.clienteNuevo.Regimen_fiscal);
     formData.append('Direccion', this.clienteNuevo.Direccion);
-    formData.append('contacto_principal', this.clienteNuevo.contacto_principal); // NUEVO
-    formData.append('correo_contacto', this.clienteNuevo.correo_contacto);       // NUEVO
+    formData.append('contacto_principal', this.clienteNuevo.contacto_principal);
+    formData.append('correo_contacto', this.clienteNuevo.correo_contacto);
     formData.append('CP', this.clienteNuevo.CP);
-    formData.append('id_asesor', this.clienteNuevo.id_asesor);
-    formData.append('asesor_tipo', this.clienteNuevo.asesor_tipo);
+    
+formData.append('asesores_json', JSON.stringify(this.clienteNuevo.asesoresAsignados));
+    formData.append('marcas_asignadas', this.clienteNuevo.marcas_asignadas || '');
+
+    formData.append('tiene_credito', this.clienteNuevo.tiene_credito ? '1' : '0');
+    
+    const limiteGuardar = this.clienteNuevo.tiene_credito ? this.clienteNuevo.limite_credito : 0;
+    formData.append('limite_credito', limiteGuardar.toString());
 
     if (this.archivoActual) {
       formData.append('archivo', this.archivoActual);
@@ -177,21 +226,43 @@ procesarAccion() {
       }
     }
   }
-  actualizarClienteExistente() {
+ actualizarClienteExistente() {
     const idCliente = this.clienteNuevo.id;
+    const formData = new FormData();
 
+    formData.append('Nombre', this.clienteNuevo.Nombre);
+    formData.append('RFC', this.clienteNuevo.RFC);
+    formData.append('Razon_social', this.clienteNuevo.Razon_social);
+    formData.append('Regimen_fiscal', this.clienteNuevo.Regimen_fiscal);
+    formData.append('Direccion', this.clienteNuevo.Direccion);
+    formData.append('contacto_principal', this.clienteNuevo.contacto_principal);
+    formData.append('correo_contacto', this.clienteNuevo.correo_contacto);
+    formData.append('CP', this.clienteNuevo.CP);
 
-    this.clienteService.updateCliente(idCliente, this.clienteNuevo as any).subscribe({
+    formData.append('asesores_json', JSON.stringify(this.clienteNuevo.asesoresAsignados));
+
+    formData.append('tiene_credito', this.clienteNuevo.tiene_credito ? '1' : '0');
+    const limiteGuardar = this.clienteNuevo.tiene_credito ? this.clienteNuevo.limite_credito : 0;
+    formData.append('limite_credito', limiteGuardar.toString());
+
+    formData.append('nombre_constancia', this.clienteNuevo.nombre_constancia || '');
+    formData.append('ruta_constancia', this.clienteNuevo.ruta_constancia || '');
+
+    if (this.archivoActual) {
+      formData.append('archivo', this.archivoActual);
+    }
+
+    this.clienteService.updateCliente(idCliente, formData).subscribe({
       next: (response) => {
         toast.success('Cliente actualizado correctamente');
-        this.dialogRef.close(true); // Cerrar y recargar
+        this.dialogRef.close(true);
       },
       error: (err) => {
         console.error(err);
         toast.error('Error al actualizar el cliente');
       }
     });
-  }
+}
   validarYSanitizarOpcionales(): boolean {
     if (this.clienteNuevo.contacto_principal && this.clienteNuevo.contacto_principal.trim() !== '') {
       let telLimpio = this.clienteNuevo.contacto_principal.replace(/[\s\-\(\)\+]/g, '');
@@ -224,21 +295,28 @@ procesarAccion() {
 
     return true;
   }
-  validarCamposObligatorios(): boolean {
-
+validarCamposObligatorios(): boolean {
     this.clienteNuevo.Nombre = (this.clienteNuevo.Nombre || '').trim();
-    this.clienteNuevo.RFC = (this.clienteNuevo.RFC || '').trim().toUpperCase(); // RFC siempre en mayúsculas
+    this.clienteNuevo.RFC = (this.clienteNuevo.RFC || '').trim().toUpperCase();
     this.clienteNuevo.Razon_social = (this.clienteNuevo.Razon_social || '').trim();
     this.clienteNuevo.Regimen_fiscal = (this.clienteNuevo.Regimen_fiscal || '').trim();
     this.clienteNuevo.Direccion = (this.clienteNuevo.Direccion || '').trim();
     this.clienteNuevo.CP = (this.clienteNuevo.CP || '').trim();
+    this.clienteNuevo.contacto_principal = (this.clienteNuevo.contacto_principal || '').trim();
+    this.clienteNuevo.correo_contacto = (this.clienteNuevo.correo_contacto || '').trim();
 
     if (!this.clienteNuevo.Nombre || !this.clienteNuevo.RFC ||
-      !this.clienteNuevo.Razon_social || !this.clienteNuevo.Regimen_fiscal ||
-      !this.clienteNuevo.Direccion || !this.clienteNuevo.CP ||
-      !this.clienteNuevo.id_asesor || !this.clienteNuevo.asesor_tipo) {
-
+        !this.clienteNuevo.Razon_social || !this.clienteNuevo.Regimen_fiscal ||
+        !this.clienteNuevo.Direccion || !this.clienteNuevo.CP) {
       toast.error('Por favor, completa todos los campos obligatorios.');
+      return false;
+    }
+
+    const hayAsesorIncompleto = this.clienteNuevo.asesoresAsignados.some((rel: any) =>
+      !rel.id_asesor || !rel.asesor_tipo || !rel.marcasArray || rel.marcasArray.length === 0
+    );
+    if (hayAsesorIncompleto) {
+      toast.error('Completa el asesor, el origen y al menos una marca para cada asesor agregado.');
       return false;
     }
 
@@ -254,8 +332,16 @@ procesarAccion() {
       return false;
     }
 
-    return true; // Todos los campos obligatorios están listos
-  }
+    if (this.clienteNuevo.tiene_credito) {
+      const limite = Number(this.clienteNuevo.limite_credito);
+      if (isNaN(limite) || limite <= 0) {
+        toast.error('Si el cliente tiene crédito, debes asignar un límite mayor a $0.00.');
+        return false;
+      }
+    }
+
+    return true;
+}
   actualizarSoloCsf() {
     if (!this.archivoActual) {
       toast.error('Por favor, selecciona un archivo PDF primero.');

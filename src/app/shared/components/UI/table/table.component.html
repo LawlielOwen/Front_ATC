@@ -18,12 +18,11 @@
           <td *ngFor="let col of columns" class="py-4 px-4 relative"
             [ngClass]="{'text-right': col.align === 'right', 'text-center': col.align === 'center'}">
 
-            <!-- Barra lateral azul (solo se muestra en la primera columna) -->
             <div *ngIf="col === columns[0]"
               class="absolute left-0 top-0 bottom-0 w-[3px] bg-[#003B8A] opacity-0 group-hover:opacity-100 transition-opacity">
             </div>
 
-            <!-- EVALUAMOS QUÉ TIPO DE CELDA ES -->
+            <!-- EVALUA QUÉ TIPO DE CELDA ES -->
             <ng-container [ngSwitch]="col.type">
 
               <div *ngSwitchCase="'avatar-text'" class="flex items-center gap-4 pl-4">
@@ -74,17 +73,17 @@
                 {{ row[col.key] }}
               </span>
 
-              <span *ngSwitchCase="'pill-destino'"
+             <span *ngSwitchCase="'pill-destino'"
                 class="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-[11.5px] font-bold tracking-wide"
                 [ngClass]="{
                   'bg-[#e0f2fe] text-[#0369a1]': row[col.key] === 'Almacen' || row[col.key] === 'Almacén',
                   'bg-[#ecfdf5] text-[#047857]': row[col.key] === 'Cliente',
-                  'bg-[#f3e8ff] text-[#6d28d9]': row[col.key] === 'Pedido'
+                  'bg-[#f3e8ff] text-[#6d28d9]': row[col.key] === 'Pedido',
+                  'bg-[#fef3c7] text-[#b45309]': row[col.key] === 'Demostracion' || row[col.key] === 'Demostración'
                 }">
                 {{ row[col.key] }}
               </span>
 
-              <!-- CORREGIDO: ahora es un caso hermano real dentro del ngSwitch, ya no anidado en 'actions' -->
               <div *ngSwitchCase="'link'" class="flex items-center justify-center" (click)="$event.stopPropagation()">
                 <a *ngIf="row[col.key]"
                    [href]="row[col.key]"

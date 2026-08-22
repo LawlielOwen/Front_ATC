@@ -11,21 +11,38 @@
     </div>
     <app-estatus [estatus]="cliente.Estatus" class="shrink-0"></app-estatus>
   </div>
-  <div class="flex flex-col gap-1.5 text-xs mt-3 border-t border-gray-100 pt-3">
+  
+  <div class="flex flex-col gap-2 text-xs mt-3 border-t border-gray-100 pt-3">
     
-    <div class="flex justify-between">
-      <span class="text-[#94a3b8]">Asesor</span>
-      <span class="text-[#414a53] font-medium">{{ cliente.Nombre_asesor }}</span>
+    <!-- Sección de Asesores Actualizada -->
+    <div class="flex justify-between gap-4">
+      <span class="text-[#94a3b8] shrink-0">Asesor(es)</span>
+      <span 
+        class="text-[#414a53] font-medium text-right line-clamp-2" 
+        [title]="cliente.Nombres_asesores || 'Sin asignar'">
+        {{ cliente.Nombres_asesores || 'Sin asignar' }}
+      </span>
     </div>
     
-    <div class="flex justify-between">
-      <span class="text-[#94a3b8]">Razon Social</span>
-      <span class="text-[#414a53] font-medium">{{ cliente.Razon_social}}</span>
+    <div class="flex justify-between gap-4">
+      <span class="text-[#94a3b8] shrink-0">Razón Social</span>
+      <span class="text-[#414a53] font-medium text-right truncate" [title]="cliente.Razon_social">
+        {{ cliente.Razon_social }}
+      </span>
     </div>
     
+    <!-- Nueva Sección de Crédito (Solo se muestra si tiene crédito) -->
+    <div class="flex justify-between items-center" *ngIf="cliente.tiene_credito === 1">
+      <span class="text-[#94a3b8]">Límite de Crédito</span>
+      <span class="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded">
+        {{ cliente.limite_credito | currency:'MXN' }}
+      </span>
+    </div>
+
     <div class="flex justify-between">
       <span class="text-[#94a3b8]">Registro</span>
-<span class="text-[#414a53] font-medium">{{ cliente.fecha_registro | date:'dd MMM yyyy' }}</span>    </div>
+      <span class="text-[#414a53] font-medium">{{ cliente.fecha_registro | date:'dd MMM yyyy' }}</span>    
+    </div>
     
   </div>
 </div>

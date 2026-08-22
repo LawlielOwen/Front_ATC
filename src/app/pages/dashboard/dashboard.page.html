@@ -13,17 +13,14 @@
 
         <div class="p-6 max-w-7xl mx-auto w-full animate-fade-in">
 
-          <!-- ===================== HEADER ===================== -->
           <div class="mb-7">
             <h1 class="text-[26px] font-extrabold text-[#0d1f38] tracking-tight">Tablero de Métricas</h1>
             <div class="w-10 h-1 rounded-full bg-gradient-to-r from-[#003B8A] to-[#3b6ba5] mt-2 mb-2"></div>
             <p class="text-sm text-slate-500">Resumen de ventas y comportamiento de productos</p>
           </div>
 
-          <!-- ===================== TOP / BOTTOM PRODUCTOS ===================== -->
           <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
-            <!-- TOP 5 PRODUCTOS -->
             <div class="relative bg-white p-5 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col gap-4 overflow-hidden">
               <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-400 to-emerald-600"></div>
 
@@ -40,7 +37,6 @@
                 </div>
               </div>
 
-              <!-- Loading skeleton -->
               <div *ngIf="cargandoTopProductos" class="flex flex-col justify-center gap-4 h-[190px] py-2">
                 <div class="flex items-center gap-3" *ngFor="let w of [92, 78, 55, 38, 22]">
                   <div class="h-2.5 w-24 bg-slate-100 rounded-full animate-pulse shrink-0"></div>
@@ -60,7 +56,6 @@
               </div>
             </div>
 
-            <!-- PRODUCTOS REZAGADOS -->
             <div class="relative bg-white p-5 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col gap-4 overflow-hidden">
               <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-orange-400 to-orange-600"></div>
 
@@ -77,7 +72,6 @@
                 </div>
               </div>
 
-              <!-- Loading skeleton -->
               <div *ngIf="cargandoBottomProductos" class="flex flex-col justify-center gap-4 h-[190px] py-2">
                 <div class="flex items-center gap-3" *ngFor="let w of [92, 78, 55, 38, 22]">
                   <div class="h-2.5 w-24 bg-slate-100 rounded-full animate-pulse shrink-0"></div>
@@ -99,7 +93,6 @@
 
           </div>
 
-          <!-- ===================== CONVERSIÓN POR CLIENTE ===================== -->
           <div class="relative mt-6 bg-white p-6 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col gap-4 mb-8 overflow-hidden">
             <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#3b6ba5] to-[#003B8A]"></div>
 
@@ -194,7 +187,6 @@
 
             </div>
 
-            <!-- Loading skeleton -->
             <div *ngIf="cargandoConversion" class="flex flex-col gap-3 py-2">
               <div class="flex items-center gap-4" *ngFor="let r of [1,2,3,4,5]">
                 <div class="h-3 w-32 bg-slate-100 rounded-full animate-pulse"></div>
@@ -283,7 +275,6 @@
 
           </div>
 
-          <!-- ===================== TENDENCIA DE COTIZACIONES ===================== -->
           <div class="relative mt-6 bg-white p-6 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col gap-4 mb-8 overflow-hidden">
             <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-indigo-400 to-indigo-600"></div>
 
@@ -342,7 +333,6 @@
 
           </div>
 
-          <!-- ===================== PRODUCTOS ESTRELLA POR CLIENTE ===================== -->
           <div class="relative mt-6 bg-white p-6 rounded-2xl border border-slate-200/70 shadow-sm hover:shadow-md transition-shadow duration-300 flex flex-col gap-4 mb-8 overflow-hidden">
             <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-amber-400 to-amber-600"></div>
 

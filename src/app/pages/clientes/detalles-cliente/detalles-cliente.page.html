@@ -16,9 +16,10 @@
           <h2 class="text-base font-semibold text-white leading-tight">{{cliente.Nombre}}</h2>
           <app-estatus [estatus]="cliente.Estatus"></app-estatus>
         </div>
-        <span class="w-fit text-[11px] text-[#2dd4bf] font-bold bg-[#11274a] px-2 py-0.5 rounded tracking-widest leading-none uppercase shadow-sm">
-          RFC: {{cliente.RFC}}
-        </span>
+        <span class="w-fit inline-flex items-center gap-1.5 text-[11px] text-[#eafff8] font-bold bg-[#1D9E75]/[0.16] border border-[#2dd4bf]/55 px-2.5 py-1 rounded-md tracking-widest leading-none uppercase shadow-sm">
+  <i class="ti ti-file-text text-[13px] text-[#5eead4]"></i>
+  RFC: {{cliente.RFC}}
+</span>
       </div>
     </div>
   </div>
@@ -120,34 +121,68 @@
       </app-card-details>
       
       <div class="flex flex-col gap-4 w-full h-fit">
-        <app-card-details titulo="Asesor Responsable">
+        <app-card-details titulo="Asesor(es) Responsable(s)">
+  <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+  </svg>
+
+  <div class="flex flex-col gap-2 mt-2 w-full">
+    
+    <div *ngFor="let asesor of obtenerAsesores(cliente.Nombres_asesores)"
+         class="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl p-2.5 w-full">
+
+      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#0d1f38] to-[#1e3a63] text-white flex items-center justify-center font-bold text-[13px] shadow-sm flex-shrink-0">
+        {{ asesor.substring(0, 2) | uppercase }}
+      </div>
+
+      <div class="flex flex-col justify-center min-w-0">
+
+        <h4 class="font-bold text-[#0d1f38] text-[12px] leading-tight mb-1.5 break-words whitespace-normal">
+          {{ asesor | titlecase }}
+        </h4>
+
+        <span class="w-fit text-[9px] text-[#0f6e56] font-bold bg-[#e8f5f0] border border-[#bce3d4] px-2 py-0.5 rounded-md leading-none uppercase tracking-wide">
+          Asesor Asignado
+        </span>
+
+      </div>
+    </div>
+    
+  </div>
+</app-card-details>
+         <app-card-details titulo="Línea de Crédito">
           <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
-
-          <div class="flex items-center gap-3 bg-slate-50 border border-slate-100 rounded-xl p-2.5 w-full mt-1">
-
-            <div
-              class="w-10 h-10 rounded-full bg-gradient-to-br from-[#0d1f38] to-[#1e3a63] text-white flex items-center justify-center font-bold text-[13px] shadow-sm flex-shrink-0">
-              {{ cliente.Nombre_asesor.substring(0, 2) | uppercase }}
+          
+          <div *ngIf="cliente.tiene_credito; else sinCredito" class="flex items-center gap-3 bg-emerald-50 border border-emerald-100 rounded-xl p-2.5 w-full mt-2">
+            <div class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center font-bold shadow-sm flex-shrink-0 border border-emerald-100">
+              <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
             </div>
-
-            <div class="flex flex-col justify-center">
-
-              <h4 class="font-bold text-[#0d1f38] text-[12px] leading-tight mb-1.5 break-words whitespace-normal">
-                {{ cliente.Nombre_asesor | titlecase }}
+            <div class="flex flex-col justify-center min-w-0">
+              <span class="text-[#0f6e56] font-bold text-[9px] uppercase tracking-wider mb-0.5">Límite Autorizado</span>
+              <h4 class="font-bold text-emerald-700 text-[14px] leading-tight break-words whitespace-normal">
+                {{ cliente.limite_credito | currency:'MXN' }}
               </h4>
-
-              <span
-                class="w-fit text-[9px] text-[#0f6e56] font-bold bg-[#e8f5f0] border border-[#bce3d4] px-2 py-0.5 rounded-md leading-none uppercase tracking-wide">
-                {{ cliente.asesor_tipo }}
-              </span>
-
             </div>
           </div>
+          <ng-template #sinCredito>
+            <div class="flex items-center gap-2 bg-slate-50/50 border border-slate-200 border-dashed rounded-lg p-1.5 w-full overflow-hidden mx-auto md:mx-0 mt-2">
+              <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                </svg>
+              </div>
+              <p class="text-[10px] text-slate-500 font-medium pr-3 leading-none">
+                Sin crédito asignado
+              </p>
+            </div>
+          </ng-template>
         </app-card-details>
-        
         <app-card-details titulo="Documentación Adjunta">
           <svg icono class="w-3.5 h-3.5 text-[#1D9E75] -rotate-45" fill="none" viewBox="0 0 24 24"
             stroke="currentColor">
@@ -208,10 +243,13 @@
       <app-button-action [label]="'Resubir CSF'" [claseCss]="'btn-editar'" *ngIf="authService.tieneAcceso(['Administrador', 'Asesor'])"
         (click)="abrirModalActualizarCsf(cliente)"></app-button-action>
 
+      <app-button-action [label]="'Asignar Crédito'" [claseCss]="'btn-editar'" *ngIf="authService.tieneAcceso(['Administrador'])"
+        (click)="asignarCredito(cliente)"></app-button-action>
+
       <app-button-action (click)="procesarFuncion()" [label]="'Eliminar'" [esEliminar]="true" *ngIf="authService.tieneAcceso(['Administrador'])"
         [estatus]="cliente.Estatus"></app-button-action>
       <app-button-action [label]="'Editar cliente'" [claseCss]="'btn-editar'" *ngIf="authService.tieneAcceso(['Administrador', 'Asesor'])"
         (click)="abrirModalEdicion(cliente)"></app-button-action>
     </div>
-  </app-footer-modal>
+</app-footer-modal>
 </div>

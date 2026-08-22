@@ -82,7 +82,7 @@ export class CotizacionesPage implements OnInit {
     {
       header: 'Folio',
       key: 'num_cotizacion',
-      type: 'text' // O 'text-light' dependiendo de qué tanto quieras resaltarlo
+      type: 'text'
     },
     {
       header: 'Cliente',
@@ -91,13 +91,13 @@ export class CotizacionesPage implements OnInit {
     },
     {
       header: 'Fecha',
-      key: 'fecha_formateada', // Recuerda formatearla en tu .map() como hiciste con movimientos
+      key: 'fecha_formateada', 
       type: 'text-light'
     },
     {
       header: 'Total',
-      key: 'total_formateado', // Ej: "$ 4,049.56"
-      subKey: 'moneda',        // Aquí se mostrará "MONEDA NACIONAL" o "USD" justo debajo del total
+      key: 'total_formateado', 
+      subKey: 'moneda',        
       type: 'text-light'
     },
     {
@@ -111,8 +111,8 @@ export class CotizacionesPage implements OnInit {
       key: 'acciones',
       type: 'actions',
       align: 'center',
-      omitirBase: true, // <--- Le decimos que no ponga Editar/Eliminar
-      menuOptions: [    // <--- Pasamos las nuevas opciones
+      omitirBase: true,
+      menuOptions: [    
         { accion: 'ver_pdf', etiqueta: 'Ver PDF' },
         { accion: 'aceptar', etiqueta: 'Aceptar', mostrarSi: (row) => row.Estatus === 1 },
         { accion: 'cancelar', etiqueta: 'Cancelar', mostrarSi: (row) => row.Estatus === 1 }
@@ -152,9 +152,6 @@ export class CotizacionesPage implements OnInit {
   }
   formatearFecha(fecha: string | Date): string {
     if (!fecha) return 'Sin fecha';
-
-    // Si la fecha viene con guiones y sin hora (ej. '2026-06-20'), 
-    // le agregamos 'T12:00:00' para evitar que la zona horaria le reste un día.
     let f = new Date(fecha);
     if (typeof fecha === 'string' && fecha.length === 10 && fecha.includes('-')) {
       f = new Date(`${fecha}T12:00:00`);
@@ -185,8 +182,8 @@ export class CotizacionesPage implements OnInit {
     this.cs.buscarCotizacion(
       this.terminoActual,
       this.estatusActual,
-      this.fechaIni, // Pasamos la fecha de inicio
-      this.fechaFin, // Agregamos la fecha de fin
+      this.fechaIni,
+      this.fechaFin, 
       this.orden,
       this.currentPage,
       this.limit
@@ -323,7 +320,7 @@ ejecutarConversionSp(idCotizacion: number, oc: string = '') {
 aceptarCotizacion(cot: any) {
   if (!cot.id_cliente) {
     confirmarRegistroCliente(cot.nombre_prospecto || cot.Cliente).then((deseaRegistrar) => {
-      if (!deseaRegistrar) return; // usuario cerró, no pasa nada más
+      if (!deseaRegistrar) return; 
     const nombreCliente = cot.nombre_cliente_final && cot.nombre_cliente_final !== 'Sin Nombre'
           ? cot.nombre_cliente_final
           : (cot.nombre_prospecto || cot.Cliente || '');
@@ -375,23 +372,18 @@ aceptarCotizacion(cot: any) {
       next: (blob: Blob) => {
         Swal.close();
 
-        // 1. Tipamos el PDF
         const pdfBlob = new Blob([blob], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(pdfBlob);
 
-        // 2. CREAMOS UN ENLACE INVISIBLE (Esto evita el bloqueo del navegador)
         const a = document.createElement('a');
         a.href = fileURL;
-        a.target = '_blank'; // Fuerza que se abra en otra pestaña
+        a.target = '_blank'; 
 
-        // IMPORTANTE: NO ponemos a.download para que se visualice en lugar de descargarse
         document.body.appendChild(a);
-        a.click(); // Simulamos el clic humano
+        a.click(); 
 
-        // 3. Limpieza de memoria
         document.body.removeChild(a);
 
-        // Liberamos la URL después de unos segundos para que el navegador no gaste RAM
         setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
       },
       error: (err) => {

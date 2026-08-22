@@ -1,12 +1,11 @@
 import Swal from 'sweetalert2';
 
-
 export function solicitarOrdenCompra(): Promise<string | null> {
   return Swal.fire({
     title: 'Convertir a Pedido',
-    html: 'Ingresa el número de <b>orden de compra</b> para confirmar y convertir esta cotización en un pedido formal.',
+    html: 'Ingresa el número de <b>orden de compra</b> para confirmar y convertir esta cotización en un pedido formal.<br><br><span style="font-size: 0.85em; color: #64748b;">* Si el cliente no maneja orden de compra, puedes dejar este campo en blanco.</span>',
     input: 'text',
-    inputPlaceholder: 'Ej. OC-2026-00123',
+    inputPlaceholder: '(opcional) Número de orden de compra',
     inputAttributes: {
       autocapitalize: 'off',
       autocorrect: 'off'
@@ -18,20 +17,20 @@ export function solicitarOrdenCompra(): Promise<string | null> {
     cancelButtonColor: '#94a3b8',
     reverseButtons: true,
     allowOutsideClick: false,
-    heightAuto: false,
-    inputValidator: (value) => {
-      if (!value || !value.trim()) {
-        return 'La orden de compra es obligatoria para continuar.';
-      }
-      return undefined;
-    }
+    heightAuto: false
+    
   }).then((result) => {
     if (result.isConfirmed) {
-      return (result.value as string).trim();
+      const valorIntroducido = (result.value as string || '').trim();
+      
+      return valorIntroducido !== '' ? valorIntroducido : 'Sin orden de compra';
     }
+    
     return null;
   });
 }
+
+
 export function confirmarRegistroCliente(nombreCliente?: string): Promise<boolean> {
   return Swal.fire({
     icon: 'warning',

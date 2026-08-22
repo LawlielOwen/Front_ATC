@@ -13,7 +13,7 @@
         </svg>
 
         <div class="flex flex-col gap-4 md:col-span-2">
-          <app-input tipo="text" placeholder="Ej. Sensor Fotoeléctrico Compacto" label="Nombre del Producto *"
+          <app-input tipo="text" placeholder="Ej. Sensor Fotoeléctrico Compacto" label="Nombre/Modelo del Producto *"
             [(value)]="productoNuevo.Nombre"></app-input>
 
           <app-input tipo="text" placeholder="Descripción breve del componente" label="Descripción *"
@@ -23,11 +23,7 @@
             [(value)]="productoNuevo.ExtraDescripcion"></app-input>
 
           <div class="flex gap-4">
-            <div class="w-1/2">
-              <app-input tipo="text" placeholder="Ej. E3Z-D62" label="Modelo *"
-                [(value)]="productoNuevo.Modelo"></app-input>
-            </div>
-            <div class="w-1/2">
+            <div class="w-full">
               <app-input tipo="number" placeholder="0.00" label="Precio *" [(value)]="productoNuevo.Precio"></app-input>
             </div>
           </div>
@@ -55,7 +51,7 @@
 
           <div class="flex gap-4">
             <div class="w-1/2 flex flex-col gap-y-1">
-              <app-select label="Marca *" [(value)]="productoNuevo.id_marca" (valueChange)="verificarMarcaSMC()">
+              <app-select label="Marca *" [(value)]="productoNuevo.id_marca" >
                 <option value="">Seleccione marca...</option>
                 <option *ngFor="let marca of opcionesMarcas" [value]="marca.value">
                   {{ marca.label }}
@@ -98,17 +94,7 @@
                 <option value="D">D</option>
               </app-select>
             </div>
-            <div class="w-1/2 flex flex-col gap-y-1" *ngIf="esSMC">
-              <app-select label="Origen (SMC)" [(value)]="productoNuevo.origen">
-                <option value="">Seleccione origen...</option>
-                <option value="FABRICACION LOCAL">FABRICACION LOCAL</option>
-                <option value="JPN A 11%">JPN A 11%</option>
-                <option value="JPN B">JPN B</option>
-                <option value="CHIN A 28.60%">CHIN A 28.60%</option>
-                <option value="CHIN B">CHIN B</option>
-                <option value="IDP">IDP</option>
-              </app-select>
-            </div>
+          
           </div>
           
         </div>

@@ -1,0 +1,159 @@
+<div
+  class="bg-[#f1f5f9] rounded-[10px] overflow-hidden shadow-2xl w-full mx-auto max-h-[90vh] flex flex-col border border-gray-100">
+  <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
+
+  <app-header-modal [label]="'Programar Visita de Demostración'"></app-header-modal>
+
+  <div class="p-6 overflow-y-auto flex-1">
+    <div class="flex flex-col gap-5 animate-fade-in">
+
+      <!-- TARJETA 1: Información General -->
+      <app-card-form title="Información General">
+        <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+        </svg>
+
+        <div class="flex flex-col gap-4 w-full md:col-span-2">
+
+          <div class="flex flex-col gap-y-1">
+            <span class="text-xs font-semibold text-[#0d1f38] ml-1">Cliente / Empresa Destino *</span>
+            <div class="relative">
+              <input type="text" [formControl]="clienteControl" [matAutocomplete]="autoCliente"
+                placeholder="Ingresa el nombre del cliente (registrado o no registrado)"
+                class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors">
+
+              <mat-autocomplete #autoCliente="matAutocomplete" [displayWith]="mostrarNombreCliente">
+                <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
+                  {{ c.nombre || c.Nombre }}
+                </mat-option>
+
+                <mat-option
+                  *ngIf="clienteControl.value && typeof clienteControl.value === 'string' && clientesFiltrados.length === 0"
+                  [value]="clienteControl.value">
+                  <span class="italic text-slate-500">Registrar como prospecto eventual:</span>
+                  <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value }}</span>
+                </mat-option>
+              </mat-autocomplete>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            <!-- Asesor (Usando tu estructura nativa de select) -->
+            <div class="flex-1 flex flex-col gap-y-1">
+              <app-select label="SELECCIONAR ASESOR *" [(value)]="visitaNueva.id_asesor">
+                <option [value]="null" disabled>Seleccione un asesor...</option>
+                <option *ngFor="let asesor of asesores" [value]="asesor.id">
+                  {{ asesor.Nombre_completo }}
+                </option>
+              </app-select>
+            </div>
+
+            <!-- Técnico (Se removió el [readonly] que causaba error) -->
+            <div class="flex-1 flex flex-col gap-y-1 pointer-events-none opacity-80">
+              <app-input tipo="text" label="Soporte Técnico *" [(value)]="nombreTecnicoActivo" [disabled]="true">
+              </app-input>
+            </div>
+
+            <!-- Fecha -->
+            <div class="flex-1 flex flex-col gap-y-1">
+              <app-date label="Fecha de la Visita *" [(value)]="visitaNueva.fecha_visita">
+              </app-date>
+            </div>
+
+          </div>
+
+        </div>
+      </app-card-form>
+
+      <!-- TARJETA 2: Productos Demos Solicitados -->
+      <app-card-form title="Equipos Demo Solicitados">
+        <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+
+        <div class="flex flex-col gap-3 w-full md:col-span-2">
+
+          <div class="relative">
+            <input type="text" [formControl]="demoControl" [matAutocomplete]="autoDemo"
+              placeholder="Buscar demo por modelo o número de serie..."
+              class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+              (keyup.enter)="onEnterDemo($event)">
+
+            <mat-autocomplete #autoDemo="matAutocomplete" (optionSelected)="seleccionarDemo($event.option.value)">
+              <mat-option *ngFor="let demo of demosFiltrados" [value]="demo" class="h-auto py-2">
+                <div class="flex flex-col py-1">
+                  <div class="flex justify-between items-center w-full gap-4">
+                    <span class="text-xs font-bold text-[#0d1f38] truncate flex-1">{{ demo.nombre_modelo }}</span>
+                    <span class="text-[10px] font-bold whitespace-nowrap flex-shrink-0"
+                      [class.text-emerald-600]="demo.stock > 0" [class.text-rose-500]="demo.stock <= 0">
+                      Stock: {{ demo.stock }}
+                    </span>
+                  </div>
+                  <div class="text-[10px] text-slate-400 font-semibold mt-0.5 flex gap-2">
+                    <span>SN: <span class="text-slate-600">{{ demo.numero_serie || 'N/A' }}</span></span>
+                  </div>
+                </div>
+              </mat-option>
+            </mat-autocomplete>
+          </div>
+
+          <div class="rounded-lg border border-slate-200 bg-white shadow-sm mt-2">
+
+            <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2 px-4 items-center rounded-t-lg">
+              <span class="col-span-6 text-[9px] font-bold text-white uppercase tracking-wider">Equipo Demo</span>
+              <span class="col-span-3 text-[9px] font-bold text-white uppercase tracking-wider text-center">N.
+                Serie</span>
+              <span
+                class="col-span-2 text-[9px] font-bold text-white uppercase tracking-wider text-center">Cantidad</span>
+              <span class="col-span-1"></span>
+            </div>
+
+            <div *ngIf="demosSolicitados.length === 0" class="py-8 text-center text-slate-400 text-xs">
+              Usa el buscador para agregar equipos a la visita.
+            </div>
+
+            <div *ngFor="let item of demosSolicitados; let i = index"
+              class="grid grid-cols-12 gap-3 py-2.5 px-4 border-b border-slate-100 last:border-0 items-center hover:bg-slate-50 transition-colors">
+
+              <div class="col-span-6 flex flex-col truncate pr-2">
+                <span class="text-[12px] font-bold text-[#0d1f38] truncate">{{ item.nombre_modelo }}</span>
+                <span class="text-[9px] font-semibold text-slate-400 mt-0.5">Stock Disponible: {{ item.stock_actual
+                  }}</span>
+              </div>
+
+              <div class="col-span-3 text-[11px] text-slate-500 text-center font-medium">{{ item.numero_serie || 'N/A'
+                }}</div>
+
+              <div class="col-span-2 flex justify-center">
+                <input type="number" min="1" [max]="item.stock_actual" [(ngModel)]="item.cantidad"
+                  class="w-16 h-8 text-center bg-[#fafbfc] border border-slate-200 rounded-md text-[13px] font-black text-[#003B8A] outline-none focus:border-[#003B8A] transition-colors">
+              </div>
+
+              <div class="col-span-1 flex justify-center">
+                <button (click)="eliminarFila(i)"
+                  class="text-slate-400 hover:text-red-600 p-1.5 rounded-md hover:bg-red-50 transition-colors">
+                  <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+        </div>
+      </app-card-form>
+
+    </div>
+  </div>
+
+  <app-footer-modal [paddingClass]="'p-4 px-6'">
+    <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+    <app-button-action [label]="'Programar Visita'" [claseCss]="'btn-agregar'" (click)="guardarVisita()">
+    </app-button-action>
+  </app-footer-modal>
+</div>

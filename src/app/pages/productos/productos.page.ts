@@ -139,7 +139,7 @@ timeoutBusqueda: any;
             ...pr,
             Estanteria: `${pr.Estanteria}`,
             Nombre: `${pr.Nombre}`,
-            MarcaModelo: `${pr.Marca} · Mod: ${pr.Modelo}`,
+            MarcaModelo: `${pr.Marca}`,
             Modelo: `${pr.Modelo}`,
             Precio: pr.Precio,
             Stock: pr.Stock,

@@ -26,7 +26,8 @@
                                             </svg>
                                         </button>
 
-                                        <h2 class="text-lg font-bold text-slate-800">{{ isEditMode ? 'Editar Cotización' : 'Nueva cotización' }}</h2>
+                                        <h2 class="text-lg font-bold text-slate-800">{{ isEditMode ? 'Editar Cotización'
+                                            : 'Nueva cotización' }}</h2>
                                     </div>
 
                                     <button (click)="limpiarFormulario()"
@@ -40,28 +41,30 @@
                                 </div>
                                 <div class="grid grid-cols-2 gap-4 mb-6">
                                     <input type="text" [formControl]="clienteControl" [matAutocomplete]="auto"
-    placeholder="Ingresa nombre del cliente registrado o no registrado"
-    class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                        placeholder="Ingresa nombre del cliente registrado o no registrado"
+                                        class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
 
-<mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente"
-    (optionSelected)="onClienteSeleccionado($event.option.value)">
-    <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
-        {{ c.nombre || c.Nombre }}
-    </mat-option>
+                                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente"
+                                        (optionSelected)="onClienteSeleccionado($event.option.value)">
+                                        <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
+                                            {{ c.nombre || c.Nombre }}
+                                        </mat-option>
 
-    <mat-option
-        *ngIf="clienteControl.value && typeof clienteControl.value === 'string' && clientesFiltrados.length === 0"
-        [value]="clienteControl.value">
-        <span class="italic text-slate-500">Usar como cliente eventual:</span>
-        <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value }}</span>
-    </mat-option>
-</mat-autocomplete>
+                                        <mat-option
+                                            *ngIf="clienteControl.value && typeof clienteControl.value === 'string' && clientesFiltrados.length === 0"
+                                            [value]="clienteControl.value">
+                                            <span class="italic text-slate-500">Usar como cliente eventual:</span>
+                                            <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value
+                                                }}</span>
+                                        </mat-option>
+                                    </mat-autocomplete>
 
                                     <input type="text" placeholder="Telefono (opcional)"
                                         class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                                         [(ngModel)]="cotizacion.contacto">
                                 </div>
                                 <div class="flex gap-3 mb-6">
+                                    <!-- Buscador de Productos (Existente) -->
                                     <div class="relative flex-1">
                                         <input type="text" [formControl]="productoControl"
                                             [matAutocomplete]="autoProducto"
@@ -75,17 +78,14 @@
                                                 class="h-auto py-2">
                                                 <div class="flex flex-col py-1">
                                                     <div class="flex justify-between items-center w-full gap-4">
-
                                                         <span class="text-xs font-bold text-[#0d1f38] truncate flex-1">
                                                             {{ p.Nombre }}
                                                         </span>
-
                                                         <span
                                                             class="text-xs font-black text-[#003B8A] whitespace-nowrap flex-shrink-0">
                                                             {{ p.Precio | currency: (cotizacion.moneda === 'USD' ? 'USD'
                                                             : 'MXN') : '$' }}
                                                         </span>
-
                                                     </div>
                                                     <div
                                                         class="text-[10px] text-slate-400 font-semibold mt-0.5 flex gap-2">
@@ -99,111 +99,167 @@
                                             </mat-option>
                                         </mat-autocomplete>
                                     </div>
+
+                                    <button type="button" (click)="agregarItemManual()"
+                                        class="flex items-center justify-center gap-1.5 bg-white border border-slate-200 hover:border-[#003B8A] text-[#003B8A] hover:bg-slate-50 text-xs font-bold px-4 py-2.5 rounded-lg transition-all shadow-sm whitespace-nowrap">
+                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        Partida Manual
+                                    </button>
                                 </div>
-                                <div class="rounded-lg border border-slate-200 bg-white shadow-sm mt-4">
+                               <div class="rounded-lg border border-slate-200 bg-white shadow-sm mt-4">
 
-                                    <div
-                                        class="bg-[#003B8A] rounded-t-lg grid grid-cols-[30px_2.5fr_1.5fr_1.5fr_1fr_60px_1.2fr_40px] gap-3 py-3.5 px-4 items-center">
-                                        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">N.</span>
-                                        <span
-                                            class="text-[10px] font-bold text-white uppercase tracking-widest">Producto
-                                            / Modelo</span>
-                                        <span
-                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-center">Origen</span>
-                                        <span
-                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-center">T.
-                                            Entrega</span>
-                                        <span
-                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-right">Precio
-                                            Unit.</span>
-                                        <span
-                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-center">Cant.</span>
-                                        <span
-                                            class="text-[10px] font-bold text-white uppercase tracking-widest text-right">Subtotal</span>
-                                        <span></span>
-                                    </div>
+    <!-- ENCABEZADOS -->
+    <div class="bg-[#003B8A] rounded-t-lg grid grid-cols-[30px_minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,1.2fr)_40px] gap-3 py-3.5 px-4 items-center">
+        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+        <span class="text-[10px] font-bold text-white uppercase tracking-widest">Producto</span>
+        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">Origen</span>
+        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">T. Entrega</span>
+        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-right">P. Unit.</span>
+        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-right">Flete</span>
+        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">Cant.</span>
+        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-right">Subtotal</span>
+        <span></span>
+    </div>
 
-                                    <div *ngFor="let item of detalles; let i = index"
-                                        class="grid grid-cols-[30px_2.5fr_1.5fr_1.5fr_1fr_60px_1.2fr_40px] gap-3 py-3 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center group">
+    <!-- FILAS -->
+    <div *ngFor="let item of detalles; let i = index"
+        class="grid grid-cols-[30px_minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,1.2fr)_40px] gap-3 py-3 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center group">
 
-                                        <div class="text-[12px] font-semibold text-slate-400 text-center">{{ i + 1 }}
-                                        </div>
+        <!-- 1. Número -->
+        <div class="text-[12px] font-semibold text-slate-400 text-center">{{ i + 1 }}</div>
 
-                                        <div class="flex flex-col justify-center pr-2 overflow-hidden">
-                                            <span class="text-[13px] font-bold text-[#0d1f38] leading-tight truncate"
-                                                title="{{ item.nombre_producto }}">
-                                                {{ item.nombre_producto }}
-                                            </span>
-                                            <span class="text-[10px] font-semibold text-slate-400 truncate mt-0.5"
-                                                title="Modelo">
-                                                {{ item.Modelo || item.Codigo_japon || 'Sin Cód.' }}
-                                            </span>
-                                        </div>
-                                        <div class="flex justify-center items-center px-1 w-full">
+        <!-- 2. Producto (Dinámico: BD vs Manual) -->
+        <div class="flex flex-col justify-center pr-2 overflow-hidden gap-1">
 
-    <span *ngIf="item.Marca?.toUpperCase().includes('SMC')"
-          class="w-full max-w-[120px] bg-slate-100 border border-slate-200 text-slate-500 rounded-md text-[11px] font-bold text-center py-1.5 truncate cursor-not-allowed select-none"
-          title="Origen fijo (SMC)">
-        {{ item.origen || 'N/A' }}
+            <ng-container *ngIf="item.id_producto">
+                <span class="text-[13px] font-bold text-[#0d1f38] leading-tight truncate" title="{{ item.nombre_producto }}">
+                    {{ item.nombre_producto }}
+                </span>
+                <span class="text-[10px] font-semibold text-slate-400 truncate" title="Modelo">
+                    {{ item.codigo_producto || 'Sin Cód.' }}
+                </span>
+            </ng-container>
+
+            <ng-container *ngIf="!item.id_producto">
+                <textarea rows="2" placeholder="Extra Descripción"
+                    class="appearance-none w-full bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8]  rounded-md outline-none text-[11px] font-normal text-slate-600 py-1.5 px-2 transition-colors resize-none leading-snug"
+                    [(ngModel)]="item.extra_descripcion_manual"></textarea>
+
+                <div class="flex gap-1.5">
+                    <input type="text" placeholder="Descripción"
+                        class="appearance-none w-full bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] rounded-md outline-none text-[10px] font-normal text-slate-600 py-1.5 px-2 transition-colors"
+                        [(ngModel)]="item.descripcion_manual">
+
+                    <input type="text" placeholder="Código Interno"
+                        class="appearance-none w-full bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] rounded-md outline-none text-[10px] font-normal text-slate-600 py-1.5 px-2 transition-colors"
+                        [(ngModel)]="item.codigo_manual">
+                </div>
+            </ng-container>
+
+        </div>
+
+        <!-- 3. Origen -->
+        <div class="flex justify-center items-center px-1 w-full">
+
+            <select *ngIf="esSMC(item)" [(ngModel)]="item.origen"
+                class="appearance-none w-full max-w-[130px] h-[30px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center px-2 transition-colors uppercase cursor-pointer">
+                <option value="" disabled selected>Origen SMC</option>
+                <option *ngFor="let o of ORIGENES_SMC" [value]="o">{{ o }}</option>
+            </select>
+
+            <input *ngIf="!esSMC(item)" type="text" placeholder="Ej. AVION"
+                class="appearance-none w-full max-w-[120px] h-[30px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center px-2 transition-colors uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-400"
+                [(ngModel)]="item.origen">
+        </div>
+
+        <!-- 4. Tiempo de Entrega -->
+        <div class="flex justify-center items-center px-1">
+            <input type="text" placeholder="Ej. 1-2 DÍAS"
+                class="appearance-none w-full max-w-[95px] h-[30px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center px-2 transition-colors uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-400"
+                [(ngModel)]="item.tiempo_entrega">
+        </div>
+
+       <div class="flex flex-col items-end pr-1 gap-0.5">
+            <input type="number" min="0" placeholder="$0.00"
+                [readonly]="!!item.id_producto"
+                [ngClass]="item.id_producto
+                    ? 'bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed'
+                    : ((!item.precio_unitario_cotizado)
+                        ? 'bg-[#fafbfc] border-amber-400 focus:border-amber-500 focus:ring-amber-400 text-slate-700'
+                        : 'bg-[#fafbfc] border-[#d2ddec] focus:border-[#003B8A] focus:ring-[#003B8A] text-slate-700')"
+                class="appearance-none w-full max-w-[90px] h-[30px] text-right border border-solid hover:border-[#a8bcd8] focus:ring-1 rounded-md outline-none text-[13px] font-semibold px-2 transition-colors disabled:hover:border-slate-200"
+                [(ngModel)]="item.precio_unitario_cotizado" (change)="recalcularFleteItem(item)"
+                [title]="item.id_producto ? 'Precio fijado por catálogo' : ''">
+
+        </div>
+        <!-- 6. Costo Flete: % o $, siempre manual (toggle en línea con el input) -->
+ <div class="flex flex-col items-end pr-1 gap-1 min-w-0">
+    <div class="flex bg-[#e2e8f0] rounded p-0.5 w-[60px] h-[16px] flex-shrink-0">
+        <button type="button" (click)="cambiarTipoFlete(item, 'PORCENTAJE')"
+            [ngClass]="item.tipo_flete === 'PORCENTAJE' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400'"
+            class="flex-1 rounded-sm text-[8px] leading-none transition-all">%</button>
+        <button type="button" (click)="cambiarTipoFlete(item, 'FIJO')"
+            [ngClass]="item.tipo_flete === 'FIJO' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400'"
+            class="flex-1 rounded-sm text-[8px] leading-none transition-all">$</button>
+    </div>
+
+    <!-- Toggle MXN/USD: solo tiene sentido en modo FIJO -->
+    <div class="flex bg-[#e2e8f0] rounded p-0.5 w-[60px] h-[16px] flex-shrink-0" *ngIf="item.tipo_flete === 'FIJO'">
+        <button type="button" (click)="cambiarMonedaFlete(item, 'MXN')"
+            [ngClass]="item.moneda_flete === 'MXN' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400'"
+            class="flex-1 rounded-sm text-[7px] leading-none transition-all">MXN</button>
+        <button type="button" (click)="cambiarMonedaFlete(item, 'USD')"
+            [ngClass]="item.moneda_flete === 'USD' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400'"
+            class="flex-1 rounded-sm text-[7px] leading-none transition-all">USD</button>
+    </div>
+
+    <input type="number" min="0" [placeholder]="item.tipo_flete === 'PORCENTAJE' ? '% ej. 11' : '$0.00'"
+        class="appearance-none w-full min-w-0 max-w-[60px] h-[26px] text-right bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[12px] font-semibold text-slate-600 px-2 transition-colors"
+        [(ngModel)]="item.valor_flete" (change)="recalcularFleteItem(item)">
+
+    <span class="text-[9px] text-slate-400 pr-0.5 truncate max-w-full" *ngIf="item.tipo_flete === 'PORCENTAJE'">
+        = {{ item.costo_flete | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
     </span>
 
-    <input *ngIf="!item.Marca?.toUpperCase().includes('SMC')" type="text"
-           placeholder="Ej. AVION 30%"
-           class="appearance-none w-full max-w-[120px] bg-transparent border border-transparent hover:bg-slate-100 focus:bg-white focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center py-1.5 transition-all cursor-pointer focus:cursor-text uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-300"
-           [(ngModel)]="item.origen">
-
+    <!-- En modo FIJO, muestra el equivalente convertido cuando la moneda del flete no coincide con la de la cotización -->
+    <span class="text-[9px] text-slate-400 pr-0.5 truncate max-w-full"
+        *ngIf="item.tipo_flete === 'FIJO' && item.moneda_flete === 'USD'">
+        = {{ item.costo_flete | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
+    </span>
 </div>
-                                        <div class="flex justify-center items-center px-1">
-                                            <input type="text" placeholder="Ej. 1-2 DÍAS"
-                                                class="appearance-none w-full max-w-[95px] bg-transparent border border-transparent hover:bg-slate-100 focus:bg-white focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center py-1.5 transition-all cursor-pointer focus:cursor-text uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-300"
-                                                [(ngModel)]="item.tiempo_entrega">
-                                        </div>
+        <!-- 7. Cantidad -->
+        <div class="flex justify-center">
+            <input type="number" min="1"
+                class="appearance-none w-full max-w-[50px] h-[30px] text-center bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] rounded-md text-[13px] font-black text-[#003B8A] outline-none focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] transition-colors m-0"
+                [(ngModel)]="item.cantidad_producto" (change)="calcularTotales()">
+        </div>
 
-                                        <div class="flex justify-end items-center pr-1">
-                                            <span
-                                                class="text-[13px] font-semibold text-slate-700 text-right whitespace-nowrap">
-                                                {{ item.precio_unitario_cotizado | currency: (cotizacion.moneda ===
-                                                'USD' ? 'USD' : 'MXN') : '$' }}
-                                            </span>
-                                        </div>
+        <!-- 8. Subtotal -->
+        <div class="text-[13px] font-bold text-[#003B8A] text-right whitespace-nowrap">
+    {{ item.subtotal_partida | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
+</div>
 
-                                        <div class="flex justify-center">
-                                            <input type="number" min="1"
-                                                class="appearance-none w-full max-w-[50px] h-[30px] text-center bg-[#fafbfc] border border-slate-200 hover:border-slate-300 rounded-md text-[13px] font-black text-[#003B8A] outline-none focus:bg-white focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] transition-all m-0"
-                                                [(ngModel)]="item.cantidad_producto" (change)="calcularTotales()">
-                                        </div>
+        <!-- 9. Botón Eliminar -->
+        <div class="flex justify-end items-center">
+            <button (click)="eliminarItem(i)" class="text-slate-300 hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-md hover:bg-red-50" title="Eliminar partida">
+                <svg class="w-4 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+            </button>
+        </div>
+    </div>
 
-                                        <div class="text-[13px] font-bold text-[#003B8A] text-right whitespace-nowrap">
-                                            {{ (item.cantidad_producto * item.precio_unitario_cotizado) | currency:
-                                            (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
-                                        </div>
-
-                                        <div class="flex justify-end items-center">
-                                            <button (click)="eliminarItem(i)"
-                                                class="text-slate-300 hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-md hover:bg-red-50"
-                                                title="Eliminar partida">
-                                                <svg class="w-4 h-5" fill="none" viewBox="0 0 24 24"
-                                                    stroke="currentColor">
-                                                    <path stroke-linecap="round" stroke-linejoin="round"
-                                                        stroke-width="2"
-                                                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                </svg>
-                                            </button>
-                                        </div>
-
-                                    </div>
-
-                                    <div *ngIf="detalles.length === 0"
-                                        class="py-12 flex flex-col items-center justify-center text-slate-400">
-                                        <svg class="w-12 h-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24"
-                                            stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                        </svg>
-                                        <p class="text-[13px] font-medium italic">No hay productos. Utiliza el buscador
-                                            para agregar ítems.</p>
-                                    </div>
-                                </div>
+    <!-- State Vacio -->
+    <div *ngIf="detalles.length === 0" class="py-12 flex flex-col items-center justify-center text-slate-400">
+        <svg class="w-12 h-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+        </svg>
+        <p class="text-[13px] font-medium italic">No hay productos. Utiliza el buscador o agrega una partida manual.</p>
+    </div>
+</div>
                             </div>
                         </div>
 

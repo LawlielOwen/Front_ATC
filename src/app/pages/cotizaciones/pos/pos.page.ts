@@ -18,7 +18,14 @@ import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { Asesor } from "../../../shared/model/asesor.model"
 import { AsesoresService } from "../../../core/services/Asesores.service";
+type TipoFlete = 'PORCENTAJE' | 'FIJO' | 'NINGUNO';
 
+interface OrigenConfig {
+  nombre: string;
+  tipo_flete: TipoFlete;
+  valor_flete: number; 
+  nota?: string;        
+}
 @Component({
   selector: 'app-pos',
   templateUrl: './pos.page.html',
@@ -29,7 +36,9 @@ import { AsesoresService } from "../../../core/services/Asesores.service";
     MatFormFieldModule, ReactiveFormsModule,
   ]
 })
+
 export class POSPage implements OnInit {
+  
   isEditMode: boolean = false;
   cotizacionHeaderData: any = null;
   cotizacionIdEdit: number | null = null;
@@ -42,6 +51,15 @@ export class POSPage implements OnInit {
 
   productoControl = new FormControl('');
   productosFiltrados: any[] = [];
+  readonly ORIGENES_SMC: string[] = [
+  'FABRICACION LOCAL',
+  'JPN A',
+  'JPN B',
+  'CHINA A',
+  'CHINA B',
+  'IDP'
+];
+
   cotizacion = {
     id_asesor: 0,
     id_cliente: null,
@@ -158,19 +176,28 @@ export class POSPage implements OnInit {
         } else {
           detallesCrudos = Object.values(res).find(Array.isArray) || [];
         }
+this.detalles = detallesCrudos.map((item: any) => ({
+  id_producto: item.id_producto,
 
-        this.detalles = detallesCrudos.map((item: any) => ({
-          id_producto: item.id_producto,
-          nombre_producto: item.nombre_producto,
-          Codigo_japon: item.Codigo_japon,
-          Codigo_numeral: item.Codigo_numeral,
-          Modelo: item.modelo_producto || item.Modelo,
-          Marca: item.marca_producto || item.Marca,
-          cantidad_producto: item.cantidad_producto,
-          precio_unitario_cotizado: item.precio_unitario_cotizado,
-          origen: item.origen || '',
-          tiempo_entrega: item.tiempo_entrega || ''
-        }));
+  nombre_producto: item.nombre_producto,
+  codigo_producto: item.codigo_producto || item.Codigo_numeral || '',
+  Codigo_japon: item.Codigo_japon,
+  Codigo_numeral: item.Codigo_numeral,
+  Marca: item.marca_producto || item.Marca,
+
+  cantidad_producto: item.cantidad_producto,
+  precio_unitario_cotizado: item.precio_unitario_cotizado,
+  origen: item.origen || '',
+  tiempo_entrega: item.tiempo_entrega || '',
+  tipo_flete: item.tipo_flete || 'FIJO',
+  valor_flete: item.valor_flete || 0,
+  moneda_flete: item.moneda_flete || 'MXN',
+  costo_flete: item.costo_flete || 0,
+
+  descripcion_manual: !item.id_producto ? item.nombre_producto : '',
+  extra_descripcion_manual: !item.id_producto ? item.extra_descripcion : '',
+  codigo_manual: !item.id_producto ? item.codigo_producto : ''
+}));
 
         this.calcularTotales();
       },
@@ -180,10 +207,44 @@ export class POSPage implements OnInit {
       }
     });
   }
+  esSMC(item: any): boolean {
+  return !!item.Marca?.toUpperCase().includes('SMC');
+}
+private hayPreciosFaltantes(): boolean {
+  return this.detalles.some(item => !item.id_producto && !item.precio_unitario_cotizado);
+}
+
+recalcularFleteItem(item: any) {
+  const precio = Number(item.precio_unitario_cotizado || 0); // siempre MXN
+  const valor = Number(item.valor_flete || 0);
+
+  if (item.tipo_flete === 'PORCENTAJE') {
+    item.costo_flete = +(precio * (valor / 100)).toFixed(2);
+  } else {
+
+    const tipoCambio = Number(this.cotizacion.tipo_cambio) || 1;
+    item.costo_flete = item.moneda_flete === 'USD'
+      ? +(valor * tipoCambio).toFixed(2)
+      : valor;
+  }
+
+  this.calcularTotales();
+}
+
+cambiarTipoFlete(item: any, tipo: 'PORCENTAJE' | 'FIJO') {
+  item.tipo_flete = tipo;
+  if (tipo === 'PORCENTAJE') item.moneda_flete = 'MXN'; 
+  this.recalcularFleteItem(item);
+}
+
+cambiarMonedaFlete(item: any, moneda: 'MXN' | 'USD') {
+  item.moneda_flete = moneda;
+  this.recalcularFleteItem(item);
+}
   cargarAsesores() {
     this.service.getAsesores().subscribe({
       next: (response: any) => {
-        this.asesores = response.filter((asesor: Asesor) => ['Asesor', 'Administrador'].includes(asesor.Rol));
+        this.asesores = response.filter((asesor: Asesor) => ['Asesor', 'Administrador'].includes(asesor.Rol) && asesor.Estatus === 1);
         if (this.data && this.data.id_asesor) {
           this.cotizacion.id_asesor = this.data.id_asesor.toString();
         }
@@ -218,25 +279,66 @@ export class POSPage implements OnInit {
     this.productosFiltrados = [];
   }
 
-  agregarItem(productoDB: any) {
-    // Mapeamos lo que viene de BD a lo que necesita el detalle
-    this.detalles.push({
-      id_producto: productoDB.id,
-      nombre_producto: productoDB.Nombre,
-      Codigo_japon: productoDB.Codigo_japon,
-      Codigo_numeral: productoDB.Codigo_numeral,
-      Modelo: productoDB.Modelo,
+// 1. Agregar un producto que SÍ está en la Base de Datos
+ agregarItem(productoDB: any) {
+  this.detalles.push({
+    id_producto: productoDB.id,
+    codigo_producto: productoDB.Codigo_numeral || productoDB.Nombre || '',
+    nombre_producto: productoDB.Nombre,
+    Marca: productoDB.Marca || productoDB.nombre_marca || '',
+    cantidad_producto: 1,
+    precio_unitario_cotizado: productoDB.Precio || 0,
+    origen: '',              
+    tipo_flete: 'FIJO',
+    moneda_flete: 'MXN',
+    valor_flete: 0,
+    costo_flete: 0,
+    tiempo_entrega: ''
+  });
+  this.calcularTotales();
+}
 
-      Marca: productoDB.Marca || productoDB.nombre_marca,
+agregarItemManual() {
+  this.detalles.push({
+    id_producto: null,
+    codigo_manual: '',
+    descripcion_manual: '',
+    extra_descripcion_manual: '',
+    Marca: '',
+    cantidad_producto: 1,
+    precio_unitario_cotizado: 0,
+    origen: '',
+    tipo_flete: 'FIJO',
+    moneda_flete: 'MXN',
+    valor_flete: 0,
+    costo_flete: 0,
+    tiempo_entrega: ''
+  });
+  this.calcularTotales();
+}
 
-      cantidad_producto: 1,
-      precio_unitario_cotizado: productoDB.Precio,
+  calcularTotales() {
+    let subtotalMXN = 0;
 
-      origen: productoDB.origen || '',
-      tiempo_entrega: ''
+    this.detalles.forEach(item => {
+        const precio = Number(item.precio_unitario_cotizado) || 0;
+        const flete = Number(item.costo_flete) || 0;
+        const cantidad = Number(item.cantidad_producto) || 1;
+        item.subtotal_partida = (precio * cantidad) + flete;
+
+        subtotalMXN += item.subtotal_partida;
     });
-    this.calcularTotales();
-  }
+
+    if (this.cotizacion.moneda === 'USD') {
+        this.subtotal_final = subtotalMXN / this.cotizacion.tipo_cambio;
+        this.iva_final = (subtotalMXN * 0.16) / this.cotizacion.tipo_cambio;
+        this.total_final = (subtotalMXN * 1.16) / this.cotizacion.tipo_cambio;
+    } else {
+        this.subtotal_final = subtotalMXN;
+        this.iva_final = subtotalMXN * 0.16;
+        this.total_final = subtotalMXN * 1.16;
+    }
+}
 
   eliminarItem(index: number) {
     this.detalles.splice(index, 1);
@@ -249,6 +351,10 @@ export class POSPage implements OnInit {
       toast.error('La cotización debe tener al menos un producto');
       return;
     }
+    if (this.hayPreciosFaltantes()) {
+    toast.warning('Hay una o más partidas manuales sin precio unitario capturado.');
+    return;
+  }
     if (!this.cotizacion.id_cliente && !this.cotizacion.nombre_prospecto) {
       toast.warning('Debes seleccionar un cliente o escribir el nombre del prospecto.');
       return;
@@ -341,7 +447,10 @@ export class POSPage implements OnInit {
       toast.error('La cotización debe tener al menos un producto');
       return;
     }
-
+if (this.hayPreciosFaltantes()) {
+    toast.warning('Hay una o más partidas manuales sin precio unitario capturado.');
+    return;
+  }
     if (!this.cotizacion.id_cliente && !this.cotizacion.nombre_prospecto) {
       toast.warning('Debes seleccionar un cliente o escribir el nombre de un cliente.');
       return;
@@ -450,20 +559,7 @@ export class POSPage implements OnInit {
     this.iva_final = 0;
     this.total_final = 0;
   }
-  calcularTotales() {
-    let subtotalMXN = this.detalles.reduce((acc, item) =>
-      acc + (item.precio_unitario_cotizado * item.cantidad_producto), 0);
-
-    if (this.cotizacion.moneda === 'USD') {
-      this.subtotal_final = subtotalMXN / this.cotizacion.tipo_cambio;
-      this.iva_final = (subtotalMXN * 0.16) / this.cotizacion.tipo_cambio;
-      this.total_final = (subtotalMXN * 1.16) / this.cotizacion.tipo_cambio;
-    } else {
-      this.subtotal_final = subtotalMXN;
-      this.iva_final = subtotalMXN * 0.16;
-      this.total_final = subtotalMXN * 1.16;
-    }
-  }
+ 
 
   irACot() {
     this.router.navigate(['/cotizaciones']);

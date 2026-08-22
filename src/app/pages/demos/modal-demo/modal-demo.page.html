@@ -1,0 +1,65 @@
+<div class="bg-[#f1f5f9] rounded-[10px] overflow-hidden shadow-2xl w-full mx-auto max-h-[90vh] flex flex-col border border-gray-100">
+  <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
+
+  <app-header-modal [label]="isEditMode ? 'Editar Equipo Demo' : 'Registrar Nuevo Demo'"></app-header-modal>
+
+  <div class="p-6 overflow-y-auto flex-1">
+    <div class="flex flex-col gap-5 animate-fade-in">
+
+      <!-- TARJETA 1: Información del Equipo -->
+      <app-card-form title="Información del Equipo">
+        <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M9 3v2m6-2v2M9 19v2m6-2v2M5 9H3m2 6H3m18-6h-2m2 6h-2M7 19h10a2 2 0 002-2V7a2 2 0 00-2-2H7a2 2 0 00-2 2v10a2 2 0 002 2zM9 9h6v6H9V9z" />
+        </svg>
+
+        <div class="flex flex-col gap-4 md:col-span-2">
+          <app-input tipo="text" placeholder="Ej. Sensor Fotoeléctrico Demo" label="Nombre/Modelo del Equipo *"
+            [(value)]="demoNuevo.nombre_modelo"></app-input>
+
+          <app-input tipo="text" placeholder="Descripción breve o especificaciones" label="Descripción"
+            [(value)]="demoNuevo.descripcion"></app-input>
+
+          <app-input tipo="text" placeholder="Ej. SN-89237492 (Opcional)" label="Codigo"
+            [(value)]="demoNuevo.numero_serie"></app-input>
+        </div>
+      </app-card-form>
+
+      <!-- TARJETA 2: Inventario y Marca -->
+      <app-card-form title="Clasificación e Inventario">
+        <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+
+        <div class="flex flex-col gap-4 md:col-span-2">
+          <div class="flex gap-4">
+            
+            <div class="w-1/2 flex flex-col gap-y-1">
+              <app-select label="Marca *" [(value)]="demoNuevo.id_marca">
+                <option value="">Seleccione marca...</option>
+                <option *ngFor="let marca of opcionesMarcas" [value]="marca.value">
+                  {{ marca.label }}
+                </option>
+              </app-select>
+            </div>
+
+            <div class="w-1/2 flex flex-col gap-1.5">
+              <app-input tipo="number" placeholder="0" label="Stock en Oficina *"
+                [(value)]="demoNuevo.stock"></app-input>
+            </div>
+
+          </div>
+        </div>
+      </app-card-form>
+
+    </div>
+  </div>
+
+  <app-footer-modal [paddingClass]="'p-4 px-6'">
+    <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+    <app-button-action [label]="isEditMode ? 'Guardar Cambios' : 'Registrar Demo'" [claseCss]="'btn-agregar'"
+      (click)="procesarAccion()">
+    </app-button-action>
+  </app-footer-modal>
+</div>

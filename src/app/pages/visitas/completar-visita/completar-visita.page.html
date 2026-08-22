@@ -1,0 +1,89 @@
+<div class="bg-white rounded-2xl overflow-hidden w-full max-w-3xl mx-auto max-h-[85vh] flex flex-col border border-slate-200 shadow-2xl">
+
+  <app-header-modal [label]="'Completar Visita — ' + (visita.empresa_destino || 'Sin destino')"></app-header-modal>
+
+  <div class="p-4 overflow-y-auto bg-[#f4f7fa] flex-1 flex flex-col gap-4">
+
+    <!-- Resumen de actividades -->
+    <app-card-details titulo="Resumen de la Visita">
+      <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+
+      <div class="mt-1">
+        <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-1 block">
+          ¿Qué se hizo durante la visita? <span class="text-red-500">*</span>
+        </span>
+        <!-- Textarea: quita font-medium -->
+<textarea
+  [(ngModel)]="resumenActividades"
+  rows="4"
+  placeholder="Ej: Se fue a reparar el equipo X, se llevó demo del modelo Y para prueba en cliente..."
+  class="w-full border border-slate-200 rounded-lg p-3 text-[12px] text-[#0d1f38] font-normal placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[#003B8A] resize-none">
+</textarea>
+      </div>
+    </app-card-details>
+
+    <!-- Equipos asociados -->
+    <app-card-details titulo="Equipos y Demostraciones">
+      <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+          d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+      </svg>
+
+      <!-- Loading -->
+      <div *ngIf="cargandoDetalles" class="text-[12px] text-slate-400 py-6 text-center">
+        Cargando equipos asociados...
+      </div>
+
+      <!-- Sin equipos -->
+      <div *ngIf="!cargandoDetalles && equipos.length === 0"
+        class="text-[12px] text-slate-400 py-6 text-center italic">
+        Esta visita no tiene equipos demo asociados.
+      </div>
+
+      <!-- Lista de equipos -->
+      <div *ngIf="!cargandoDetalles && equipos.length > 0" class="flex flex-col gap-2 mt-1 max-h-64 overflow-y-auto pr-1">
+        <div *ngFor="let equipo of equipos"
+          class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-3">
+
+          <div class="flex items-center gap-3 min-w-0 flex-1">
+            <div class="w-9 h-9 rounded-lg bg-[#f0f9f5] flex items-center justify-center flex-shrink-0">
+              <svg class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+              </svg>
+            </div>
+            <div class="flex flex-col min-w-0">
+              <span class="text-[#0d1f38] font-semibold text-[12px] leading-tight truncate">
+                {{ equipo.nombre_modelo }}
+              </span>
+              <span class="text-[10px] text-slate-400 truncate" *ngIf="equipo.numero_serie">
+                Serie: {{ equipo.numero_serie }}
+              </span>
+            </div>
+          </div>
+
+         <!-- Select: quita font-semibold -->
+<select [(ngModel)]="equipo.estatus_retorno"
+  class="border border-slate-300 rounded-lg text-[11px] font-normal text-[#0d1f38] px-2 py-1.5 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[#003B8A]">
+  <option *ngFor="let opcion of opcionesEstatusRetorno" [value]="opcion">{{ opcion }}</option>
+</select>
+        </div>
+      </div>
+    </app-card-details>
+
+  </div>
+
+  <app-footer-modal [paddingClass]="'p-3 px-5 rounded-b-2xl'">
+    <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" (click)="cerrarModal()"></app-button-action>
+    <div class="flex gap-2.5">
+      <app-button-action
+        [label]="guardando ? 'Guardando...' : 'Completar Visita'"
+        [claseCss]="'btn-editar'"
+        (click)="guardar()">
+      </app-button-action>
+    </div>
+  </app-footer-modal>
+</div>

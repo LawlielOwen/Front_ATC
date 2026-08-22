@@ -23,9 +23,9 @@ export class ClientesService {
 
     return this.http.post(`${this.apiUrl}/clientes`, datos);
   }
-  updateCliente(id: number, cliente: Cliente) {
-    return this.http.put(`${this.apiUrl}/clientes/${id}`, cliente);
-  }
+updateCliente(id: number, cliente: FormData): Observable<any> {
+  return this.http.put(`${this.apiUrl}/clientes/${id}`, cliente);
+}
   deleteCliente(id: number) {
     return this.http.delete(`${this.apiUrl}/clientes/${id}`);
   }
@@ -79,4 +79,7 @@ export class ClientesService {
           formData.append('CSF', archivo);
         return this.http.post<any>(`${this.apiUrl}/clientes/${id}/CSF`, formData);
     }
+    asignarCredito(id: number, tiene_credito: boolean, limite_credito: number): Observable<any> {
+  return this.http.put(`${this.apiUrl}/clientes/${id}/credito`, { tiene_credito, limite_credito });
+}
 }

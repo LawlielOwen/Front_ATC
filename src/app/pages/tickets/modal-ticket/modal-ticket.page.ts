@@ -68,10 +68,10 @@ export class ModalTicketPage implements OnInit {
 
       if (typeof valorBuscado === 'object' && valorBuscado !== null) {
         this.ticketData.id_cliente = valorBuscado.id || valorBuscado.Id || valorBuscado.ID;
-        this.ticketData.nombre_prospecto = ''; // Cliente registrado, no hace falta el texto libre
+        this.ticketData.nombre_prospecto = '';
       } else if (typeof valorBuscado === 'string') {
         this.ticketData.id_cliente = null;
-        this.ticketData.nombre_prospecto = valorBuscado; // Prospecto sin registrar
+        this.ticketData.nombre_prospecto = valorBuscado;
       }
     });
   }
@@ -79,7 +79,7 @@ export class ModalTicketPage implements OnInit {
   cargarAsesores() {
     this.asesoresService.getAsesores().subscribe({
       next: (response: any) => {
-        this.asesores = response.filter((asesor: Asesor) => ['Asesor', 'Administrador'].includes(asesor.Rol));
+        this.asesores = response.filter((asesor: Asesor) => ['Asesor', 'Administrador'].includes(asesor.Rol) && asesor.Estatus === 1);
       },
       error: (err) => console.error('Error al cargar asesores', err)
     });
@@ -94,7 +94,6 @@ export class ModalTicketPage implements OnInit {
           this.clientesFiltrados = this.clientes;
         }
 
-        // Hasta tener la lista de clientes cargada podemos precargar el ticket a editar
         if (this.data && this.data.ticket) {
           this.precargarTicket(this.data.ticket);
         }

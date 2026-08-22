@@ -11,11 +11,9 @@ import { EstatusComponent } from '../../shared/components/UI/Filter/estatus/esta
 import { CountComponent } from '../../shared/components/UI/count/count.component'
 import { ContainerTableComponent } from '../../shared/components/layout/container-table/container-table.component';
 import { PaginationComponent } from '../../shared/components/UI/pagination/pagination.component';
-import { FiltroDinamicoComponent } from '../../shared/components/UI/Filter/filtro-dinamico/filtro-dinamico.component';
 import { TableComponent, TableColumn } from '../../shared/components/UI/table/table.component';
 import { TableSkeletonComponent } from '../../shared/components/UI/table/table-skeleton/table-skeleton.component';
 import { AuthService } from '../../core/services/auth.service';
-import { toast } from 'ngx-sonner';
 import { TicketService } from '../../core/services/Tickets.service';
 import { MatDialog } from '@angular/material/dialog';
 import { ModalTicketPage } from './modal-ticket/modal-ticket.page';
@@ -27,7 +25,7 @@ import { DetalleTicketPage } from './detalle-ticket/detalle-ticket.page';
   standalone: true,
   imports: [IonicModule, SiderbarComponent, HeaderComponent, ButtonLayoutComponent,
     ButtonNewComponent, SearchBarComponent, EstatusComponent, CountComponent, ContainerTableComponent,
-    SearchLayoutComponent, PaginationComponent, FiltroDinamicoComponent, TableComponent, TableSkeletonComponent,
+    SearchLayoutComponent, PaginationComponent, TableComponent, TableSkeletonComponent,
     CommonModule
   ]
 })
@@ -72,29 +70,6 @@ export class TicketsPage implements OnInit {
       columnasBase.splice(1, 0, { header: 'Asesor', key: 'nombre_asesor', type: 'text' });
     }
 
-    const opcionesMenuAutorizadas = [];
-    if (this.authService.tieneAcceso(['Administrador', 'Asesor'])) {
-      opcionesMenuAutorizadas.push({
-        accion: 'editar',
-        etiqueta: 'Modificar/Avanzar'
-      });
-      opcionesMenuAutorizadas.push({
-        accion: 'cerrar',
-        etiqueta: 'Cerrar Ticket',
-        mostrarSi: (row: any) => row.estatus !== 4
-      });
-    }
-
-    if (opcionesMenuAutorizadas.length > 0) {
-      columnasBase.push({
-        header: '',
-        key: 'acciones',
-        type: 'actions',
-        align: 'center',
-        omitirBase: true,
-        menuOptions: opcionesMenuAutorizadas
-      });
-    }
 
     this.columnasTickets = columnasBase;
   }
@@ -111,8 +86,7 @@ cargarTickets() {
     const textoBusqueda = this.busqueda || '';
     const estatus = this.estatusActual || 0;
     
-    // --- NUEVA LÓGICA: Extraer idAsesor desde el Token JWT ---
-    let idAsesorFiltro = 0; // Por defecto 0 para que traiga todos (Administrador)
+    let idAsesorFiltro = 0; 
     const token = localStorage.getItem('token');
 
     if (token) {
@@ -120,7 +94,6 @@ cargarTickets() {
         const payload = JSON.parse(atob(token.split('.')[1]));
         const rol = payload.Rol ? payload.Rol.toLowerCase().trim() : '';
 
-        // Si es asesor, filtramos estrictamente por su ID
         if (rol === 'asesor') {
           idAsesorFiltro = payload.id;
         }

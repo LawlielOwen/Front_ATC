@@ -2,8 +2,9 @@
 flex flex-col border border-gray-100">
   <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
 
-<app-header-modal [label]="isUpdateCsfMode ? 'Actualizar Constancia (CSF)' : (isEditMode ? 'Editar Cliente' : 'Agregar Cliente')">
-    
+  <app-header-modal
+    [label]="isUpdateCsfMode ? 'Actualizar Constancia (CSF)' : (isEditMode ? 'Editar Cliente' : 'Agregar Cliente')">
+
     <div *ngIf="!isEditMode && !isUpdateCsfMode" class="flex bg-[#e2e8f0] p-1 rounded-lg w-[240px] h-[40px] relative">
       <button (click)="uploadMode = true"
         [ngClass]="uploadMode ? 'bg-white text-[#003B8A] shadow-lg font-bold' : 'bg-transparent text-[#475569] hover:text-[#0f172a]'"
@@ -66,50 +67,120 @@ flex flex-col border border-gray-100">
           </div>
         </div>
       </app-card-form>
-
       <app-card-form title="Datos operativos">
         <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
             d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
         </svg>
 
+        <!-- Fila 1: solo Teléfono -->
         <div class="flex flex-col gap-4">
           <app-input tipo="text" placeholder="ej. 4771234567" label="Teléfono de Contacto" maxlength="14"
             [(value)]="clienteNuevo.contacto_principal"></app-input>
-          
-          <app-select label="Asesor Asignado *" [(value)]="clienteNuevo.id_asesor">
-            <option value="">Seleccione un asesor...</option>
-            <option *ngFor="let asesor of asesores" [value]="asesor.id">
-              {{ asesor.Nombre_completo }}
-            </option>
-          </app-select>
         </div>
 
+        <!-- Fila 2: Correo y Origen -->
         <div class="space-y-4">
-          <div class="flex flex-col gap-1.5">
-            <app-input tipo="text" placeholder="ej. correo@empresa.com" label="Correo Electrónico"
-              [(value)]="clienteNuevo.correo_contacto"></app-input>
+          <app-input tipo="text" placeholder="ej. correo@empresa.com" label="Correo Electrónico"
+            [(value)]="clienteNuevo.correo_contacto"></app-input>
+        </div>
+
+        <!-- Asesores Responsables: FUERA del split de 2 columnas, ancho completo -->
+        <div class="col-span-1 md:col-span-2 mt-4 pt-4 border-t border-gray-200">
+          <div class="flex justify-between items-center mb-4">
+            <h3 class="text-[#0d1f38] font-bold text-sm">Asesores Responsables</h3>
+            <button (click)="agregarAsesor()" type="button"
+              class="text-xs bg-[#e8f5f0] text-[#0f6e56] font-bold px-3 py-1.5 rounded-md hover:bg-[#d1eadd] transition-colors flex items-center gap-1">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Agregar otro asesor
+            </button>
           </div>
 
-          <div class="flex flex-col gap-y-1">
-            <app-select label="Origen del asesor *" [(value)]="clienteNuevo.asesor_tipo">
-              <option value="">Seleccione origen</option>
-              <option value="Asesor propio">Asesor propio</option>
-              <option value="Asignado por la sucursal">Asignado por Sucursal</option>
-            </app-select>
+          <div *ngFor="let rel of clienteNuevo.asesoresAsignados; let i = index"
+            class="bg-white border border-gray-200 rounded-lg p-4 mb-4 relative shadow-sm">
+
+            <button *ngIf="clienteNuevo.asesoresAsignados.length > 1" (click)="removerAsesor(i)"
+              class="absolute top-3 right-3 text-red-500 hover:bg-red-50 p-1 rounded-md">
+              <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <app-select label="Asesor Asignado *" [(value)]="rel.id_asesor">
+                <option value="">Seleccione un asesor...</option>
+                <option *ngFor="let asesor of asesores" [value]="asesor.id">{{ asesor.Nombre_completo }}</option>
+              </app-select>
+
+              <app-select label="Origen del asesor *" [(value)]="rel.asesor_tipo">
+                <option value="">Seleccione origen</option>
+                <option value="Asesor propio">Asesor propio</option>
+                <option value="Asignado por la sucursal">Asignado por Sucursal</option>
+              </app-select>
+            </div>
+
+            <div class="mt-4 pt-4 border-t border-gray-100">
+              <label class="block text-sm font-medium text-[#414a53] mb-3">Marcas Asignadas *</label>
+              <div class="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2.5">
+                <label *ngFor="let marca of opcionesMarcas"
+                  class="flex items-center gap-2 text-sm cursor-pointer select-none hover:bg-blue-50 p-2 rounded-md border transition-all"
+                  [class.border-[#003B8A]]="rel.marcasArray.includes(marca.label)"
+                  [class.bg-blue-50]="rel.marcasArray.includes(marca.label)"
+                  [class.border-gray-200]="!rel.marcasArray.includes(marca.label)">
+                  <input type="checkbox" class="sr-only peer" [value]="marca.label"
+                    (change)="toggleMarca($event, marca.label, i)" [checked]="rel.marcasArray.includes(marca.label)">
+                  <span
+                    class="w-4 h-4 shrink-0 rounded border border-gray-300 flex items-center justify-center peer-checked:bg-[#003B8A] peer-checked:border-[#003B8A]">
+                    <svg *ngIf="rel.marcasArray.includes(marca.label)" class="w-3 h-3 text-white" fill="none"
+                      viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </span>
+                  <span class="text-gray-700 font-medium">{{ marca.label }}</span>
+                </label>
+              </div>
+            </div>
           </div>
         </div>
       </app-card-form>
+      <div class="col-span-1 md:col-span-2">
+        <app-card-form title="Datos Financieros">
+          <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+
+          <div class="flex flex-col gap-4 w-full">
+            <div class="flex items-center justify-between p-4 border border-gray-200 rounded-lg bg-gray-50 w-full">
+              <div>
+                <h4 class="text-sm font-medium text-gray-900">Línea de Crédito</h4>
+                <p class="text-xs text-gray-500">Habilitar si el cliente tiene crédito aprobado para compras.</p>
+              </div>
+              <label class="relative inline-flex items-center cursor-pointer shrink-0">
+                <input type="checkbox" class="sr-only peer" [(ngModel)]="clienteNuevo.tiene_credito">
+                <div
+                  class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#003B8A]">
+                </div>
+              </label>
+            </div>
+
+            <div class="mt-2 transition-all duration-300 w-full" *ngIf="clienteNuevo.tiene_credito">
+              <app-input tipo="number" placeholder="ej. 50000.00" label="Límite de Crédito Autorizado (MXN) *"
+                [(value)]="clienteNuevo.limite_credito"></app-input>
+            </div>
+          </div>
+        </app-card-form>
+      </div>
     </div>
   </div>
 
   <app-footer-modal [paddingClass]="'p-4 px-6'">
     <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
-   <app-button-action 
+    <app-button-action
       [label]="isUpdateCsfMode ? 'Subir Constancia' : (uploadMode ? 'Procesar PDF' : (isEditMode ? 'Guardar Cambios' : 'Guardar Cliente'))"
-      [disabled]="uploadMode && !archivoActual" 
-      [claseCss]="'btn-agregar'" 
-      (click)="procesarAccion()">
+      [disabled]="uploadMode && !archivoActual" [claseCss]="'btn-agregar'" (click)="procesarAccion()">
     </app-button-action>
   </app-footer-modal>
 </div>

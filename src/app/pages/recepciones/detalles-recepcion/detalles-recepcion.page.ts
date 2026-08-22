@@ -102,7 +102,7 @@ cargarIncidentesDelPedido() {
       panelClass: [],
       data: {
         pedido: pedido, 
-        productos: this.productosDetalle // Mandamos la tabla de productos que ya cargaste en este modal
+        productos: this.productosDetalle 
       }
     });
 

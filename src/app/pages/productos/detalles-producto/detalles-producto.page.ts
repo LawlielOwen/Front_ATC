@@ -5,7 +5,6 @@ import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dial
 import { ProductoService } from '../../../core/services/Productos.service'
 import { ModalProductoPage } from "../modal-producto/modal-producto.page";
 
-// Importa aquí tus componentes Standalone (asegúrate de que las rutas coincidan con tu proyecto)
 import { HeaderModalComponent } from "../../../shared/components/UI/modal/header-modal/header-modal.component";
 import { FooterModalComponent } from "../../../shared/components/UI/modal/footer-modal/footer-modal.component";
 import { CardDetailsComponent } from "../../../shared/components/UI/modal/card-details/card-details.component";

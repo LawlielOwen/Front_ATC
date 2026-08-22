@@ -46,9 +46,11 @@ export class ClientesPage implements OnInit {
     timeoutBusqueda: any;
 
   ngOnInit() {
+    
+  }
+  ionViewWillEnter() {
     this.cargarClientes();
     this.obtenerTotalActivos();
-    
   }
   mostrarSidebarMobile() {
     if (this.sidebar) {

@@ -41,7 +41,6 @@ export class ModalProductoPage implements OnInit {
     Precio: null as any,
     Codigo_numeral: '',
     Codigo_japon: '',
-    Modelo: '',
     Estanteria: '',
     Caja: '',
     Stock: null as any,
@@ -81,37 +80,15 @@ esSMC: boolean = false;
   cerrar() {
     this.dialogRef.close(false)
   }
-verificarMarcaSMC(limpiarOrigen: boolean = true) {
-    if (!this.productoNuevo.id_marca) {
-      this.esSMC = false;
-      if (limpiarOrigen) this.productoNuevo.origen = ''; 
-      return;
-    }
 
-    const marcaSeleccionada = this.opcionesMarcas.find(
-      (m: any) => m.value == this.productoNuevo.id_marca
-    );
-
-    if (marcaSeleccionada && marcaSeleccionada.label.toUpperCase().includes('SMC')) {
-      this.esSMC = true;
-    } else {
-      this.esSMC = false;
-      if (limpiarOrigen) {
-        this.productoNuevo.origen = '';
-      }
-    }
-  }
   ngOnInit() {
   }
  procesarAccion() {
-    // Disparamos la validación. Si falla, el return detiene el guardado.
     if (!this.validarCampos()) {
       return;
     }
 
-    // Si llega hasta aquí, los datos son 100% seguros
     if (this.isEditMode) {
-      this.verificarMarcaSMC();
       this.actualizarProducto();
     } else {
       this.guardarNuevoProducto();
@@ -134,7 +111,7 @@ verificarMarcaSMC(limpiarOrigen: boolean = true) {
     this.ps.updateProducto(idProducto, this.productoNuevo as any).subscribe({
       next: (response) => {
         toast.success('Producto actualizado correctamente');
-        this.dialogRef.close(true); // Esto es suficiente para cerrar y avisar
+        this.dialogRef.close(true);
       },
       error: (err) => {
         console.error(err);
@@ -143,26 +120,21 @@ verificarMarcaSMC(limpiarOrigen: boolean = true) {
     });
   }
 validarCampos(): boolean {
-    // 1. Sanitizar campos de texto (Obligatorios)
     this.productoNuevo.Nombre = (this.productoNuevo.Nombre || '').toString().trim();
     this.productoNuevo.Descripcion = (this.productoNuevo.Descripcion || '').toString().trim();
     this.productoNuevo.Codigo_numeral = (this.productoNuevo.Codigo_numeral || '').toString().trim();
     this.productoNuevo.Codigo_japon = (this.productoNuevo.Codigo_japon || '').toString().trim();
-    this.productoNuevo.Modelo = (this.productoNuevo.Modelo || '').toString().trim();
     this.productoNuevo.Estanteria = (this.productoNuevo.Estanteria || '').toString().trim();
     this.productoNuevo.Caja = (this.productoNuevo.Caja || '').toString().trim();
 
-    // 1.1 Sanitizar campos de texto (Opcionales)
     this.productoNuevo.ExtraDescripcion = (this.productoNuevo.ExtraDescripcion || '').toString().trim();
     this.productoNuevo.origen = (this.productoNuevo.origen || '').toString().trim();
 
-    // 2. Validar que los obligatorios no estén vacíos
     if (
       !this.productoNuevo.Nombre ||
       !this.productoNuevo.Descripcion ||
       !this.productoNuevo.Codigo_numeral ||
       !this.productoNuevo.Codigo_japon ||
-      !this.productoNuevo.Modelo ||
       !this.productoNuevo.Estanteria ||
       !this.productoNuevo.Caja ||
       !this.productoNuevo.id_marca
@@ -197,6 +169,6 @@ validarCampos(): boolean {
       this.productoNuevo.Apartado = apartadoNumerico; 
     }
 
-    return true; // Si superó todas las pruebas, los datos son perfectos
+    return true; 
   }
 }

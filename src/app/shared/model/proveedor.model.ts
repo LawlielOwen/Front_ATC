@@ -1,6 +1,4 @@
-// ==========================================
-// MODELOS PARA ENVIAR DATOS (PAYLOADS)
-// ==========================================
+
 export interface ProductoRecepcion {
     id_producto: number;
     cantidad_buena: number; 
@@ -16,11 +14,7 @@ export interface RecepcionPedidoPayload {
     productos: ProductoRecepcion[]; 
 }
 
-// ==========================================
-// NUEVO: MODELO PARA MOSTRAR EN LA TABLA
-// ==========================================
 export interface PedidoTabla {
-    // 1. Datos crudos que devuelve tu vista SQL (verPedidosGeneral)
     id_pedido: number;
     id_proveedor: number;
     id_asesor: number;

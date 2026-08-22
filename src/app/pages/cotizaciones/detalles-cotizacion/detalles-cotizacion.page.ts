@@ -51,7 +51,7 @@ export class DetallesCotizacionPage implements OnInit {
   cerrar() {
     this.dialogRef.close(false);
   }
-  cargarDetallesCot() {
+cargarDetallesCot() {
     this.cargando = true;
     this.cs.obtenerCotizacionPorId(this.cot.id).subscribe({
       next: (res: any) => {
@@ -70,22 +70,22 @@ export class DetallesCotizacionPage implements OnInit {
           currencyDisplay: 'narrowSymbol' as any
         });
 
-        // 1. Identificamos si es USD y obtenemos el tipo de cambio
         const esUSD = this.cot.moneda === 'USD';
-        // Usamos el tipo de cambio de la cotización, si no hay o es 0, usamos 1 para no afectar el valor
         const factorConversion = (esUSD && this.cot.tipo_cambio > 0) ? Number(this.cot.tipo_cambio) : 1;
 
         this.cotizacionDetalle = detallesCrudos.map((item: any) => {
           const precioRaw = item.precio_unitario || item.precio_unitario_cotizado || 0;
+          const fleteRaw = item.costo_flete || 0;
 
-          // 2. Aplicamos la conversión matemática
+  
           const precioConvertido = Number(precioRaw) / factorConversion;
-          const importeConvertido = (item.cantidad_producto * precioConvertido) || 0;
+          const fleteConvertido = Number(fleteRaw) / factorConversion;
+          const importeConvertido = (item.cantidad_producto * precioConvertido) + fleteConvertido;
 
           return {
             ...item,
-            // 3. Formateamos ya la cantidad dividida en dólares
             precio_formateado: formateador.format(precioConvertido),
+            flete_formateado: formateador.format(fleteConvertido),
             importe_formateado: formateador.format(importeConvertido)
           };
         });
@@ -106,7 +106,7 @@ export class DetallesCotizacionPage implements OnInit {
         this.cargando = false;
       }
     });
-  }
+}
   cancelarCotizacion(cot: any) {
     const dialogRef = this.dialog.open(DeleteComponent, {
       width: '400px',

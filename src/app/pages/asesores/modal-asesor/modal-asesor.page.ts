@@ -41,7 +41,7 @@ import { DateComponent } from "../../../shared/components/UI/form/date/date.comp
 })
 export class ModalAsesorPage implements OnInit {
   isEditMode: boolean = false;
-  guardando: boolean = false; // Para deshabilitar el botón mientras carga
+  guardando: boolean = false; 
 
   asesorNuevo = {
     id: 0,
@@ -68,7 +68,6 @@ export class ModalAsesorPage implements OnInit {
       this.isEditMode = true;
       this.asesorNuevo = { ...this.data };
 
-      // Ajustamos las fechas para el mat-datepicker evitando el desfase de 1 día
       if (this.data.Fecha_nacimiento) {
         const f_nac = this.data.Fecha_nacimiento.substring(0, 10);
         this.asesorNuevo.Fecha_nacimiento = new Date(`${f_nac}T12:00:00`);
@@ -97,9 +96,8 @@ private formatearParaBD(fecha: any): string {
   }
 
 procesarAccion() {
-    // Disparamos la validación estricta
     if (!this.validarAsesor()) {
-      return; // Se detiene si algún dato es incorrecto
+      return; 
     }
 
     this.guardando = true;
@@ -171,7 +169,7 @@ procesarAccion() {
         toast.error('El teléfono debe ser un número válido de entre 10 y 15 dígitos.');
         return false;
       }
-      this.asesorNuevo.telefono = telLimpio; // Guardamos el número limpio
+      this.asesorNuevo.telefono = telLimpio; 
     } else {
       this.asesorNuevo.telefono = '';
     }
@@ -197,6 +195,6 @@ procesarAccion() {
     
     this.asesorNuevo.contra = passGuardar;
 
-    return true; // Todos los datos pasaron los filtros
+    return true; 
   }
 }

@@ -76,6 +76,21 @@ const routes: Routes = [
     path: 'no-autorizado',
     loadChildren: () => import('./pages/no-autorizado/no-autorizado.module').then( m => m.NoAutorizadoPageModule)
   },
+  {
+    path: 'demos',
+    loadChildren: () => import('./pages/demos/demos.module').then( m => m.DemosPageModule),
+    canActivate: [authGuard]
+  },
+  {
+    path: 'visitas',
+    loadChildren: () => import('./pages/visitas/visitas.module').then( m => m.VisitasPageModule),
+    canActivate: [authGuard]
+  },  {
+    path: 'proyectos',
+    loadChildren: () => import('./pages/proyectos/proyectos.module').then( m => m.ProyectosPageModule)
+  },
+
+
 
 ];
 

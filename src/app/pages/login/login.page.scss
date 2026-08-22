@@ -5,7 +5,6 @@ ion-content {
   --padding-end: 0;
 }
 
-// ── Keyframes ──────────────────────────────────────────
 @keyframes fadeSlideUp {
   from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -16,7 +15,6 @@ ion-content {
   to   { opacity: 1; }
 }
 
-// ── Layout principal ───────────────────────────────────
 .split-container {
   display: flex;
   height: 100vh;
@@ -28,13 +26,10 @@ ion-content {
   }
 }
 
-// ══════════════════════════════════════════════════════
-// PANEL IZQUIERDO
-// ══════════════════════════════════════════════════════
+
 .left-panel {
   background: linear-gradient(145deg, #003B8A 0%, #005a6e 60%, #008B72 100%);
   
-  // Patrón de puntos sutil para dar profundidad
   background-image:
     radial-gradient(circle at 20% 80%, rgba(0, 139, 114, 0.3) 0%, transparent 50%),
     radial-gradient(circle at 80% 20%, rgba(0, 59, 138, 0.4) 0%, transparent 50%),
@@ -160,9 +155,7 @@ ion-content {
   }
 }
 
-// ══════════════════════════════════════════════════════
-// PANEL DERECHO
-// ══════════════════════════════════════════════════════
+
 .right-panel {
   background-color: #ffffff;
   display: flex;
@@ -220,7 +213,6 @@ flex: 1;
     font-size: 0.88rem;
   }
 
-  // ── Grupos de input ───────────────────────────────
   .input-group {
     margin-bottom: 1.4rem;
 
@@ -235,50 +227,43 @@ flex: 1;
       margin-bottom: 0.5rem;
     }
 
-    // Wrapper relativo para posicionar los íconos
     .input-wrapper {
       position: relative;
     }
 
-    // ✅ FIX FOCUS: --border-color va en el HOST, NO dentro de ::part()
     ion-input {
       --background: #f8fafc;
       --border-color: #e2e8f0;
       --border-width: 1.5px;
       --border-radius: 10px;
       --placeholder-color: #b0bec5;
-      --padding-start: 22px; // espacio para ícono izquierdo
-      --padding-end: 44px;   // espacio para ícono derecho
+      --padding-start: 22px; 
+      --padding-end: 44px;   
       color: #0f1f3d;
       font-size: 14px;
       font-family: 'Inter', sans-serif;
       min-height: 50px;
       transition: --border-color 0.18s;
 
-      // Hover sutil
       &:hover {
         --border-color: #94a3b8;
       }
     }
 
-    // Transición del shadow en el elemento nativo
     ion-input::part(native) {
       transition: box-shadow 0.2s ease;
     }
 
-    // ✅ CSS var en el HOST → funciona
     ion-input.ion-focused {
       --border-color: #003B8A;
       --background: #fff;
     }
 
-    // ✅ box-shadow en ::part(native) → funciona
     ion-input.ion-focused::part(native) {
       box-shadow: 0 0 0 3.5px rgba(0, 59, 138, 0.12);
       border-radius: 10px;
     }
 
-    // Íconos decorativos
     .ico-left {
       position: absolute;
       left: 13px;
@@ -305,13 +290,11 @@ flex: 1;
       &:hover { color: #003B8A; }
     }
 
-    // Cuando el input tiene focus, el ícono izquierdo cambia de color
     &:focus-within .ico-left {
       color: #003B8A;
     }
   }
 
-  // ── Acciones del form ─────────────────────────────
   .form-actions {
     display: flex;
     justify-content: space-between;
@@ -348,7 +331,6 @@ flex: 1;
     }
   }
 
-  // ── Botón login ───────────────────────────────────
   .btn-login {
     --background: #003B8A;
     --background-activated: #002f6c;
@@ -386,7 +368,6 @@ flex: 1;
     }
   }
 
-  // ── Divider ───────────────────────────────────────
   .divider {
     text-align: center;
     margin: 1.8rem 0 1rem;
@@ -416,7 +397,6 @@ flex: 1;
     }
   }
 
-  // ── Nota de seguridad al pie ──────────────────────
   .security-note {
     display: flex;
     align-items: center;

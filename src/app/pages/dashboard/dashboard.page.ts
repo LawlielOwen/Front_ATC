@@ -6,7 +6,6 @@ import { NgxSonnerToaster } from 'ngx-sonner';
 import { MetricaService } from '../../core/services/Metricas.service';
 import { NgApexchartsModule } from 'ng-apexcharts';
 import { CommonModule } from '@angular/common';
-import { StatCardComponent } from '../../shared/components/UI/stat-card/stat-card.component'
 import { ClientesService } from '../../core/services/clientes.service';
 import { FormsModule } from '@angular/forms';
 @Component({
@@ -19,9 +18,8 @@ import { FormsModule } from '@angular/forms';
     SiderbarComponent,
     HeaderComponent,
     NgxSonnerToaster,
-    NgApexchartsModule, // <-- IMPORTANTE PARA LAS GRÁFICAS
+    NgApexchartsModule, 
     CommonModule,
-    StatCardComponent,
     FormsModule
   ]
 })
@@ -53,7 +51,7 @@ export class DashboardPage implements OnInit {
   busquedaClienteConversion: string = '';
   clientesFiltradosSelectConversion: any[] = [];
   clienteSeleccionadoNombre: string = 'Vista Global (Todos)';
-  fechaInicioTendencia: string = ''; // Formato esperado: YYYY-MM-DD
+  fechaInicioTendencia: string = ''; 
   fechaFinTendencia: string = '';
   constructor(private ms: MetricaService, private cs: ClientesService) {
     this.inicializarGraficaTopProductos();
@@ -66,7 +64,7 @@ export class DashboardPage implements OnInit {
   }
   cambiarFiltroConversion(moneda: string) {
     this.filtroMonedaConversion = moneda;
-    this.cargarConversion(); // Volvemos a pedir los datos al hacer clic
+    this.cargarConversion();
   }
 cargarClientes() {
     let idUsuarioActual = null;
@@ -118,11 +116,11 @@ cargarClientes() {
     this.idClienteFiltroEstrella = id;
     this.clienteSeleccionadoNombre = nombre;
     
-    this.mostrarDropdown = false; // Cerramos el buscador
-    this.busquedaCliente = '';    // Limpiamos el texto escrito
-    this.clientesFiltradosSelect = this.listaClientes; // Restauramos la lista completa
+    this.mostrarDropdown = false; 
+    this.busquedaCliente = '';    
+    this.clientesFiltradosSelect = this.listaClientes; 
     
-    this.cargarProductosEstrella(); // Lanza la petición al SP
+    this.cargarProductosEstrella();
   }
   ionViewWillEnter() {
     this.cargarTopProductos();
@@ -155,26 +153,21 @@ cargarClientes() {
         bar: {
           horizontal: true,
           distributed: true,
-          barHeight: '62%', // Grosor perfecto para las barras
+          barHeight: '62%',
           borderRadius: 6
         }
       },
-      // 1. APAGAMOS LOS NÚMEROS FIJOS
       dataLabels: {
         enabled: false
       },
-      // 2. APAGAMOS LOS CUADRITOS DE LA LEYENDA
       legend: {
         show: false
       },
-      // 3. CONFIGURAMOS EL GLOBO FLOTANTE OSCURO
       tooltip: {
         custom: function ({ series, seriesIndex, dataPointIndex, w }: any) {
-          // Extraemos el nombre del producto y la cantidad
           const producto = w.globals.labels[dataPointIndex];
           const cantidad = series[seriesIndex][dataPointIndex];
 
-          // Dibujamos nuestra propia caja con HTML y CSS en línea para evitar conflictos con Tailwind/Ionic
           return `
             <div style="background-color: #ffffff; color: #0d1f38; padding: 8px 12px; border-radius: 10px; font-family: 'Inter', sans-serif; font-size: 12px; font-weight: 700; box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -2px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;">
               <span style="color: #64748b; font-weight: 500; margin-right: 4px;">${producto}:</span> 
@@ -211,8 +204,8 @@ cargarClientes() {
         xaxis: { lines: { show: true } },
         yaxis: { lines: { show: false } },
         padding: {
-          top: -15,     // <-- 3. Recortamos el margen invisible de arriba
-          bottom: -10,  // <-- Recortamos el margen de abajo
+          top: -15,    
+          bottom: -10, 
           left: 10,
           right: 15
         }
@@ -323,13 +316,12 @@ cargarBottomProductos(meses: number = 3) {
           `;
         }
       },
-      // Paleta Ámbar/Naranja de más oscuro a más claro
       colors: [
-        "#c2410c", // Naranja rojizo oscuro (El que menos se vendió)
+        "#c2410c",
         "#ea580c",
         "#f97316",
         "#fb923c",
-        "#fdba74"  // Naranja claro
+        "#fdba74" 
       ],
       xaxis: {
         categories: [],
@@ -358,12 +350,10 @@ cargarBottomProductos(meses: number = 3) {
     this.cargandoConversion = true;
     this.ms.getTasaConversion(this.filtroMonedaConversion, this.idClienteFiltroConversion).subscribe({
       next: (data) => {
-        // Tomamos los top 7 y le agregamos la lógica del porcentaje
         this.datosConversion = data.slice(0, 7).map((item: any) => {
           const cotizado = Number(item.Cotizado);
           const vendido = Number(item.Vendido);
 
-          // Prevenimos la división entre cero
           let porcentaje = 0;
           if (cotizado > 0) {
             porcentaje = Math.round((vendido / cotizado) * 100);
@@ -412,7 +402,6 @@ cargarBottomProductos(meses: number = 3) {
         zoom: { enabled: false }
       },
 
-      // 1. CAMBIAMOS EL COLOR DE LAS BARRAS: Azul grisáceo (#93aecb)
       colors: ['#93aecb', '#003B8A'],
 
       stroke: {
@@ -426,17 +415,16 @@ cargarBottomProductos(meses: number = 3) {
         }
       },
 
-      // 2. LA SOLUCIÓN AL HOVER: Controlamos el efecto para que no desaparezcan
       states: {
         hover: {
           filter: {
             type: 'darken',
-            value: 0.85 // En lugar de desaparecer, la barra se oscurece un 15% al pasar el mouse
+            value: 0.85 
           }
         },
         active: {
           filter: {
-            type: 'none' // Evita que se quede "pegado" el efecto al hacer clic
+            type: 'none'
           }
         }
       },
@@ -456,7 +444,6 @@ cargarBottomProductos(meses: number = 3) {
         axisBorder: { show: false },
         axisTicks: { show: false },
 
-        // --- ESTAS DOS LÍNEAS MATAN EL GLOBO BLANCO FANTASMA ---
         tooltip: { enabled: false },
         crosshairs: { show: false }
       },
@@ -473,13 +460,11 @@ cargarBottomProductos(meses: number = 3) {
       tooltip: {
         shared: true,
         intersect: false,
-        // USAMOS FUNCIÓN DE FLECHA AQUÍ:
         custom: ({ series, seriesIndex, dataPointIndex, w }: any) => {
           const categorias = w.globals.categoryLabels || w.config.xaxis.categories || [];
           const mes = categorias[dataPointIndex];
           const monto = series[0][dataPointIndex];
 
-          // Detectamos qué moneda poner en el globo flotante
           const divisa = this.filtroMonedaTendencia === 'USD' ? 'USD' : 'MXN';
 
           return `
@@ -501,7 +486,6 @@ cargarBottomProductos(meses: number = 3) {
   cargarTendencia() {
     this.cargandoTendencia = true;
 
-    // Le pasamos la moneda al servicio
     this.ms.getTendenciaCotizaciones(this.filtroMonedaTendencia).subscribe({
       next: (data) => {
         let periodos = data.map((item: any) => item.Mes);
@@ -529,18 +513,14 @@ cargarBottomProductos(meses: number = 3) {
   alCambiarClienteFiltro(event: any) {
     const valor = event.target.value;
 
-    // Convertimos a número o a null si elige "Vista Global"
     this.idClienteFiltroEstrella = valor === 'null' || valor === '' ? null : Number(valor);
 
-    // Volvemos a pedir los datos a la base de datos
     this.cargarProductosEstrella();
   }
 
-  // MÉTODO PARA CARGAR LA TABLA:
   cargarProductosEstrella() {
     this.cargandoProductosEstrella = true;
 
-    // Le pasamos el ID seleccionado (o null) a tu servicio de métricas
     this.ms.getProductosEstrella(this.idClienteFiltroEstrella).subscribe({
       next: (data) => {
         this.datosProductosEstrella = data;
@@ -570,6 +550,6 @@ cargarBottomProductos(meses: number = 3) {
     this.busquedaClienteConversion = '';
     this.clientesFiltradosSelectConversion = this.listaClientes;
     
-    this.cargarConversion(); // Llama a refrescar la tabla
+    this.cargarConversion();
   }
 }

@@ -45,7 +45,6 @@ export class DetallesPage implements OnInit {
   }
 
   editar() {
-    // Abrimos el modal de agregar/editar pasándole los datos
     const dialogRef = this.dialog.open(ModalAsesorPage, {
       width: '630px',
       maxWidth: '105vw',
@@ -56,14 +55,12 @@ export class DetallesPage implements OnInit {
 
     dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
       if (necesitaRecargar) {
-        // Si editó con éxito, cerramos los detalles y le avisamos a la tabla que recargue
         this.cerrar(true);
       }
     });
   }
 
   desactivar() {
-    // Abrimos el modal de confirmación genérico
     const dialogRef = this.dialog.open(DeleteComponent, {
       width: '450px',
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
@@ -78,7 +75,7 @@ export class DetallesPage implements OnInit {
         this.asesorService.deleteAsesor(this.asesor.id).subscribe({
           next: () => {
             toast.success('Asesor desactivado correctamente');
-            this.cerrar(true); // Cerramos y recargamos la tabla
+            this.cerrar(true);
           },
           error: (err) => {
             console.error('Error al desactivar:', err);

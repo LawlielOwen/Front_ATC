@@ -69,18 +69,31 @@ export class ValesPage implements OnInit, OnDestroy{
     { label: 'Aceptados', value: 1 },
     { label: 'Rechazados', value: 2 }
   ]
-  ngOnInit() {
-this.socketSub = this.notiService.escucharActualizacionTabla().subscribe(() => {
+ngOnInit() {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        this.idUsuario = payload.id;
+        this.rolUsuario = payload.Rol; 
+      } catch (error) {
+        console.error('Error al decodificar el token en ngOnInit:', error);
+      }
+    }
+
+    this.socketSub = this.notiService.escucharActualizacionTabla().subscribe(() => {
       this.cargarVal(); 
       this.cargarContador();
-  });
+    });
+
+    this.cargarVal();
+    this.cargarContador();
   }
 cargarContador() {
     const token = localStorage.getItem('token');
     
     if (token) {
       try {
-        // Decodificamos el token
         const payload = JSON.parse(atob(token.split('.')[1]));
         const myId = payload.id;
         const myRol = payload.Rol;
@@ -111,7 +124,7 @@ cargarContador() {
         if (payload && payload.Rol) {
           const rol = payload.Rol.toLowerCase().trim();
 
-          if (rol === 'Asesor' || rol === 'Cotizador') {
+         if (rol === 'asesor' || rol === 'cotizador' || rol === 'soporte tecnico') {
             idAsesorFiltro = payload.id;
           }
         }
@@ -164,14 +177,11 @@ formatearFecha(fecha: string | Date): string {
     const f = new Date(fecha);
     if (isNaN(f.getTime())) return 'Fecha inválida';
 
-    // 1. Usar getDate en lugar de getUTCDate
     const dia = f.getDate().toString().padStart(2, '0');
     
-    // 2. Quitar el timeZone: 'UTC'
     let mes = f.toLocaleString('es-MX', { month: 'long' }).replace('.', '');
     mes = mes.charAt(0).toUpperCase() + mes.slice(1);
     
-    // 3. Usar getHours y getMinutes normales
     let horas = f.getHours();
     const minutos = f.getMinutes().toString().padStart(2, '0');
     const ampm = horas >= 12 ? 'p.m.' : 'a.m.';
@@ -243,26 +253,55 @@ busquedaTexto(texto: string) {
       }
     });
   }
-  ionViewWillEnter() {
+ionViewWillEnter() {
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        this.rolUsuario = payload.Rol || '';
+        this.idUsuario = payload.id || 0;
+      } catch (error) {
+        console.error('Error al decodificar el token:', error);
+      }
+    }
+
     this.establecerMesActual();
     this.cargarContador();
     this.cargarVal();
-    const user = JSON.parse(localStorage.getItem('user') || '{}');
-    this.rolUsuario = user.Rol || '';
-    this.idUsuario = user.id || 0;
-
   }
-  aceptarValeDirecto(vale: any) {
+ aceptarValeDirecto(vale: any) {
     const comentarios = 'Aprobado directamente desde la lista';
 
-    this.vs.aceptarVal(vale.id_vale, comentarios, vale.id_asesor).subscribe({
-      next: () => {
-        toast.success('Vale aceptado exitosamente');
-        this.cargarContador();
-        this.cargarVal();
-      },
-      error: (err) => { toast.error('Error al aceptar el vale.'); }
-    });
+    const tipo = vale.tipo_vale ? vale.tipo_vale.toString().toLowerCase() : 'indefinido';
+
+    if (tipo === 'demostracion' || tipo === 'demo') {
+      
+      this.vs.aceptarValeDemo(vale.id_vale, comentarios, vale.id_asesor).subscribe({
+        next: () => {
+          toast.success('Vale de demostración aceptado y equipos descontados.');
+          this.cargarContador();
+          this.cargarVal();
+        },
+        error: (err) => { 
+          toast.error(err.error?.error || 'Error al aceptar el vale de demostración.'); 
+        }
+      });
+      
+    } else {
+      
+      this.vs.aceptarVal(vale.id_vale, comentarios, vale.id_asesor).subscribe({
+        next: () => {
+          toast.success('Vale aceptado exitosamente');
+          this.cargarContador();
+          this.cargarVal();
+        },
+        error: (err) => { 
+          toast.error(err.error?.error || 'Error al aceptar el vale.'); 
+        }
+      });
+      
+    }
   }
 
   rechazarValeDirecto(vale: any) {

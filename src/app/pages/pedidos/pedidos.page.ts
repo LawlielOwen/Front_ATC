@@ -40,7 +40,7 @@ export class PedidosPage implements OnInit {
   totalRecords: number = 0;
   limit: number = 10;
   terminoActual: string = '';
-  estatusActual: number | null = 1;
+  estatusActual: number | null = 99;
   fechaIni: string = '';
   fechaFin: string = '';
   Totalcanceladas: number = 0;
@@ -53,12 +53,13 @@ export class PedidosPage implements OnInit {
 columnasPedidos: TableColumn[] = [];
   pedidosLista: any[] = [];
   timeoutBusqueda: any;
-  estatusPedidos = [
+estatusPedidos = [
     { label: 'Todos', value: null },
+    { label: 'Activos (Pend. / Incom.)', value: 99 },
     { label: 'Pendientes', value: 1 },
-    { label: 'Canceladas', value: 0 },
+    { label: 'Incompletos', value: 3 },
     { label: 'Completadas', value: 2 },
-     { label: 'Incompletos', value: 3 } 
+    { label: 'Canceladas', value: 0 }
   ];
   mostrarSidebarMobile() {
     if (this.sidebar) {
@@ -72,7 +73,6 @@ columnasPedidos: TableColumn[] = [];
 
   }
   definirColumnasPorRol() {
-    // Definimos las columnas que TODO el mundo puede ver
     const columnasBase: TableColumn[] = [
       { header: 'Cliente', key: 'nombre_cliente', type: 'text' },
       { header: 'Fecha de registro', key: 'fecha_pedido', type: 'text-light' },
@@ -81,10 +81,8 @@ columnasPedidos: TableColumn[] = [];
       { header: 'Estatus', key: 'estatusTexto', type: 'status', align: 'center' }
     ];
 
-    // Arreglo temporal para las acciones permitidas
     const opcionesMenuAutorizadas = [];
 
-    // RESTRICCIÓN 1: "Subir recibo" (Asesores y Administradores)
     if (this.authService.tieneAcceso(['Administrador', 'Asesor'])) {
       opcionesMenuAutorizadas.push({
         accion: 'subir_recibo', 
@@ -93,7 +91,6 @@ columnasPedidos: TableColumn[] = [];
       });
     }
 
-    // RESTRICCIÓN 2: "Cancelar" (Administradores y Cotizadores)
     if (this.authService.tieneAcceso(['Administrador', 'Cotizador'])) {
       opcionesMenuAutorizadas.push({
         accion: 'cancelar', 
@@ -102,7 +99,6 @@ columnasPedidos: TableColumn[] = [];
       });
     }
 
-    // Si el rol tiene al menos una acción permitida, inyectamos la columna de los "3 puntitos"
     if (opcionesMenuAutorizadas.length > 0) {
       columnasBase.push({
         header: '',
@@ -114,7 +110,6 @@ columnasPedidos: TableColumn[] = [];
       });
     }
 
-    // Finalmente, asignamos todo a la variable principal
     this.columnasPedidos = columnasBase;
   }
   ionViewWillEnter() {
@@ -122,20 +117,26 @@ columnasPedidos: TableColumn[] = [];
     this.cargarEstadisticas();
     this.definirColumnasPorRol();
   }
-  cargarPedidos() {
+cargarPedidos() {
     this.cargando = true;
 
     const estatus = this.estatusActual !== null ? this.estatusActual : -1;
 
-    // NUEVO: mismo patrón que cargarVal(), pero solo "Asesor" se restringe
-    const usuarioString = localStorage.getItem('user');
-    const usuario = usuarioString ? JSON.parse(usuarioString) : null;
     let idAsesorFiltro: number | null = null;
-
-    if (usuario && usuario.Rol) {
-      const rol = usuario.Rol.toLowerCase().trim();
-      if (rol === 'asesor') {           // 👈 Cotizador y Administrador quedan fuera de esta condición
-        idAsesorFiltro = usuario.id;
+    const token = localStorage.getItem('token');
+    
+    if (token) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        
+        if (payload && payload.Rol) {
+          const rol = payload.Rol.toLowerCase().trim();
+          if (rol === 'asesor' || rol === 'cotizador') {
+            idAsesorFiltro = payload.id;
+          }
+        }
+      } catch (error) {
+        console.error('Error decodificando el token en cargarPedidos:', error);
       }
     }
 
@@ -144,7 +145,7 @@ columnasPedidos: TableColumn[] = [];
       estatus,
       this.fechaIni,
       this.fechaFin,
-      idAsesorFiltro,                    // NUEVO
+      idAsesorFiltro,                    
       this.currentPage,
       this.limit
     ).subscribe({
@@ -169,7 +170,7 @@ columnasPedidos: TableColumn[] = [];
         this.cargando = false;
       }
     });
-}
+  }
 
   cargarEstadisticas() {
     this.ps.obtenerEstadisticas().subscribe({
@@ -190,7 +191,7 @@ columnasPedidos: TableColumn[] = [];
       0: 'Cancelado',
       1: 'Pendiente',
       2: 'Completado',
-      3: 'Incompleto'   // NUEVO
+      3: 'Incompleto'  
     };
     return mapaEstatus[estatus] || 'Desconocido';
 }
@@ -254,8 +255,6 @@ const dialogRef = this.dialog.open(DetallePedidoPage, {
   formatearFecha(fecha: string | Date): string {
     if (!fecha) return 'Sin fecha';
     
-    // Si la fecha viene con guiones y sin hora (ej. '2026-06-20'), 
-    // le agregamos 'T12:00:00' para evitar que la zona horaria le reste un día.
     let f = new Date(fecha);
     if (typeof fecha === 'string' && fecha.length === 10 && fecha.includes('-')) {
         f = new Date(`${fecha}T12:00:00`);

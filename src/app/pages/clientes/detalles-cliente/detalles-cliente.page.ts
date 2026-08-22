@@ -13,6 +13,8 @@ import { MatDialog } from '@angular/material/dialog';
 import { ModalClientePage } from "../modal-cliente/modal-cliente.page";
 import {CardDetailsComponent} from "../../../shared/components/UI/modal/card-details/card-details.component";
 import { AuthService } from '../../../core/services/auth.service';
+import { mostrarAsignarCredito, mostrarExitoCredito } from '../../../shared/utils/cliente-alerts.util';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-detalles-cliente',
@@ -26,6 +28,8 @@ import { AuthService } from '../../../core/services/auth.service';
 })
 export class DetallesClientePage implements OnInit {
 
+  private necesitaRecargarLista = false;
+
 constructor(
     private dialogRef: MatDialogRef<DetallesClientePage>,
     @Inject(MAT_DIALOG_DATA) public cliente: Cliente,
@@ -35,7 +39,7 @@ constructor(
   ngOnInit() {
   }
 cerrarDetalle() {
-    this.dialogRef.close();
+    this.dialogRef.close(this.necesitaRecargarLista);
   }
 eliminarCliente(id: number) {
     this.clientesService.deleteCliente(id).subscribe({
@@ -60,6 +64,33 @@ activarCliente(id: number) {
       this.activarCliente(this.cliente.id);
     }
   }
+
+asignarCredito(cliente: Cliente) {
+    mostrarAsignarCredito(cliente).then((datos) => {
+      if (!datos) return; 
+
+      this.clientesService.asignarCredito(cliente.id, datos.tiene_credito, datos.limite_credito).subscribe({
+        next: (res: any) => {
+          this.cliente.tiene_credito = datos.tiene_credito ? 1 : 0;  
+          this.cliente.limite_credito = datos.limite_credito;
+          this.necesitaRecargarLista = true;
+
+          mostrarExitoCredito(res.mensaje || 'La línea de crédito se actualizó correctamente.');
+        },
+        error: (err) => {
+          const mensajeError = err.error?.error || 'No se pudo actualizar la línea de crédito.';
+          Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: mensajeError,
+            confirmButtonColor: '#003B8A',
+            heightAuto: false
+          });
+        }
+      });
+    });
+}
+
 descargarPDF() {
     if (!this.cliente.ruta_constancia) {
       console.error('No hay un archivo válido para descargar');
@@ -81,20 +112,27 @@ descargarPDF() {
     const extension = ext !== -1 ? nombre.substring(ext) : '';
     return nombre.substring(0, maxChars - extension.length) + '…' + extension;
 }
- abrirModalEdicion(clienteAEditar: any) {
-  const dialogRef = this.dialog.open(ModalClientePage, {
-      width: '630px',
-      maxWidth: '105vw',
-      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-      panelClass: [],
-    data: clienteAEditar 
-    
+abrirModalEdicion(clienteAEditar: any) {
+  this.clientesService.getCliente(clienteAEditar.id).subscribe({
+    next: (clienteCompleto: any) => {
+      const dialogRef = this.dialog.open(ModalClientePage, {
+        width: '630px',
+        maxWidth: '105vw',
+        backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+        panelClass: [],
+        data: clienteCompleto
+      });
+
+      dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
+        if (necesitaRecargar) {
+          this.dialogRef.close(true);
+        }
+      });
+    },
+    error: () => {
+      toast.error('No se pudo cargar el detalle del cliente');
+    }
   });
-dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
-      if (necesitaRecargar) {
-        this.dialogRef.close(true);
-      }
-    });
 }
 abrirModalActualizarCsf(cliente: any) {
     const dialogRef = this.dialog.open(ModalClientePage, {
@@ -114,6 +152,8 @@ abrirModalActualizarCsf(cliente: any) {
       }
     });
   }
+  obtenerAsesores(nombresString: string | undefined): string[] {
+    if (!nombresString) return ['Sin asignar'];
+    return nombresString.split(' | ');
+  }
 }
-
-

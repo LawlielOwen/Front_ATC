@@ -71,9 +71,19 @@ export class ValeService {
     getValId(id: number) {
         return this.http.get<ValeSalida>(`${this.apiUrl}/vales/${id}`);
     }
-    obtenerPedidosDisponiblesVale(idAsesor: number): Observable<any> {
+    obtenerPedidosDisponiblesVale(idAsesor: number, rolUsuario: string): Observable<any> {
   return this.http.get<any>(`${this.apiUrl}/vales/pedidos/disponibles-vale`, {
-    params: { id_asesor: idAsesor.toString() }
+    params: { id_asesor: idAsesor.toString(), rol: rolUsuario }
   });
 }
+crearValeDemo(payload: any): Observable<any> {
+        return this.http.post(`${this.apiUrl}/vales/demo`, payload);
+    }
+
+    aceptarValeDemo(id: number, comentarios: string, id_asesor: number): Observable<any> {
+        return this.http.put(`${this.apiUrl}/vales/demo/aceptar`, { id, comentarios, id_asesor });
+    }
+    obtenerVisitasDisponiblesVale(id_tecnico: number) {
+    return this.http.get(`${this.apiUrl}/vales/visitas/disponibles-vale/${id_tecnico}`);
+  }
 }

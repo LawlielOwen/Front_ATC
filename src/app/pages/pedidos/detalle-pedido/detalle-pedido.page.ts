@@ -13,7 +13,7 @@ import { toast } from 'ngx-sonner';
 import { NgxSonnerToaster } from 'ngx-sonner';
 import { AuthService } from '../../../core/services/auth.service';
 import { mostrarAvisoStockIncompleto, mostrarExitoPedido } from '../../../shared/utils/pedido-alerts.util';
-
+import Swal from 'sweetalert2';
 @Component({
   selector: 'app-detalle-pedido',
   templateUrl: './detalle-pedido.page.html',
@@ -46,7 +46,6 @@ export class DetallePedidoPage implements OnInit {
     @Inject(MAT_DIALOG_DATA) public data: any, public authService: AuthService,
     public dialog: MatDialog
   ) {
-    // Los datos del encabezado del pedido
     this.ped = data.detalles;
   }
 
@@ -64,7 +63,6 @@ export class DetallePedidoPage implements OnInit {
       next: (res: any) => {
         this.pedidoDetalle = res;
 
-        // Si hay productos, extraemos la moneda (todos deberían tener la misma)
         if (this.pedidoDetalle.length > 0 && this.pedidoDetalle[0].moneda) {
           this.monedaActual = this.pedidoDetalle[0].moneda;
         }
@@ -83,7 +81,6 @@ export class DetallePedidoPage implements OnInit {
   calcularTotales() {
     this.subtotal = 0;
     this.pedidoDetalle.forEach(item => {
-      // Sumamos los importes crudos
       this.subtotal += Number(item.importe);
     });
 
@@ -98,13 +95,11 @@ export class DetallePedidoPage implements OnInit {
       codigoDivisa = 'MXN';
     }
 
-    // Configuración base para el formateador
     const opciones: Intl.NumberFormatOptions = {
       style: 'currency',
       currency: codigoDivisa
     };
 
-    // Si queremos ocultar "USD" o "MXN", forzamos a que el símbolo se muestre de forma estrecha ("$")
     if (ocultarLetras) {
       (opciones as any).currencyDisplay = 'narrowSymbol';
     }
@@ -115,15 +110,14 @@ export class DetallePedidoPage implements OnInit {
     this.ps.obtenerDetallesPedido(this.ped.id).subscribe({
       next: (pedidoActualizado: any) => {
         this.ped = {
-          ...this.ped,           // conservamos lo que ya teníamos (por si el backend no manda todo)
-          ...pedidoActualizado,  // sobreescribimos con lo fresco: Estatus, factura_ruta, nombre_factura, fecha_factura...
+          ...this.ped,          
+          ...pedidoActualizado,  
           estatusTexto: this.obtenerTextoEstatus(pedidoActualizado.Estatus)
         };
-        this.cargarDetalles(); // y de paso refrescamos la tabla de productos (cantidad_surtida, etc.)
+        this.cargarDetalles();
       },
       error: (err) => {
         console.error('Error al refrescar el pedido:', err);
-        // Como mínimo, refrescamos productos aunque el header falle
         this.cargarDetalles();
       }
     });
@@ -150,11 +144,11 @@ export class DetallePedidoPage implements OnInit {
       if (resultado && resultado.subido) {
 
         const mensajeBackend = resultado.mensaje || '';
-        this.actualizoAlgo = true; // NUEVO: marcamos que hubo cambios
+        this.actualizoAlgo = true; 
 
         if (mensajeBackend.toLowerCase().includes('incompleto')) {
             mostrarAvisoStockIncompleto(mensajeBackend).then(() => {
-              this.recargarPedidoCompleto(); // CAMBIO: antes era this.cargarDetalles()
+              this.recargarPedidoCompleto();
             });
         } else {
             mostrarExitoPedido(mensajeBackend || 'Archivo subido y pedido completado correctamente.').then(() => {
@@ -201,11 +195,9 @@ export class DetallePedidoPage implements OnInit {
 
     const url = this.ps.obtenerUrlFactura(this.ped.factura_ruta);
 
-    // Abrimos el PDF en una nueva pestaña (como lo hacías en clientes)
     const link = document.createElement('a');
     link.href = url;
     link.target = '_blank';
-    // Si quieres forzar descarga pon: link.download = this.ped.nombre_factura || 'factura.pdf';
 
     document.body.appendChild(link);
     link.click();
@@ -224,4 +216,65 @@ export class DetallePedidoPage implements OnInit {
       }
     });
   }
+pagarConCredito() {
+
+    if (this.monedaActual !== 'MXN') {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No disponible en esta moneda',
+        text: 'El pago con línea de crédito solo aplica para pedidos en MXN. Usa "Subir Recibo" para este pedido.',
+        confirmButtonColor: '#003B8A',
+        heightAuto: false
+      });
+      return;
+    }
+
+    Swal.fire({
+      icon: 'question',
+      title: '¿Pagar con Línea de Crédito?',
+      html: `
+        <p style="font-size: 14px; color: #475569; margin-bottom: 0;">
+          Se intentará cobrar el total de este pedido descontándolo directamente del límite de crédito autorizado del cliente.
+        </p>
+      `,
+      showCancelButton: true,
+      confirmButtonText: 'Sí, cobrar de crédito',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#10b981', 
+      cancelButtonColor: '#94a3b8',
+      reverseButtons: true,
+      heightAuto: false
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.ps.pagarConCredito(this.ped.id).subscribe({
+          next: (res: any) => {
+            const mensajeBackend = res.mensaje || '';
+            this.actualizoAlgo = true;
+
+            if (mensajeBackend.toLowerCase().includes('incompleto')) {
+              mostrarAvisoStockIncompleto(mensajeBackend).then(() => {
+                this.recargarPedidoCompleto();
+              });
+            } else {
+              mostrarExitoPedido(mensajeBackend || 'El cobro se aplicó exitosamente al crédito del cliente.').then(() => {
+                this.dialogRef.close(true);
+              });
+            }
+          },
+          error: (err) => {
+            console.error('Error al cobrar con crédito:', err);
+            const mensajeError = err.error?.error || 'No se pudo procesar el pago con crédito.';
+            
+            Swal.fire({
+              icon: 'error',
+              title: 'Cobro Rechazado',
+              text: mensajeError,
+              confirmButtonColor: '#003B8A',
+              heightAuto: false
+            });
+          }
+        });
+      }
+    });
+}
 }

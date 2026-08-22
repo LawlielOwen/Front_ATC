@@ -11,57 +11,73 @@
         { numero: 3, etiqueta: 'Confirmar' }
       ]">
     </app-step-item>
-    <ng-container *ngIf="paso === 1">
-      <!-- Alerta Info -->
-      <div class="bg-[#eff6ff] text-[#1e40af] text-[13px] px-4 py-3.5 rounded-lg border border-[#bfdbfe]">
-        Ingresa el <strong>código Japón o numeral</strong> del producto para localizarlo automáticamente.
-      </div>
-      <div class="flex flex-col gap-1.5">
-        <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Código del producto</label>
-        <div class="flex gap-3 h-12">
-          <input type="text" placeholder="Ej. JP-44821"
-            class="flex-1 border border-slate-300 rounded-lg px-4 text-sm font-mono text-[#0d1f38] focus:ring-2 focus:ring-[#003B8A] outline-none transition-all"
-            [(ngModel)]="producto.codigo">
-          <button class="bg-slate-100 text-[#0d1f38] font-bold px-6 rounded-lg
-           hover:bg-slate-200 transition-colors text-[13px]" (click)="consultarProducto()">
-            Consultar
-          </button>
-        </div>
-      </div>
-      <div *ngIf="productoEncontrado"
-        class="bg-[#f0fdf4] border border-[#86efac] rounded-xl py-3 px-4 flex flex-col gap-2 animate-fade-in mt-2">
-        <div class="flex justify-between items-center w-full">
+ <ng-container *ngIf="paso === 1">
+  <!-- Alerta Info -->
+  <div class="bg-[#eff6ff] text-[#1e40af] text-[13px] px-4 py-3.5 rounded-lg border border-[#bfdbfe]">
+    Busca por <strong>nombre, código Japón o código numeral</strong> para localizar el producto.
+  </div>
 
-          <div class="flex items-center gap-4">
-            <div
-              class="w-10 h-10 bg-white rounded-lg border border-[#bbf7d0] flex-shrink-0 flex items-center justify-center">
-              <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-              </svg>
+  <div class="flex flex-col gap-1.5">
+    <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Producto</label>
+    <div class="relative">
+      <input type="text" [formControl]="productoControl" [matAutocomplete]="autoProducto"
+        placeholder="Buscar por nombre, Cód. Japón o Cód. Numeral..."
+        class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-4 h-12 outline-none transition-colors"
+        (keyup.enter)="onEnterProducto($event)">
+
+      <mat-autocomplete #autoProducto="matAutocomplete"
+        (optionSelected)="seleccionarProducto($event.option.value)">
+        <mat-option *ngFor="let p of productosFiltrados" [value]="p" class="h-auto py-2">
+          <div class="flex flex-col py-1">
+            <div class="flex justify-between items-center w-full gap-4">
+              <span class="text-xs font-bold text-[#0d1f38] truncate flex-1">{{ p.Nombre }}</span>
+              <span class="text-[10px] font-bold whitespace-nowrap flex-shrink-0"
+                [class.text-emerald-600]="p.Stock > 0" [class.text-rose-500]="p.Stock <= 0">
+                Stock: {{ p.Stock }}
+              </span>
             </div>
-
-            <div class="flex flex-col">
-              <h4 class="font-bold text-[#0d1f38] text-sm">{{ productoEncontrado.Nombre }}</h4>
-              <span class="text-[11px] text-slate-500 font-medium mb-1">
-                {{ productoEncontrado.Codigo_japon }} • {{ productoEncontrado.Marca }} • Estantería: <strong>{{
-                  productoEncontrado.Estanteria }}</strong>
-              </span>
-              <span class="text-[12px] text-slate-500 font-medium">
-                Stock actual: <strong class="text-[#003B8A] text-[13px]">{{ productoEncontrado.Stock }} pz</strong>
-              </span>
+            <div class="text-[10px] text-slate-400 font-semibold mt-0.5 flex gap-2">
+              <span>JP: <span class="text-slate-600">{{ p.Codigo_japon || '--' }}</span></span>
+              <span class="text-slate-300">|</span>
+              <span>Num: <span class="text-slate-600">{{ p.Codigo_numeral || '--' }}</span></span>
+              <span class="text-slate-300">|</span>
+              <span class="text-slate-600">{{ p.Marca || '--' }}</span>
             </div>
           </div>
+        </mat-option>
+      </mat-autocomplete>
+    </div>
+  </div>
 
+  <div *ngIf="productoEncontrado"
+    class="bg-[#f0fdf4] border border-[#86efac] rounded-xl py-3 px-4 flex flex-col gap-2 animate-fade-in mt-2">
+    <div class="flex justify-between items-center w-full">
+      <div class="flex items-center gap-4">
+        <div class="w-10 h-10 bg-white rounded-lg border border-[#bbf7d0] flex-shrink-0 flex items-center justify-center">
+          <svg class="w-6 h-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
         </div>
-
-        <div class="flex justify-end w-full border-t border-[#bbf7d0] pt-2">
-          <button (click)="avanzarPaso()"
-            class="bg-[#1D9E75] text-white font-bold px-6 py-1.5 rounded-lg hover:bg-[#15805d] transition-colors text-[13px] shadow-sm">
-            Continuar
-          </button>
+        <div class="flex flex-col">
+          <h4 class="font-bold text-[#0d1f38] text-sm">{{ productoEncontrado.Nombre }}</h4>
+          <span class="text-[11px] text-slate-500 font-medium mb-1">
+            {{ productoEncontrado.Codigo_japon }} • {{ productoEncontrado.Marca }} • Estantería: <strong>{{ productoEncontrado.Estanteria }}</strong>
+          </span>
+          <span class="text-[12px] text-slate-500 font-medium">
+            Stock actual: <strong class="text-[#003B8A] text-[13px]">{{ productoEncontrado.Stock }} pz</strong>
+          </span>
         </div>
       </div>
-    </ng-container>
+    </div>
+
+    <div class="flex justify-end w-full border-t border-[#bbf7d0] pt-2">
+      <button (click)="avanzarPaso()"
+        class="bg-[#1D9E75] text-white font-bold px-6 py-1.5 rounded-lg hover:bg-[#15805d] transition-colors text-[13px] shadow-sm">
+        Continuar
+      </button>
+    </div>
+  </div>
+</ng-container>
     <ng-container *ngIf="paso === 2">
       <div class="flex items-center justify-between bg-slate-50 border border-slate-200 rounded-lg py-2 px-4">
         <div class="flex items-center gap-3">

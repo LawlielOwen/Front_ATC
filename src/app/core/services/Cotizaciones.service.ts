@@ -70,7 +70,6 @@ convertirAPedido(idCotizacion: number, ordenCompra: string): Observable<any> {
         return this.http.delete<any>(`${this.apiUrl}/cotizaciones/${id}`);
     }
     descargarPDF(idCotizacion: number): Observable<Blob> {
-    // La opción responseType: 'blob' es vital para descargar archivos binarios
     return this.http.get(`${this.apiUrl}/cotizaciones/${idCotizacion}/pdf`, {
       responseType: 'blob'
     });

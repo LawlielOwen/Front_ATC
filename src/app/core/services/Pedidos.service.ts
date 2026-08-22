@@ -2,10 +2,10 @@ import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Observable } from 'rxjs';
-import { Pedido, DetallePedido } from '../../shared/model/pedidos.model'; // Agregamos DetallePedido
+import { Pedido, DetallePedido } from '../../shared/model/pedidos.model';
 
 export interface RespuestaPaginada {
-    pedidos: Pedido[]; // Corregido: el backend devuelve 'pedidos', no 'p'
+    pedidos: Pedido[]; 
     total: number;
     paginas: number;
     paginaActual: number;
@@ -37,7 +37,6 @@ export class PedidoService {
             params = params.set('busqueda', busqueda);
         }
         
-        // Enviamos el estatus (incluso si es 0, por eso validamos contra null)
         if (estatus !== null && estatus !== undefined) {
             params = params.set('estatus', estatus.toString());
         }
@@ -61,25 +60,24 @@ export class PedidoService {
 
     // 3. Subir la factura física (PDF, JPG, PNG)
     subirFactura(idPedido: number, archivoFactura: File): Observable<any> {
-        // Para mandar archivos FÍSICOS al backend, es obligatorio usar FormData
         const formData = new FormData();
         
-        // El key 'factura' DEBE coincidir con lo que pusimos en uploadRecibo.single('factura') en tu Router de Node
         formData.append('factura', archivoFactura);
 
-        // Ojo: HttpClient configura automáticamente los headers (multipart/form-data) al enviarle un FormData
         return this.http.post<any>(`${this.apiUrl}/pedido/${idPedido}/factura`, formData);
     }
 
     // 4. Aceptar el pedido (Este verificará el Stock y la Factura en el backend)
     aceptarPedido(idPedido: number): Observable<any> {
-        // Enviamos un cuerpo vacío {} porque el ID ya va en la URL
         return this.http.post<any>(`${this.apiUrl}/pedido/${idPedido}/aceptar`, {});
     }
 
     // 5. Cancelar el pedido
     cancelarPedido(idPedido: number): Observable<any> {
         return this.http.post<any>(`${this.apiUrl}/pedido/${idPedido}/cancelar`, {});
+    }
+    pagarConCredito(idPedido: number): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/pedido/${idPedido}/pagar-credito`, {});
     }
     obtenerEstadisticas(): Observable<{ pendientes: number, cancelados: number, pagados: number, total_mes: number }> {
         return this.http.get<{ pendientes: number, cancelados: number, pagados: number, total_mes: number }>(`${this.apiUrl}/pedido/estadisticas`);
@@ -89,7 +87,7 @@ obtenerUrlFactura(rutaRelativa: string): string {
     if (rutaRelativa.startsWith('http')) return rutaRelativa;
     
     const partes = rutaRelativa.split(/[/\\]/);
-    const nombreArchivo = partes[partes.length - 1]; // Ej: recibo-1782062568592-875973605.pdf
+    const nombreArchivo = partes[partes.length - 1]; 
     
     const baseUrl = this.apiUrl.replace(/\/api\/?$/, ''); 
     

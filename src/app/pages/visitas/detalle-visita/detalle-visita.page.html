@@ -1,0 +1,191 @@
+<div class="bg-white rounded-2xl overflow-hidden w-full max-w-4xl mx-auto max-h-[85vh] flex flex-col border border-slate-200 shadow-2xl">
+
+    <app-header-modal [label]="'Detalles de la Visita'"></app-header-modal>
+
+    <div class="p-4 overflow-y-auto bg-[#f4f7fa] flex-1">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+
+            <!-- TARJETA 1: Información General -->
+            <app-card-details titulo="Información General">
+                <svg icono class="w-3.5 h-3.5 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2-2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                </svg>
+
+                <div class="flex flex-col text-xs mt-1">
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-[#eff6ff] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col flex-1 min-w-0">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Cliente / Empresa</span>
+                            <span class="text-[#0d1f38] font-bold text-[12px] truncate" [title]="visita.empresa_destino">{{ visita.empresa_destino }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-[#eff6ff] flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col flex-1 min-w-0">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Asesor Responsable</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px] truncate">{{ visita.nombre_asesor }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col flex-1 min-w-0">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Soporte Técnico</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px] truncate">{{ visita.nombre_tecnico }}</span>
+                        </div>
+                    </div>
+                </div>
+            </app-card-details>
+
+            <!-- TARJETA 2: Fechas y Estatus -->
+            <app-card-details titulo="Fechas y Estatus">
+                <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+
+                <div class="flex flex-col text-xs mt-1">
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-[#f0f9f5] flex items-center justify-center flex-shrink-0">
+                            <span class="text-[#1D9E75] font-bold text-[10px]">VIS</span>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Fecha Programada</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px]">{{ visita.FechaFormat || (visita.fecha_visita | date:'mediumDate':'':'es-MX') }}</span>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-3 py-2 border-b border-slate-50">
+                        <div class="w-7 h-7 rounded-md bg-slate-100 flex items-center justify-center flex-shrink-0">
+                            <svg class="w-4 h-4 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="flex flex-col flex-1">
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Estatus Actual</span>
+                            <span class="font-bold text-[12px]"
+                                [ngClass]="{'text-[#003B8A]': visita.estatus === 1, 'text-[#1D9E75]': visita.estatus === 2, 'text-rose-600': visita.estatus === 0}">
+                                {{ visita.EstatusTexto || (visita.estatus === 1 ? 'Programada' : visita.estatus === 2 ? 'Completada' : 'Cancelada') }}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </app-card-details>
+
+        </div>
+
+        <!-- REPORTE DE ACTIVIDADES (Solo visible si está completada) -->
+        <div *ngIf="visita.estatus === 2 && visita.resumen_actividades" class="mb-4 animate-fade-in">
+            <app-card-details titulo="Resumen de Actividades">
+                <svg icono class="w-3.5 h-3.5 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                <div class="bg-slate-50 p-4 border border-slate-100 rounded-lg mt-2">
+                    <p class="text-[12px] text-slate-700 leading-relaxed">{{ visita.resumen_actividades }}</p>
+                </div>
+            </app-card-details>
+        </div>
+
+        <!-- TARJETA 3: Tabla de Equipos Demo -->
+        <app-card-details titulo="Equipos Demo Solicitados">
+            <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+
+            <div class="rounded-lg border border-slate-200 overflow-hidden bg-white shadow-sm mt-3">
+
+                <!-- Encabezados de Tabla -->
+                <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2.5 px-4 items-center">
+                    <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+                    <span class="col-span-3 text-[9px] font-bold text-white uppercase tracking-widest">N. Serie</span>
+                    <span class="col-span-4 text-[9px] font-bold text-white uppercase tracking-widest">Modelo / Equipo</span>
+                    <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center">Pzas</span>
+                    <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center">Estatus</span>
+                </div>
+
+                <!-- Estado de Carga -->
+                <div *ngIf="cargando" class="flex justify-center items-center py-8">
+                    <div class="w-6 h-6 border-2 border-[#003B8A] border-t-transparent rounded-full animate-spin"></div>
+                </div>
+
+                <!-- Filas -->
+                <div *ngFor="let item of demosDetalle; let i = index"
+                    class="grid grid-cols-12 gap-3 py-3 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center">
+
+                    <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
+
+                    <div class="col-span-3 flex flex-col min-w-0 pr-2">
+                        <span class="text-[11px] font-mono text-slate-600 truncate" [title]="item.numero_serie">{{ item.numero_serie || 'N/A' }}</span>
+                    </div>
+
+                    <div class="col-span-4 flex flex-col min-w-0 pr-2">
+                        <span class="text-[12px] font-bold text-[#0d1f38] truncate" [title]="item.nombre_modelo">{{ item.nombre_modelo }}</span>
+                    </div>
+
+                    <div class="col-span-2 flex justify-center">
+                        <span class="text-[14px] font-black text-[#003B8A]">{{ item.cantidad }}</span>
+                    </div>
+
+                    <div class="col-span-2 flex justify-center">
+                        <span class="text-[10px] font-bold px-2 py-1 rounded-md border text-center truncate w-full"
+                            [ngClass]="{
+                                'text-amber-700 bg-amber-50 border-amber-200': item.estatus_retorno === 'En demostración',
+                                'text-emerald-700 bg-emerald-50 border-emerald-200': item.estatus_retorno === 'Devuelto',
+                                'text-slate-600 bg-slate-100 border-slate-300': item.estatus_retorno !== 'En demostración' && item.estatus_retorno !== 'Devuelto'
+                            }">
+                            {{ item.estatus_retorno || 'Pendiente' }}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Footer Totalizador -->
+                <div class="bg-slate-50 py-2.5 px-6 flex justify-end items-center gap-4 border-t border-slate-200">
+                    <span class="text-xs font-bold text-[#0d1f38]">Total de equipos:</span>
+                    <span class="text-lg font-black text-[#003B8A] w-12 text-center">{{ getTotalPiezas() }}</span>
+                </div>
+
+            </div>
+        </app-card-details>
+    </div>
+
+<app-footer-modal [paddingClass]="'p-4 px-6 rounded-b-2xl'">
+        <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrarModal()"></app-button-action>
+
+        <!-- Botones de acción dinámica (Solo visibles si la visita está Programada) -->
+        <div class="flex gap-2.5" *ngIf="visita.estatus === 1 && authService.tieneAcceso(['Administrador', 'Soporte Tecnico'])">
+            
+            <app-button-action 
+                [label]="'Cancelar'" 
+                [esEliminar]="true" 
+                (click)="cancelarVisita()">
+            </app-button-action>
+
+            <app-button-action 
+                [label]="'Completar Visita'" 
+                [claseCss]="'btn-agregar'" 
+                (click)="completarVisita()">
+            </app-button-action>
+
+        </div>
+    </app-footer-modal>
+</div>

@@ -58,8 +58,8 @@
 
           <div *ngFor="let prod of vale.productos; let i = index" class="grid grid-cols-12 gap-3 py-2 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center">
             <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
-            <div class="col-span-2 text-xs font-medium text-slate-500">{{ prod.Codigo_numeral || '-' }}</div>
-            <div class="col-span-3 text-xs font-medium text-slate-500">{{ prod.Codigo_japon || '-' }}</div>
+            <div class="col-span-2 text-xs font-medium text-slate-500">{{ prod.Codigo_numeral || 'Sin codigo' }}</div>
+            <div class="col-span-3 text-xs font-medium text-slate-500">{{ prod.Codigo_japon || 'No aplica' }}</div>
             <div class="col-span-5 text-xs font-bold text-[#0d1f38] truncate" [title]="prod.nombre_producto">{{ prod.nombre_producto }}</div>
             <div class="col-span-1 text-sm font-black text-[#003B8A] text-center">{{ prod.piezas }}</div>
           </div>

@@ -6,33 +6,56 @@
       <div class="logo-box"><img src="../../../../../assets/img/logo_atc.png" alt="ATC Logo"></div>
     </div>
 
-    <ion-tab-button  layout="icon-start" routerLink="/dashboard" routerLinkActive="tab-selected"
+    <ion-tab-button layout="icon-start" routerLink="/dashboard" routerLinkActive="tab-selected"
       *ngIf="authService.tieneAcceso(['Administrador','Asesor'])">
       <ion-icon name="grid-outline"></ion-icon>
       <ion-label>Dashboard</ion-label>
     </ion-tab-button>
 
-    <div class="nav-category" *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Asesor','Cotizador'])">Gestion</div>
+    <div class="nav-category" *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Asesor','Cotizador','Soporte Tecnico'])">Gestion</div>
 
-    <ion-tab-button  layout="icon-start" routerLink="/productos" routerLinkActive="tab-selected"
-      *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Asesor','Cotizador'])">
-      <ion-icon name="cube-outline"></ion-icon>
-      <ion-label>Productos</ion-label>
-    </ion-tab-button>
+    <!-- Productos: ahora agrupa Catálogo, Demos y Visitas de demostración -->
+<ion-tab-button layout="icon-start" class="has-submenu" [class.tab-selected]="productosGrupoActivo"
+  (click)="toggleMenuProductos($event)"
+  *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Asesor','Cotizador', 'Soporte Tecnico'])">
+  <div class="submenu-btn-main">
+    <ion-icon name="cube-outline"></ion-icon>
+    <ion-label>Productos</ion-label>
+    <ion-icon class="chevron" [class.rotated]="menuProductosAbierto || productosGrupoActivo" name="chevron-down-outline"></ion-icon>
+  </div>
+</ion-tab-button>
 
-    <ion-tab-button  layout="icon-start" routerLink="/clientes" routerLinkActive="tab-selected"
-      *ngIf="authService.tieneAcceso(['Administrador','Asesor','Cotizador'])">
+    <ng-container *ngIf="menuProductosAbierto || productosGrupoActivo">
+      <ion-tab-button class="submenu-item" layout="icon-start" routerLink="/productos" routerLinkActive="tab-selected"
+        *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Asesor','Cotizador','Soporte Tecnico'])">
+        <ion-icon name="cube-outline"></ion-icon>
+        <ion-label>Catálogo</ion-label>
+      </ion-tab-button>
+      <ion-tab-button class="submenu-item" layout="icon-start" routerLink="/demos" routerLinkActive="tab-selected"
+        *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Soporte Tecnico'])">
+        <ion-icon name="flask-outline"></ion-icon>
+        <ion-label>Demos</ion-label>
+      </ion-tab-button>
+      <ion-tab-button class="submenu-item" layout="icon-start" routerLink="/visitas" routerLinkActive="tab-selected"
+        *ngIf="authService.tieneAcceso(['Administrador', 'Soporte Tecnico'])">
+        <ion-icon name="walk-outline"></ion-icon>
+        <ion-label>Visitas</ion-label>
+      </ion-tab-button>
+    </ng-container>
+
+    <ion-tab-button layout="icon-start" routerLink="/clientes" routerLinkActive="tab-selected"
+      *ngIf="authService.tieneAcceso(['Administrador','Asesor','Cotizador','Soporte Tecnico'])">
       <ion-icon name="people-outline"></ion-icon>
       <ion-label>Clientes</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button  layout="icon-start" routerLink="/cotizaciones" routerLinkActive="tab-selected"
+    <ion-tab-button layout="icon-start" routerLink="/cotizaciones" routerLinkActive="tab-selected"
       *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador'])">
       <ion-icon name="document-text-outline"></ion-icon>
       <ion-label>Cotizaciones</ion-label>
     </ion-tab-button>
 
-    <ion-tab-button  layout="icon-start" routerLink="/pedidos" routerLinkActive="tab-selected"
+    <ion-tab-button layout="icon-start" routerLink="/pedidos" routerLinkActive="tab-selected"
       *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])">
       <ion-icon name="cart-outline"></ion-icon>
       <ion-label>Pedidos</ion-label>
@@ -43,27 +66,33 @@
       <ion-icon name="ticket-outline"></ion-icon>
       <ion-label>Tickets</ion-label>
     </ion-tab-button>
+    <ion-tab-button layout="icon-start" routerLink="/proyectos" routerLinkActive="tab-selected"
+      *ngIf="authService.tieneAcceso(['Administrador', 'Soporte Tecnico'])">
+      <ion-icon name="briefcase-outline"></ion-icon>
+      <ion-label>Proyectos</ion-label>
+    </ion-tab-button>
 
-    <div class="nav-category" *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Asesor'])">Control</div>
+    <div class="nav-category" *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Asesor','Soporte Tecnico'])">Control</div>
 
-    <ion-tab-button  layout="icon-start" routerLink="/historial-es" routerLinkActive="tab-selected"
+    <ion-tab-button layout="icon-start" routerLink="/historial-es" routerLinkActive="tab-selected"
       *ngIf="authService.tieneAcceso(['Administrador', 'Almacen'])">
       <ion-icon name="swap-vertical-outline"></ion-icon>
       <ion-label>Historial E/S</ion-label>
     </ion-tab-button>
-    <ion-tab-button  layout="icon-start" routerLink="/vales" routerLinkActive="tab-selected"
-      *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Asesor'])">
+    <ion-tab-button layout="icon-start" routerLink="/vales" routerLinkActive="tab-selected"
+      *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Asesor','Soporte Tecnico'])">
       <ion-icon name="receipt-outline"></ion-icon>
       <ion-label>Vales salida</ion-label>
     </ion-tab-button>
-   <ion-tab-button  layout="icon-start" routerLink="/recepciones" routerLinkActive="tab-selected"
+    <ion-tab-button layout="icon-start" routerLink="/recepciones" routerLinkActive="tab-selected"
       *ngIf="authService.tieneAcceso(['Administrador', 'Almacen','Cotizador','Asesor'])">
       <ion-icon name="archive-outline"></ion-icon>
       <ion-label>Recepción</ion-label>
     </ion-tab-button>
+
     <div class="nav-category" *ngIf="authService.tieneAcceso(['Administrador'])">Admin</div>
 
-    <ion-tab-button  layout="icon-start" routerLink="/asesores" routerLinkActive="tab-selected"
+    <ion-tab-button layout="icon-start" routerLink="/asesores" routerLinkActive="tab-selected"
       *ngIf="authService.tieneAcceso(['Administrador'])">
       <ion-icon name="id-card-outline"></ion-icon>
       <ion-label>Asesores</ion-label>

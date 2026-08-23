@@ -124,8 +124,11 @@ export class ModalDemoPage implements OnInit {
       toast.error('Por favor, completa el Nombre/Modelo y selecciona una Marca.');
       return false;
     }
-
-    if (this.demoNuevo.stock === null || this.demoNuevo.stock === '' || this.demoNuevo.stock === undefined) {
+     if(this.demoNuevo.stock === ''){
+      toast.error('Por favor, completa el campo Stock.');
+      return false;
+     }
+    if (this.demoNuevo.stock === null  || this.demoNuevo.stock === undefined) {
       this.demoNuevo.stock = 0;
     } else {
       const stockNumerico = Number(this.demoNuevo.stock);

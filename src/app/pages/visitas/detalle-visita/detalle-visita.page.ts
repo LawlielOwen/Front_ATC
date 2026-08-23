@@ -74,8 +74,6 @@ export class DetalleVisitaPage implements OnInit {
     return this.demosDetalle.reduce((total, item) => total + (Number(item.cantidad) || 0), 0);
   }
 
-  // --- NUEVAS FUNCIONES DE ACCIÓN ---
-
   completarVisita() {
     const dialogRef = this.dialog.open(CompletarVisitaPage, {
       width: '600px',
@@ -87,7 +85,6 @@ export class DetalleVisitaPage implements OnInit {
 
     dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
       if (necesitaRecargar) {
-        // Cierra este modal de detalles y devuelve true para que la tabla principal recargue
         this.dialogRef.close(true); 
       }
     });
@@ -113,7 +110,6 @@ export class DetalleVisitaPage implements OnInit {
         this.vs.cancelarVisita(idVisita).subscribe({
           next: () => {
             toast.success('Visita cancelada correctamente');
-            // Cierra este modal de detalles y devuelve true para que la tabla principal recargue
             this.dialogRef.close(true);
           },
           error: () => toast.error('Error al cancelar la visita')

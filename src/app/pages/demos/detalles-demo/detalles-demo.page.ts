@@ -11,6 +11,7 @@ import { DemoService } from '../../../core/services/Demos.service';
 import { StockDemo } from '../../../shared/model/demo.model';
 import { toast } from 'ngx-sonner';
 import { AuthService } from '../../../core/services/auth.service';
+import { DeleteComponent } from '../../../shared/components/UI/modal/delete/delete.component';
 
 @Component({
   selector: 'app-detalles-demo',
@@ -77,6 +78,17 @@ export class DetallesDemoPage implements OnInit {
         }
       });
     } else {
+      const dialogRef = this.dialog.open(DeleteComponent, {
+      width: '400px',
+      panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      data: {
+        titulo: 'Eliminar Equipo Demo',
+        mensaje: `¿Estás seguro de que deseas eliminar el demo"${this.demo.nombre_modelo}"?`,
+        textoAceptar: 'Eliminar',
+        textoCancelar: 'Regresar'
+      }
+    });
       this.ds.eliminarDemo(this.demo.id_demo).subscribe({
         next: () => {
           toast.success('Equipo Demo dado de baja correctamente');

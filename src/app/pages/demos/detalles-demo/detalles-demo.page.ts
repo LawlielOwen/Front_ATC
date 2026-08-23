@@ -65,7 +65,7 @@ export class DetallesDemoPage implements OnInit {
     });
   }
 
-  procesarFuncion() {
+procesarFuncion() {
     if (this.demo.estatus === 0) {
       this.ds.activarDemo(this.demo.id_demo).subscribe({
         next: () => {
@@ -78,25 +78,30 @@ export class DetallesDemoPage implements OnInit {
         }
       });
     } else {
-      const dialogRef = this.dialog.open(DeleteComponent, {
-      width: '400px',
-      panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
-      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-      data: {
-        titulo: 'Eliminar Equipo Demo',
-        mensaje: `¿Estás seguro de que deseas eliminar el demo"${this.demo.nombre_modelo}"?`,
-        textoAceptar: 'Eliminar',
-        textoCancelar: 'Regresar'
-      }
-    });
-      this.ds.eliminarDemo(this.demo.id_demo).subscribe({
-        next: () => {
-          toast.success('Equipo Demo dado de baja correctamente');
-          this.dialogRef.close(true);
-        },
-        error: (err) => {
-          console.error(err);
-          toast.error('Error al dar de baja el equipo demo');
+      const confirmDialogRef = this.dialog.open(DeleteComponent, {
+        width: '400px',
+        panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+        backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+        data: {
+          titulo: 'Eliminar Equipo Demo',
+          mensaje: `¿Estás seguro de que deseas eliminar el demo "${this.demo.nombre_modelo}"?`,
+          textoAceptar: 'Eliminar',
+          textoCancelar: 'Regresar'
+        }
+      });
+
+      confirmDialogRef.afterClosed().subscribe((confirmado: boolean) => {
+        if (confirmado) {
+          this.ds.eliminarDemo(this.demo.id_demo).subscribe({
+            next: () => {
+              toast.success('Equipo Demo dado de baja correctamente');
+              this.dialogRef.close(true);
+            },
+            error: (err) => {
+              console.error(err);
+              toast.error('Error al dar de baja el equipo demo');
+            }
+          });
         }
       });
     }

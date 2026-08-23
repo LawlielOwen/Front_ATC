@@ -115,7 +115,7 @@ export class ModalDemoPage implements OnInit {
     });
   }
 
-  validarCampos(): boolean {
+validarCampos(): boolean {
     this.demoNuevo.nombre_modelo = (this.demoNuevo.nombre_modelo || '').toString().trim();
     this.demoNuevo.descripcion = (this.demoNuevo.descripcion || '').toString().trim();
     this.demoNuevo.numero_serie = (this.demoNuevo.numero_serie || '').toString().trim();
@@ -124,20 +124,20 @@ export class ModalDemoPage implements OnInit {
       toast.error('Por favor, completa el Nombre/Modelo y selecciona una Marca.');
       return false;
     }
-     if(this.demoNuevo.stock === ''){
+
+    if (this.demoNuevo.stock === '' || this.demoNuevo.stock === null || this.demoNuevo.stock === undefined) {
       toast.error('Por favor, completa el campo Stock.');
       return false;
-     }
-    if (this.demoNuevo.stock === null  || this.demoNuevo.stock === undefined) {
-      this.demoNuevo.stock = 0;
-    } else {
-      const stockNumerico = Number(this.demoNuevo.stock);
-      if (isNaN(stockNumerico) || !Number.isInteger(stockNumerico) || stockNumerico < 0) {
-        toast.error('El stock debe ser un número entero válido (0 o mayor).');
-        return false;
-      }
-      this.demoNuevo.stock = stockNumerico; 
     }
+
+    const stockNumerico = Number(this.demoNuevo.stock);
+    
+    if (isNaN(stockNumerico) || !Number.isInteger(stockNumerico) || stockNumerico < 0) {
+      toast.error('El stock debe ser un número entero válido (0 o mayor).');
+      return false;
+    }
+    
+    this.demoNuevo.stock = stockNumerico; 
 
     return true;
   }

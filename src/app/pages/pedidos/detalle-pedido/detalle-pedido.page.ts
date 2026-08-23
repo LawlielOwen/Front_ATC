@@ -218,11 +218,11 @@ export class DetallePedidoPage implements OnInit {
   }
 pagarConCredito() {
 
-    if (this.monedaActual !== 'USD') {
+    if (this.monedaActual === 'USD') {
       Swal.fire({
         icon: 'warning',
         title: 'No disponible en esta moneda',
-        text: 'El pago con línea de crédito solo aplica para pedidos en USD. Usa "Subir Recibo" para este pedido.',
+        text: 'El pago con línea de crédito no está disponible para pedidos en USD. Usa "Subir Recibo" para este pedido.',
         confirmButtonColor: '#003B8A',
         heightAuto: false
       });
@@ -264,7 +264,18 @@ pagarConCredito() {
           error: (err) => {
             console.error('Error al cobrar con crédito:', err);
             const mensajeError = err.error?.error || 'No se pudo procesar el pago con crédito.';
-            
+
+            if (mensajeError.toLowerCase().includes('crédito insuficiente') || mensajeError.toLowerCase().includes('credito insuficiente')) {
+              Swal.fire({
+                icon: 'warning',
+                title: 'Crédito Insuficiente',
+                text: mensajeError,
+                confirmButtonColor: '#003B8A',
+                heightAuto: false
+              });
+              return;
+            }
+
             Swal.fire({
               icon: 'error',
               title: 'Cobro Rechazado',

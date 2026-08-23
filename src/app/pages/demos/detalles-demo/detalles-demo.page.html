@@ -141,7 +141,7 @@
         [label]="'Editar Demo'" 
         [claseCss]="'btn-editar'"
         (click)="abrirModalEdicion(demo)" 
-        *ngIf="authService.tieneAcceso(['Administrador', 'Soporte Tecnico'])">
+        *ngIf="authService.tieneAcceso(['Administrador', 'Soporte Tecnico','Almacen'])">
       </app-button-action>
     </div>
   </app-footer-modal>

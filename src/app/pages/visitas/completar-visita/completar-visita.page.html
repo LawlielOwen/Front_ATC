@@ -1,10 +1,10 @@
 <div class="bg-white rounded-2xl overflow-hidden w-full max-w-3xl mx-auto max-h-[85vh] flex flex-col border border-slate-200 shadow-2xl">
 
   <app-header-modal [label]="'Completar Visita — ' + (visita.empresa_destino || 'Sin destino')"></app-header-modal>
+  <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
 
   <div class="p-4 overflow-y-auto bg-[#f4f7fa] flex-1 flex flex-col gap-4">
 
-    <!-- Resumen de actividades -->
     <app-card-details titulo="Resumen de la Visita">
       <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
@@ -15,62 +15,82 @@
         <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-1 block">
           ¿Qué se hizo durante la visita? <span class="text-red-500">*</span>
         </span>
-        <!-- Textarea: quita font-medium -->
-<textarea
-  [(ngModel)]="resumenActividades"
-  rows="4"
-  placeholder="Ej: Se fue a reparar el equipo X, se llevó demo del modelo Y para prueba en cliente..."
-  class="w-full border border-slate-200 rounded-lg p-3 text-[12px] text-[#0d1f38] font-normal placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[#003B8A] resize-none">
-</textarea>
+        <textarea
+          [(ngModel)]="resumenActividades"
+          rows="4"
+          placeholder="Ej: Se fue a reparar el equipo X, se llevó demo del modelo Y para prueba en cliente..."
+          class="w-full border border-slate-200 rounded-lg p-3 text-[12px] text-[#0d1f38] font-normal placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-[#003B8A] resize-none">
+        </textarea>
       </div>
     </app-card-details>
 
-    <!-- Equipos asociados -->
     <app-card-details titulo="Equipos y Demostraciones">
       <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
           d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
       </svg>
 
-      <!-- Loading -->
       <div *ngIf="cargandoDetalles" class="text-[12px] text-slate-400 py-6 text-center">
         Cargando equipos asociados...
       </div>
 
-      <!-- Sin equipos -->
       <div *ngIf="!cargandoDetalles && equipos.length === 0"
         class="text-[12px] text-slate-400 py-6 text-center italic">
         Esta visita no tiene equipos demo asociados.
       </div>
 
-      <!-- Lista de equipos -->
       <div *ngIf="!cargandoDetalles && equipos.length > 0" class="flex flex-col gap-2 mt-1 max-h-64 overflow-y-auto pr-1">
-        <div *ngFor="let equipo of equipos"
-          class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex items-center justify-between gap-3">
 
-          <div class="flex items-center gap-3 min-w-0 flex-1">
-            <div class="w-9 h-9 rounded-lg bg-[#f0f9f5] flex items-center justify-center flex-shrink-0">
-              <svg class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-              </svg>
+        <div *ngFor="let equipo of equipos"
+          class="bg-slate-50 border border-slate-200 rounded-xl p-3 flex flex-col gap-2.5">
+
+          <div class="flex items-center justify-between gap-3">
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <div class="w-9 h-9 rounded-lg bg-[#f0f9f5] flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+              </div>
+              <div class="flex flex-col min-w-0">
+                <span class="text-[#0d1f38] font-semibold text-[12px] leading-tight truncate">{{ equipo.nombre_modelo }}</span>
+                <span class="text-[10px] text-slate-400 truncate" *ngIf="equipo.numero_serie">Serie: {{ equipo.numero_serie }}</span>
+              </div>
             </div>
-            <div class="flex flex-col min-w-0">
-              <span class="text-[#0d1f38] font-semibold text-[12px] leading-tight truncate">
-                {{ equipo.nombre_modelo }}
-              </span>
-              <span class="text-[10px] text-slate-400 truncate" *ngIf="equipo.numero_serie">
-                Serie: {{ equipo.numero_serie }}
-              </span>
-            </div>
+
+            <span class="text-[10px] font-bold px-2 py-1 rounded-full flex-shrink-0"
+              [ngClass]="totalAsignado(equipo) === equipo.piezas ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'">
+              {{ totalAsignado(equipo) }} / {{ equipo.piezas }} pzas
+            </span>
           </div>
 
-         <!-- Select: quita font-semibold -->
-<select [(ngModel)]="equipo.estatus_retorno"
-  class="border border-slate-300 rounded-lg text-[11px] font-normal text-[#0d1f38] px-2 py-1.5 flex-shrink-0 focus:outline-none focus:ring-2 focus:ring-[#003B8A]">
-  <option *ngFor="let opcion of opcionesEstatusRetorno" [value]="opcion">{{ opcion }}</option>
-</select>
+          <div *ngFor="let div of equipo.divisiones; let di = index" class="flex items-center gap-2 pl-12">
+       <input type="text" inputmode="numeric" pattern="[0-9]*"
+  class="cantidad-input w-14 border border-slate-300 rounded-lg text-[11px] text-center font-normal text-[#0d1f38] px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#003B8A]"
+  [ngModel]="div.cantidad"
+  (ngModelChange)="onCantidadChange(equipo, div, $event)"
+  [maxlength]="equipo.piezas.toString().length">
+
+            <select [(ngModel)]="div.estatus_retorno"
+              class="estatus-select flex-1 border border-slate-300 rounded-lg text-[11px] font-normal text-[#0d1f38] px-2 py-1.5 focus:outline-none focus:ring-2 focus:ring-[#003B8A]">
+              <option *ngFor="let opcion of opcionesEstatusRetorno" [value]="opcion">{{ opcion }}</option>
+            </select>
+
+            <button *ngIf="equipo.divisiones.length > 1" (click)="eliminarDivision(equipo, di)"
+              class="text-slate-300 hover:text-red-500 p-1" title="Eliminar división">
+              <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+
+         <button *ngIf="faltantePorAsignar(equipo) > 0" (click)="agregarDivision(equipo)"
+        class="repartir-btn ml-12 self-start text-[10px] font-bold text-[#003B8A] hover:underline
+               bg-transparent border-none outline-none focus:outline-none focus:ring-0 appearance-none">
+  + Repartir estatus ({{ faltantePorAsignar(equipo) }} pza(s) restante(s))
+</button>
         </div>
+
       </div>
     </app-card-details>
 

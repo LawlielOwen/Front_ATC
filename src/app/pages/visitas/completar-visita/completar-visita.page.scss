@@ -1,0 +1,67 @@
+.no-spinner {
+  -moz-appearance: textfield;
+  appearance: none;
+  box-shadow: none !important;
+  outline: none;
+
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+
+  // Anula el estado nativo "inválido" del navegador (por min/max) para que
+  // no dibuje su propio indicador de validación encima de nuestro borde
+  &:invalid {
+    box-shadow: none;
+    outline: none;
+  }
+
+  &:focus {
+    box-shadow: none;
+  }
+
+input,
+select,
+button {
+  forced-color-adjust: none;
+}
+
+input,
+select,
+button {
+  forced-color-adjust: none;
+}
+@media (forced-colors: active) {
+  .cantidad-input,
+  .estatus-select {
+    background-color: white !important;
+    color: #0d1f38 !important;
+    border: 1px solid #cbd5e1 !important;
+  }
+
+  .repartir-btn {
+    background-color: transparent !important;
+    color: #003B8A !important;
+    border: none !important;
+  }
+}
+.cantidad-input {
+  color: #0d1f38 !important;
+  -webkit-text-fill-color: #0d1f38 !important;
+  -webkit-appearance: none;
+  appearance: none;
+  color-scheme: light;
+  font-weight: 400 !important;
+  outline: none;
+  box-shadow: none;
+}
+
+.cantidad-input:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #003B8A; // para que el focus se vea igual que el select
+}
+.repartir-btn {
+  -webkit-tap-highlight-color: transparent;
+}
+}

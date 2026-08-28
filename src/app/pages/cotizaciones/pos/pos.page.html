@@ -196,40 +196,34 @@
                 [title]="item.id_producto ? 'Precio fijado por catálogo' : ''">
 
         </div>
-        <!-- 6. Costo Flete: % o $, siempre manual (toggle en línea con el input) -->
- <div class="flex flex-col items-end pr-1 gap-1 min-w-0">
-    <div class="flex bg-[#e2e8f0] rounded p-0.5 w-[60px] h-[16px] flex-shrink-0">
+  <!-- 6. Costo Flete: % o $, moneda heredada de la cotización -->
+<div class="flex flex-col items-end pr-1 gap-1 min-w-0">
+
+    <!-- Toggle % / $ -->
+    <div class="flex bg-[#e2e8f0] rounded p-0.5 w-[64px] h-[22px] flex-shrink-0">
         <button type="button" (click)="cambiarTipoFlete(item, 'PORCENTAJE')"
-            [ngClass]="item.tipo_flete === 'PORCENTAJE' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400'"
-            class="flex-1 rounded-sm text-[8px] leading-none transition-all">%</button>
+            [ngClass]="item.tipo_flete === 'PORCENTAJE' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400 hover:text-slate-600'"
+            class="flex-1 rounded-sm text-[10px] leading-none transition-all cursor-pointer">%</button>
         <button type="button" (click)="cambiarTipoFlete(item, 'FIJO')"
-            [ngClass]="item.tipo_flete === 'FIJO' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400'"
-            class="flex-1 rounded-sm text-[8px] leading-none transition-all">$</button>
+            [ngClass]="item.tipo_flete === 'FIJO' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400 hover:text-slate-600'"
+            class="flex-1 rounded-sm text-[10px] leading-none transition-all cursor-pointer">$</button>
     </div>
 
-    <!-- Toggle MXN/USD: solo tiene sentido en modo FIJO -->
-    <div class="flex bg-[#e2e8f0] rounded p-0.5 w-[60px] h-[16px] flex-shrink-0" *ngIf="item.tipo_flete === 'FIJO'">
-        <button type="button" (click)="cambiarMonedaFlete(item, 'MXN')"
-            [ngClass]="item.moneda_flete === 'MXN' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400'"
-            class="flex-1 rounded-sm text-[7px] leading-none transition-all">MXN</button>
-        <button type="button" (click)="cambiarMonedaFlete(item, 'USD')"
-            [ngClass]="item.moneda_flete === 'USD' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400'"
-            class="flex-1 rounded-sm text-[7px] leading-none transition-all">USD</button>
+    <!-- Input con sufijo de moneda (solo informativo, heredado de la cotización) -->
+    <div class="relative w-full max-w-[70px]">
+        <input type="number" min="0"
+            [placeholder]="item.tipo_flete === 'PORCENTAJE' ? 'Ej. 11' : '0.00'"
+            class="appearance-none w-full h-[26px] text-right bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[12px] font-semibold text-slate-600 pl-1 pr-8 transition-colors"
+            [(ngModel)]="item.valor_flete" (change)="recalcularFleteItem(item)">
+        <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] font-bold text-slate-400 pointer-events-none select-none">
+            {{ item.tipo_flete === 'PORCENTAJE' ? '%' : (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') }}
+        </span>
     </div>
 
-    <input type="number" min="0" [placeholder]="item.tipo_flete === 'PORCENTAJE' ? '% ej. 11' : '$0.00'"
-        class="appearance-none w-full min-w-0 max-w-[60px] h-[26px] text-right bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[12px] font-semibold text-slate-600 px-2 transition-colors"
-        [(ngModel)]="item.valor_flete" (change)="recalcularFleteItem(item)">
-
-    <span class="text-[9px] text-slate-400 pr-0.5 truncate max-w-full" *ngIf="item.tipo_flete === 'PORCENTAJE'">
-    = {{ obtenerPrecioEnMonedaActual(item.costo_flete) | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
-</span>
-
-    <!-- En modo FIJO, muestra el equivalente convertido cuando la moneda del flete no coincide con la de la cotización -->
-    <span class="text-[9px] text-slate-400 pr-0.5 truncate max-w-full"
-    *ngIf="item.tipo_flete === 'FIJO' && item.moneda_flete === 'USD'">
-    = {{ obtenerPrecioEnMonedaActual(item.costo_flete) | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
-</span>
+    <!-- Equivalente en la moneda de cotización (referencia visual) -->
+    <span class="text-[9px] text-slate-400 pr-0.5 truncate max-w-full">
+        = {{ obtenerPrecioEnMonedaActual(item.costo_flete) | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
+    </span>
 </div>
         <!-- 7. Cantidad -->
         <div class="flex justify-center">

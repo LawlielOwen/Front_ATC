@@ -59,4 +59,9 @@ export class VisitaService {
   cancelarVisita(id: number): Observable<any> {
     return this.http.delete(`${this.apiUrl}/visitas/${id}`);
   }
+    generarPDFVisita(id: number): Observable<Blob> {
+    return this.http.get(`${this.apiUrl}/visitas/${id}/pdf`, {
+      responseType: 'blob'
+    });
+  }
 }

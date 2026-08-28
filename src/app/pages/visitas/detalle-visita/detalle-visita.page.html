@@ -1,4 +1,5 @@
-<div class="bg-white rounded-2xl overflow-hidden w-full max-w-4xl mx-auto max-h-[85vh] flex flex-col border border-slate-200 shadow-2xl">
+<div
+    class="bg-white rounded-2xl overflow-hidden w-full max-w-4xl mx-auto max-h-[85vh] flex flex-col border border-slate-200 shadow-2xl">
 
     <app-header-modal [label]="'Detalles de la Visita'"></app-header-modal>
 
@@ -22,8 +23,10 @@
                             </svg>
                         </div>
                         <div class="flex flex-col flex-1 min-w-0">
-                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Cliente / Empresa</span>
-                            <span class="text-[#0d1f38] font-bold text-[12px] truncate" [title]="visita.empresa_destino">{{ visita.empresa_destino }}</span>
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Cliente /
+                                Empresa</span>
+                            <span class="text-[#0d1f38] font-bold text-[12px] truncate"
+                                [title]="visita.empresa_destino">{{ visita.empresa_destino }}</span>
                         </div>
                     </div>
 
@@ -35,8 +38,10 @@
                             </svg>
                         </div>
                         <div class="flex flex-col flex-1 min-w-0">
-                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Asesor Responsable</span>
-                            <span class="text-[#0d1f38] font-semibold text-[12px] truncate">{{ visita.nombre_asesor }}</span>
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Asesor
+                                Responsable</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px] truncate">{{ visita.nombre_asesor
+                                }}</span>
                         </div>
                     </div>
 
@@ -48,8 +53,10 @@
                             </svg>
                         </div>
                         <div class="flex flex-col flex-1 min-w-0">
-                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Soporte Técnico</span>
-                            <span class="text-[#0d1f38] font-semibold text-[12px] truncate">{{ visita.nombre_tecnico }}</span>
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Soporte
+                                Técnico</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px] truncate">{{ visita.nombre_tecnico
+                                }}</span>
                         </div>
                     </div>
                 </div>
@@ -68,8 +75,10 @@
                             <span class="text-[#1D9E75] font-bold text-[10px]">VIS</span>
                         </div>
                         <div class="flex flex-col flex-1">
-                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Fecha Programada</span>
-                            <span class="text-[#0d1f38] font-semibold text-[12px]">{{ visita.FechaFormat || (visita.fecha_visita | date:'mediumDate':'':'es-MX') }}</span>
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Fecha
+                                Programada</span>
+                            <span class="text-[#0d1f38] font-semibold text-[12px]">{{ visita.FechaFormat ||
+                                (visita.fecha_visita | date:'mediumDate':'':'es-MX') }}</span>
                         </div>
                     </div>
 
@@ -81,10 +90,12 @@
                             </svg>
                         </div>
                         <div class="flex flex-col flex-1">
-                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Estatus Actual</span>
+                            <span class="text-[#94a3b8] font-bold text-[9px] uppercase tracking-wider mb-0.5">Estatus
+                                Actual</span>
                             <span class="font-bold text-[12px]"
                                 [ngClass]="{'text-[#003B8A]': visita.estatus === 1, 'text-[#1D9E75]': visita.estatus === 2, 'text-rose-600': visita.estatus === 0}">
-                                {{ visita.EstatusTexto || (visita.estatus === 1 ? 'Programada' : visita.estatus === 2 ? 'Completada' : 'Cancelada') }}
+                                {{ visita.EstatusTexto || (visita.estatus === 1 ? 'Programada' : visita.estatus === 2 ?
+                                'Completada' : 'Cancelada') }}
                             </span>
                         </div>
                     </div>
@@ -97,7 +108,8 @@
         <div *ngIf="visita.estatus === 2 && visita.resumen_actividades" class="mb-4 animate-fade-in">
             <app-card-details titulo="Resumen de Actividades">
                 <svg icono class="w-3.5 h-3.5 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 <div class="bg-slate-50 p-4 border border-slate-100 rounded-lg mt-2">
                     <p class="text-[12px] text-slate-700 leading-relaxed">{{ visita.resumen_actividades }}</p>
@@ -116,11 +128,15 @@
 
                 <!-- Encabezados de Tabla -->
                 <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2.5 px-4 items-center">
-                    <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+                    <span
+                        class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
                     <span class="col-span-3 text-[9px] font-bold text-white uppercase tracking-widest">N. Serie</span>
-                    <span class="col-span-4 text-[9px] font-bold text-white uppercase tracking-widest">Modelo / Equipo</span>
-                    <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center">Pzas</span>
-                    <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center">Estatus</span>
+                    <span class="col-span-4 text-[9px] font-bold text-white uppercase tracking-widest">Modelo /
+                        Equipo</span>
+                    <span
+                        class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center">Pzas</span>
+                    <span
+                        class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest text-center">Estatus</span>
                 </div>
 
                 <!-- Estado de Carga -->
@@ -135,11 +151,13 @@
                     <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
 
                     <div class="col-span-3 flex flex-col min-w-0 pr-2">
-                        <span class="text-[11px] font-mono text-slate-600 truncate" [title]="item.numero_serie">{{ item.numero_serie || 'N/A' }}</span>
+                        <span class="text-[11px] font-mono text-slate-600 truncate" [title]="item.numero_serie">{{
+                            item.numero_serie || 'N/A' }}</span>
                     </div>
 
                     <div class="col-span-4 flex flex-col min-w-0 pr-2">
-                        <span class="text-[12px] font-bold text-[#0d1f38] truncate" [title]="item.nombre_modelo">{{ item.nombre_modelo }}</span>
+                        <span class="text-[12px] font-bold text-[#0d1f38] truncate" [title]="item.nombre_modelo">{{
+                            item.nombre_modelo }}</span>
                     </div>
 
                     <div class="col-span-2 flex justify-center">
@@ -168,24 +186,20 @@
         </app-card-details>
     </div>
 
-<app-footer-modal [paddingClass]="'p-4 px-6 rounded-b-2xl'">
+    <app-footer-modal [paddingClass]="'p-4 px-6 rounded-b-2xl'">
         <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrarModal()"></app-button-action>
 
-        <!-- Botones de acción dinámica (Solo visibles si la visita está Programada) -->
-        <div class="flex gap-2.5" *ngIf="visita.estatus === 1 && authService.tieneAcceso(['Administrador', 'Soporte Tecnico'])">
-            
-            <app-button-action 
-                [label]="'Cancelar'" 
-                [esEliminar]="true" 
-                (click)="cancelarVisita()">
-            </app-button-action>
+        <div class="flex gap-2.5">
+            <app-button-action [label]="'Ver PDF'" [claseCss]="'btn-pdf'"
+                (click)="abrirPdf(visita.id_visita)"></app-button-action>
 
-            <app-button-action 
-                [label]="'Completar Visita'" 
-                [claseCss]="'btn-agregar'" 
-                (click)="completarVisita()">
-            </app-button-action>
+            <ng-container *ngIf="visita.estatus === 1 && authService.tieneAcceso(['Administrador', 'Soporte Tecnico'])">
+                <app-button-action [label]="'Cancelar'" [esEliminar]="true" (click)="cancelarVisita()">
+                </app-button-action>
 
+                <app-button-action [label]="'Completar Visita'" [claseCss]="'btn-agregar'" (click)="completarVisita()">
+                </app-button-action>
+            </ng-container>
         </div>
     </app-footer-modal>
 </div>

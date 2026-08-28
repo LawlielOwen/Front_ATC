@@ -20,7 +20,6 @@ export function mostrarAvisoStockIncompleto(mensaje: string): Promise<void> {
   }).then(() => {});
 }
 
-
 export function mostrarExitoPedido(mensaje: string): Promise<void> {
   return Swal.fire({
     icon: 'success',
@@ -28,6 +27,34 @@ export function mostrarExitoPedido(mensaje: string): Promise<void> {
     text: mensaje,
     confirmButtonText: 'Entendido',
     confirmButtonColor: '#1D9E75',
+    heightAuto: false
+  }).then(() => {});
+}
+
+export function mostrarCreditoInsuficiente(mensaje: string): Promise<void> {
+  return Swal.fire({
+    icon: 'warning',
+    title: 'Crédito Insuficiente',
+    text: mensaje,
+    confirmButtonText: 'Entendido',
+    confirmButtonColor: '#003B8A',
+    heightAuto: false
+  }).then(() => {});
+}
+
+export function mostrarCreditoVencido(mensaje: string): Promise<void> {
+  return Swal.fire({
+    icon: 'error',
+    title: 'Línea de Crédito Vencida',
+    html: `
+      <p style="margin-bottom: 12px; font-size: 15px; color: #334155;">${mensaje}</p>
+      <p style="font-size: 13px; color: #64748b; line-height: 1.5;">
+        Se debe renovar la vigencia del crédito de este cliente,
+        o usa "Subir Recibo" para registrar el pago.
+      </p>
+    `,
+    confirmButtonText: 'Entendido',
+    confirmButtonColor: '#003B8A',
     heightAuto: false
   }).then(() => {});
 }

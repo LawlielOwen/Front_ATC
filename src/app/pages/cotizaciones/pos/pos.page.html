@@ -164,11 +164,12 @@
         <!-- 3. Origen -->
         <div class="flex justify-center items-center px-1 w-full">
 
-            <select *ngIf="esSMC(item)" [(ngModel)]="item.origen"
-                class="appearance-none w-full max-w-[130px] h-[30px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center px-2 transition-colors uppercase cursor-pointer">
-                <option value="" disabled selected>Origen SMC</option>
-                <option *ngFor="let o of ORIGENES_SMC" [value]="o">{{ o }}</option>
-            </select>
+          <select *ngIf="esSMC(item)" [(ngModel)]="item.origen"
+    [ngClass]="item.origen ? 'text-slate-700' : 'text-slate-400 font-normal'"
+    class="appearance-none w-full max-w-[130px] h-[36px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-center px-2 pr-6 transition-colors uppercase cursor-pointer">
+    <option value="" disabled selected>Selecciona origen</option>
+    <option *ngFor="let o of ORIGENES_SMC" [value]="o">{{ o }}</option>
+</select>
 
             <input *ngIf="!esSMC(item)" type="text" placeholder="Ej. AVION"
                 class="appearance-none w-full max-w-[120px] h-[30px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center px-2 transition-colors uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-400"
@@ -221,14 +222,14 @@
         [(ngModel)]="item.valor_flete" (change)="recalcularFleteItem(item)">
 
     <span class="text-[9px] text-slate-400 pr-0.5 truncate max-w-full" *ngIf="item.tipo_flete === 'PORCENTAJE'">
-        = {{ item.costo_flete | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
-    </span>
+    = {{ obtenerPrecioEnMonedaActual(item.costo_flete) | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
+</span>
 
     <!-- En modo FIJO, muestra el equivalente convertido cuando la moneda del flete no coincide con la de la cotización -->
     <span class="text-[9px] text-slate-400 pr-0.5 truncate max-w-full"
-        *ngIf="item.tipo_flete === 'FIJO' && item.moneda_flete === 'USD'">
-        = {{ item.costo_flete | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
-    </span>
+    *ngIf="item.tipo_flete === 'FIJO' && item.moneda_flete === 'USD'">
+    = {{ obtenerPrecioEnMonedaActual(item.costo_flete) | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
+</span>
 </div>
         <!-- 7. Cantidad -->
         <div class="flex justify-center">
@@ -239,7 +240,7 @@
 
         <!-- 8. Subtotal -->
         <div class="text-[13px] font-bold text-[#003B8A] text-right whitespace-nowrap">
-    {{ item.subtotal_partida | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
+    {{ obtenerPrecioEnMonedaActual(item.subtotal_partida) | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
 </div>
 
         <!-- 9. Botón Eliminar -->

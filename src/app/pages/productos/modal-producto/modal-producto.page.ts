@@ -132,7 +132,6 @@ validarCampos(): boolean {
 
     if (
       !this.productoNuevo.Nombre ||
-      !this.productoNuevo.Descripcion ||
       !this.productoNuevo.Codigo_numeral ||
       !this.productoNuevo.Codigo_japon ||
       !this.productoNuevo.Estanteria ||

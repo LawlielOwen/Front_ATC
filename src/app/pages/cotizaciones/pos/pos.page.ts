@@ -408,7 +408,10 @@ agregarItemManual() {
       });
     }
   }
-
+obtenerPrecioEnMonedaActual(montoMXN: number): number {
+  const tipoCambio = Number(this.cotizacion.tipo_cambio) || 1;
+  return this.cotizacion.moneda === 'USD' ? montoMXN / tipoCambio : montoMXN;
+}
   private descargarPDFFlujo(idCotizacion: number) {
     this.cs.descargarPDF(idCotizacion).subscribe({
       next: (blob: Blob) => {

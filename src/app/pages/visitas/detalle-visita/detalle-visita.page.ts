@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { IonicModule } from '@ionic/angular';
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { toast } from 'ngx-sonner';
-
+import Swal from 'sweetalert2';
 import { VisitaService } from '../../../core/services/Visitas.service';
 import { AuthService } from '../../../core/services/auth.service';
 import { HeaderModalComponent } from "../../../shared/components/UI/modal/header-modal/header-modal.component";
@@ -113,6 +113,47 @@ export class DetalleVisitaPage implements OnInit {
             this.dialogRef.close(true);
           },
           error: () => toast.error('Error al cancelar la visita')
+        });
+      }
+    });
+  }
+  abrirPdf(idVisita: number) {
+    Swal.fire({
+      title: 'Abriendo documento...',
+      text: 'Por favor espera un momento',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      heightAuto: false,
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
+
+    this.vs.generarPDFVisita(idVisita).subscribe({
+      next: (blob: Blob) => {
+        Swal.close();
+
+        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(pdfBlob);
+
+        const a = document.createElement('a');
+        a.href = fileURL;
+        a.target = '_blank';
+
+        document.body.appendChild(a);
+        a.click();
+
+        document.body.removeChild(a);
+
+        setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
+      },
+      error: (err) => {
+        Swal.close();
+        console.error('Error al obtener el PDF:', err);
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo cargar el documento.'
         });
       }
     });

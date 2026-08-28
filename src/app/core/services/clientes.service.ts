@@ -79,7 +79,7 @@ updateCliente(id: number, cliente: FormData): Observable<any> {
           formData.append('CSF', archivo);
         return this.http.post<any>(`${this.apiUrl}/clientes/${id}/CSF`, formData);
     }
-    asignarCredito(id: number, tiene_credito: boolean, limite_credito: number): Observable<any> {
-  return this.http.put(`${this.apiUrl}/clientes/${id}/credito`, { tiene_credito, limite_credito });
+   asignarCredito(id: number, tiene_credito: boolean, limite_credito: number, fecha_vencimiento: string | null): Observable<any> {
+  return this.http.put(`${this.apiUrl}/clientes/${id}/credito`, { tiene_credito, limite_credito, fecha_vencimiento });
 }
 }

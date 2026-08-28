@@ -64,15 +64,24 @@ activarCliente(id: number) {
       this.activarCliente(this.cliente.id);
     }
   }
-
+esVencido(fecha: string | null): boolean {
+  if (!fecha) return true; 
+  return new Date(fecha) < new Date(new Date().toDateString()); 
+}
 asignarCredito(cliente: Cliente) {
     mostrarAsignarCredito(cliente).then((datos) => {
-      if (!datos) return; 
+      if (!datos) return;
 
-      this.clientesService.asignarCredito(cliente.id, datos.tiene_credito, datos.limite_credito).subscribe({
+      this.clientesService.asignarCredito(
+        cliente.id,
+        datos.tiene_credito,
+        datos.limite_credito,
+        datos.fecha_vencimiento
+      ).subscribe({
         next: (res: any) => {
-          this.cliente.tiene_credito = datos.tiene_credito ? 1 : 0;  
+          this.cliente.tiene_credito = datos.tiene_credito ? 1 : 0;
           this.cliente.limite_credito = datos.limite_credito;
+          (this.cliente as any).fecha_vencimiento_credito = datos.fecha_vencimiento;
           this.necesitaRecargarLista = true;
 
           mostrarExitoCredito(res.mensaje || 'La línea de crédito se actualizó correctamente.');

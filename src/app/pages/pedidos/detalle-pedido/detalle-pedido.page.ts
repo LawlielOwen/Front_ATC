@@ -12,7 +12,7 @@ import { PedidoService } from '../../../core/services/Pedidos.service';
 import { toast } from 'ngx-sonner';
 import { NgxSonnerToaster } from 'ngx-sonner';
 import { AuthService } from '../../../core/services/auth.service';
-import { mostrarAvisoStockIncompleto, mostrarExitoPedido } from '../../../shared/utils/pedido-alerts.util';
+import { mostrarAvisoStockIncompleto, mostrarExitoPedido, mostrarCreditoInsuficiente, mostrarCreditoVencido } from '../../../shared/utils/pedido-alerts.util';
 import Swal from 'sweetalert2';
 @Component({
   selector: 'app-detalle-pedido',
@@ -264,15 +264,15 @@ pagarConCredito() {
           error: (err) => {
             console.error('Error al cobrar con crédito:', err);
             const mensajeError = err.error?.error || 'No se pudo procesar el pago con crédito.';
+            const mensajeMinuscula = mensajeError.toLowerCase();
 
-            if (mensajeError.toLowerCase().includes('crédito insuficiente') || mensajeError.toLowerCase().includes('credito insuficiente')) {
-              Swal.fire({
-                icon: 'warning',
-                title: 'Crédito Insuficiente',
-                text: mensajeError,
-                confirmButtonColor: '#003B8A',
-                heightAuto: false
-              });
+            if (mensajeMinuscula.includes('venció') || mensajeMinuscula.includes('vencio')) {
+              mostrarCreditoVencido(mensajeError);
+              return;
+            }
+
+            if (mensajeMinuscula.includes('crédito insuficiente') || mensajeMinuscula.includes('credito insuficiente')) {
+              mostrarCreditoInsuficiente(mensajeError);
               return;
             }
 

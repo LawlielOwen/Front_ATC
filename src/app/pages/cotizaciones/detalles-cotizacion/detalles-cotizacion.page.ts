@@ -200,15 +200,14 @@ cargarDetallesCot() {
     });
   }
 abrirPdf(idCotizacion: number) {
-    const nuevaVentana = window.open('', '_blank'); 
-
+    // 1. Mostramos el loading primero
     Swal.fire({
-      title: 'Abriendo documento...',
+      title: 'Generando documento...',
       text: 'Por favor espera un momento',
       allowOutsideClick: false,
       allowEscapeKey: false,
       heightAuto: false,
-      scrollbarPadding: false, // <--- EVITA QUE LA PANTALLA SE ROMPA HACIA ABAJO
+      scrollbarPadding: false,
       didOpen: () => {
         Swal.showLoading();
       }
@@ -216,13 +215,17 @@ abrirPdf(idCotizacion: number) {
 
     this.cs.verPdfCotizacion(idCotizacion).subscribe({
       next: (blob: Blob) => {
-        Swal.close();
+        // 2. Cerramos el loading en cuanto llega el PDF
+        Swal.close(); 
 
         const pdfBlob = new Blob([blob], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(pdfBlob);
 
-        // Inyección segura del PDF para evitar el bloqueo del navegador en QA
+        // 3. AHORA SÍ abrimos la ventana nueva
+        const nuevaVentana = window.open('', '_blank');
+
         if (nuevaVentana) {
+          // Si el navegador permitió abrir la ventana, inyectamos el PDF
           nuevaVentana.document.open();
           nuevaVentana.document.write(`
             <html>
@@ -233,26 +236,32 @@ abrirPdf(idCotizacion: number) {
             </html>
           `);
           nuevaVentana.document.close();
+        } else {
+          // Si el navegador bloqueó el pop-up, avisamos al usuario
+          Swal.fire({
+            icon: 'warning',
+            title: 'Ventana bloqueada',
+            text: 'Tu navegador bloqueó el PDF. Por favor, permite las ventanas emergentes (pop-ups) en la barra superior.',
+            heightAuto: false,
+            scrollbarPadding: false
+          });
         }
 
         setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
       },
       error: (err) => {
         Swal.close();
-        if (nuevaVentana) nuevaVentana.close();
-        
         console.error('Error al obtener el PDF:', err);
         Swal.fire({
           icon: 'error',
           title: 'Error',
           text: 'No se pudo cargar el documento.',
           heightAuto: false,
-          scrollbarPadding: false // <--- TAMBIÉN AQUÍ PARA PREVENIR EL SALTO
+          scrollbarPadding: false
         });
       }
     });
   }
-
   modificarCotizacion(cot: any) {
     this.cerrar();
     this.router.navigate(['/cotizaciones/pos', cot.id], { state: { cotizacionData: cot } });

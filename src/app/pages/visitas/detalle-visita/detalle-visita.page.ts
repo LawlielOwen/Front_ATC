@@ -118,15 +118,13 @@ export class DetalleVisitaPage implements OnInit {
     });
   }
 abrirPdf(idVisita: number) {
-    const nuevaVentana = window.open('', '_blank'); 
-
     Swal.fire({
-      title: 'Abriendo documento...',
+      title: 'Generando documento...',
       text: 'Por favor espera un momento',
       allowOutsideClick: false,
       allowEscapeKey: false,
       heightAuto: false,
-      scrollbarPadding: false, // <--- EVITA EL BRINCO BLANCO
+      scrollbarPadding: false,
       didOpen: () => {
         Swal.showLoading();
       }
@@ -139,6 +137,9 @@ abrirPdf(idVisita: number) {
         const pdfBlob = new Blob([blob], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(pdfBlob);
 
+        // Abrimos la ventana hasta que el Blob está listo
+        const nuevaVentana = window.open('', '_blank');
+
         if (nuevaVentana) {
           nuevaVentana.document.open();
           nuevaVentana.document.write(`
@@ -150,14 +151,20 @@ abrirPdf(idVisita: number) {
             </html>
           `);
           nuevaVentana.document.close();
+        } else {
+          Swal.fire({
+            icon: 'warning',
+            title: 'Ventana bloqueada',
+            text: 'Tu navegador bloqueó el PDF. Por favor, permite las ventanas emergentes (pop-ups) en la barra superior.',
+            heightAuto: false,
+            scrollbarPadding: false
+          });
         }
 
         setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
       },
       error: (err) => {
         Swal.close();
-        if (nuevaVentana) nuevaVentana.close();
-        
         console.error('Error al obtener el PDF:', err);
         Swal.fire({
           icon: 'error',

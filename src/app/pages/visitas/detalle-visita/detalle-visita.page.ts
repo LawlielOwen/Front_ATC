@@ -117,45 +117,45 @@ export class DetalleVisitaPage implements OnInit {
       }
     });
   }
-  abrirPdf(idVisita: number) {
-    Swal.fire({
-      title: 'Abriendo documento...',
-      text: 'Por favor espera un momento',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      heightAuto: false,
-      didOpen: () => {
-        Swal.showLoading();
+abrirPdf(idVisita: number) {
+  const nuevaVentana = window.open('', '_blank'); // se abre YA, dentro del gesto de clic
+
+  Swal.fire({
+    title: 'Abriendo documento...',
+    text: 'Por favor espera un momento',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    heightAuto: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  this.vs.generarPDFVisita(idVisita).subscribe({
+    next: (blob: Blob) => {
+      Swal.close();
+
+      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(pdfBlob);
+
+      if (nuevaVentana) {
+        nuevaVentana.location.href = fileURL;
       }
-    });
 
-    this.vs.generarPDFVisita(idVisita).subscribe({
-      next: (blob: Blob) => {
-        Swal.close();
-
-        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(pdfBlob);
-
-        const a = document.createElement('a');
-        a.href = fileURL;
-        a.target = '_blank';
-
-        document.body.appendChild(a);
-        a.click();
-
-        document.body.removeChild(a);
-
-        setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
-      },
-      error: (err) => {
-        Swal.close();
-        console.error('Error al obtener el PDF:', err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo cargar el documento.'
-        });
+      setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
+    },
+    error: (err) => {
+      Swal.close();
+      if (nuevaVentana) {
+        nuevaVentana.close();
       }
-    });
-  }
+      console.error('Error al obtener el PDF:', err);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'No se pudo cargar el documento.'
+      });
+    }
+  });
+}
 }

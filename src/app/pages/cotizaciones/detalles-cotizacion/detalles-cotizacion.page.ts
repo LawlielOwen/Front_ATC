@@ -200,26 +200,28 @@ cargarDetallesCot() {
     });
   }
 abrirPdf(idCotizacion: number) {
-    const nuevaVentana = window.open('', '_blank');
+    const nuevaVentana = window.open('', '_blank'); 
 
-    if (nuevaVentana) {
-      nuevaVentana.document.write(`
-        <html>
-          <head><title>Cargando Documento...</title></head>
-          <body style="font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f7fa; margin: 0;">
-            <h2 style="color: #003B8A;">Generando PDF, por favor espera...</h2>
-          </body>
-        </html>
-      `);
-    }
+    Swal.fire({
+      title: 'Abriendo documento...',
+      text: 'Por favor espera un momento',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      heightAuto: false,
+      scrollbarPadding: false, // <--- EVITA QUE LA PANTALLA SE ROMPA HACIA ABAJO
+      didOpen: () => {
+        Swal.showLoading();
+      }
+    });
 
-    // 3. Petición al servidor
     this.cs.verPdfCotizacion(idCotizacion).subscribe({
       next: (blob: Blob) => {
+        Swal.close();
+
         const pdfBlob = new Blob([blob], { type: 'application/pdf' });
         const fileURL = URL.createObjectURL(pdfBlob);
 
-        // 4. Incrustamos el PDF usando <embed> para burlar el bloqueo de seguridad de Blob URLs
+        // Inyección segura del PDF para evitar el bloqueo del navegador en QA
         if (nuevaVentana) {
           nuevaVentana.document.open();
           nuevaVentana.document.write(`
@@ -236,14 +238,16 @@ abrirPdf(idCotizacion: number) {
         setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
       },
       error: (err) => {
+        Swal.close();
+        if (nuevaVentana) nuevaVentana.close();
+        
         console.error('Error al obtener el PDF:', err);
-        if (nuevaVentana) {
-          nuevaVentana.close();
-        }
         Swal.fire({
           icon: 'error',
           title: 'Error',
-          text: 'No se pudo cargar el documento.'
+          text: 'No se pudo cargar el documento.',
+          heightAuto: false,
+          scrollbarPadding: false // <--- TAMBIÉN AQUÍ PARA PREVENIR EL SALTO
         });
       }
     });

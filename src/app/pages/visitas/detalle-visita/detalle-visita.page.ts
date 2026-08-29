@@ -118,44 +118,49 @@ export class DetalleVisitaPage implements OnInit {
     });
   }
 abrirPdf(idVisita: number) {
-  const nuevaVentana = window.open('', '_blank'); // se abre YA, dentro del gesto de clic
+    const nuevaVentana = window.open('', '_blank');
 
-  Swal.fire({
-    title: 'Abriendo documento...',
-    text: 'Por favor espera un momento',
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    heightAuto: false,
-    didOpen: () => {
-      Swal.showLoading();
+    if (nuevaVentana) {
+      nuevaVentana.document.write(`
+        <html>
+          <head><title>Cargando Documento...</title></head>
+          <body style="font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; background-color: #f4f7fa; margin: 0;">
+            <h2 style="color: #003B8A;">Generando PDF, por favor espera...</h2>
+          </body>
+        </html>
+      `);
     }
-  });
 
-  this.vs.generarPDFVisita(idVisita).subscribe({
-    next: (blob: Blob) => {
-      Swal.close();
+    this.vs.generarPDFVisita(idVisita).subscribe({
+      next: (blob: Blob) => {
+        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(pdfBlob);
 
-      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-      const fileURL = URL.createObjectURL(pdfBlob);
+        if (nuevaVentana) {
+          nuevaVentana.document.open();
+          nuevaVentana.document.write(`
+            <html>
+              <head><title>Visita PDF</title></head>
+              <body style="margin: 0; padding: 0; overflow: hidden; height: 100vh;">
+                <embed src="${fileURL}" type="application/pdf" width="100%" height="100%" style="border: none;" />
+              </body>
+            </html>
+          `);
+          nuevaVentana.document.close();
+        }
 
-      if (nuevaVentana) {
-        nuevaVentana.location.href = fileURL;
+        setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
+      },
+      error: (err) => {
+        console.error('Error al obtener el PDF:', err);
+        if (nuevaVentana) nuevaVentana.close();
+        
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'No se pudo cargar el documento.'
+        });
       }
-
-      setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
-    },
-    error: (err) => {
-      Swal.close();
-      if (nuevaVentana) {
-        nuevaVentana.close();
-      }
-      console.error('Error al obtener el PDF:', err);
-      Swal.fire({
-        icon: 'error',
-        title: 'Error',
-        text: 'No se pudo cargar el documento.'
-      });
-    }
-  });
-}
+    });
+  }
 }

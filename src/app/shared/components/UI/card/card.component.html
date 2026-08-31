@@ -1,9 +1,9 @@
 <div class="card bg-white rounded-xl border border-gray-200 p-4 shadow-sm hover:shadow-md transition-shadow duration-300">
   <div class="flex justify-between items-center mb-3">
     <div class="flex items-center gap-2.5 min-w-0">
-      <div class="w-9 h-9 rounded-full bg-blue-50 text-[#003366] flex items-center justify-center font-bold text-sm uppercase shrink-0">
-        {{ cliente.Nombre.substring(0, 2) }}
-      </div>
+      <div class="w-9 h-9 rounded-full bg-blue-200 text-[#003366] flex items-center justify-center font-extrabold text-sm uppercase shrink-0 border-2 border-blue-400">
+  {{ cliente.Nombre.substring(0, 2) }}
+</div>
       <div class="min-w-0 pr-2">
         <h3 class="font-bold text-[#003366] text-sm leading-tight truncate">{{ cliente.Nombre }}</h3>
         <span class="text-xs text-gray-500">{{ cliente.RFC }}</span>
@@ -33,11 +33,11 @@
     
     <!-- Nueva Sección de Crédito (Solo se muestra si tiene crédito) -->
     <div class="flex justify-between items-center" *ngIf="cliente.tiene_credito === 1">
-      <span class="text-[#94a3b8]">Límite de Crédito</span>
-      <span class="text-emerald-600 font-bold bg-emerald-50 px-2 py-0.5 rounded">
-        {{ cliente.limite_credito | currency:'MXN' }}
-      </span>
-    </div>
+  <span class="text-[#94a3b8]">Límite de Crédito</span>
+  <span class="text-emerald-800 font-extrabold bg-emerald-200 border-2 border-emerald-500 px-2 py-0.5 rounded">
+    {{ cliente.limite_credito | currency:'MXN' }}
+  </span>
+</div>
 
     <div class="flex justify-between">
       <span class="text-[#94a3b8]">Registro</span>

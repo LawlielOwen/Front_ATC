@@ -130,35 +130,35 @@
   <div class="flex flex-col gap-2 mt-2 w-full">
 
     <div *ngFor="let asesor of cliente.asesoresAsignados"
-         class="flex flex-col gap-2 bg-slate-50 border border-slate-100 rounded-xl p-2.5 w-full">
+     class="flex flex-col gap-2 bg-slate-100 border-2 border-slate-300 rounded-xl p-2.5 w-full">
 
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#0d1f38] to-[#1e3a63] text-white flex items-center justify-center font-bold text-[13px] shadow-sm flex-shrink-0">
-          {{ (asesor.nombre_asesor || '??').substring(0, 2) | uppercase }}
-        </div>
-
-        <div class="flex flex-col justify-center min-w-0">
-          <h4 class="font-bold text-[#0d1f38] text-[12px] leading-tight mb-1.5 break-words whitespace-normal">
-            {{ asesor.nombre_asesor | titlecase }}
-          </h4>
-
-          <span class="w-fit text-[9px] text-[#0f6e56] font-bold bg-[#e8f5f0] border border-[#bce3d4] px-2 py-0.5 rounded-md leading-none uppercase tracking-wide">
-            {{ asesor.asesor_tipo === 'Asesor propio' ? 'Asesor Propio' : 'Asignado por la Sucursal' }}
-          </span>
-        </div>
-      </div>
-
-      <div *ngIf="asesor.marcasArray.length > 0" class="flex flex-wrap gap-1 pl-1">
-        <span *ngFor="let marca of asesor.marcasArray"
-              class="text-[9px] font-semibold text-[#003B8A] bg-[#eff6ff] border border-[#bfdbfe] px-2 py-0.5 rounded-md leading-none">
-          {{ marca }}
-        </span>
-      </div>
-      <p *ngIf="asesor.marcasArray.length === 0" class="text-[9px] text-slate-400 italic pl-1">
-        Sin marcas asignadas
-      </p>
-
+  <div class="flex items-center gap-3">
+    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#0d1f38] to-[#1e3a63] text-white flex items-center justify-center font-bold text-[13px] shadow-sm flex-shrink-0">
+      {{ (asesor.nombre_asesor || '??').substring(0, 2) | uppercase }}
     </div>
+
+    <div class="flex flex-col justify-center min-w-0">
+      <h4 class="font-bold text-[#0d1f38] text-[12px] leading-tight mb-1.5 break-words whitespace-normal">
+        {{ asesor.nombre_asesor | titlecase }}
+      </h4>
+
+      <span class="w-fit text-[9px] text-emerald-900 font-extrabold bg-emerald-200 border-2 border-emerald-500 px-2 py-0.5 rounded-md leading-none uppercase tracking-wide">
+        {{ asesor.asesor_tipo === 'Asesor propio' ? 'Asesor Propio' : 'Asignado por la Sucursal' }}
+      </span>
+    </div>
+  </div>
+
+  <div *ngIf="asesor.marcasArray.length > 0" class="flex flex-wrap gap-1 pl-1">
+    <span *ngFor="let marca of asesor.marcasArray"
+          class="text-[9px] font-extrabold text-blue-900 bg-blue-200 border-2 border-blue-500 px-2 py-0.5 rounded-md leading-none">
+      {{ marca }}
+    </span>
+  </div>
+  <p *ngIf="asesor.marcasArray.length === 0" class="text-[9px] text-slate-500 italic pl-1">
+    Sin marcas asignadas
+  </p>
+
+</div>
 
   </div>
 </app-card-details>
@@ -169,41 +169,41 @@
   </svg>
   
   <div *ngIf="cliente.tiene_credito; else sinCredito" class="flex flex-col gap-2 mt-2 w-full">
-    <div class="flex items-center gap-3 bg-emerald-50 border border-emerald-100 rounded-xl p-2.5 w-full">
-      <div class="w-10 h-10 rounded-full bg-white text-emerald-600 flex items-center justify-center font-bold shadow-sm flex-shrink-0 border border-emerald-100">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-        </svg>
-      </div>
-      <div class="flex flex-col justify-center min-w-0">
-        <span class="text-[#0f6e56] font-bold text-[9px] uppercase tracking-wider mb-0.5">Límite Autorizado</span>
-        <h4 class="font-bold text-emerald-700 text-[14px] leading-tight break-words whitespace-normal">
-          {{ cliente.limite_credito | currency:'MXN' }}
-        </h4>
-      </div>
-    </div>
+   <div class="flex items-center gap-3 bg-emerald-100 border-2 border-emerald-400 rounded-xl p-2.5 w-full">
+  <div class="w-10 h-10 rounded-full bg-white text-emerald-700 flex items-center justify-center font-bold shadow-sm flex-shrink-0 border-2 border-emerald-400">
+    <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+  </div>
+  <div class="flex flex-col justify-center min-w-0">
+    <span class="text-emerald-800 font-extrabold text-[9px] uppercase tracking-wider mb-0.5">Límite Autorizado</span>
+    <h4 class="font-extrabold text-emerald-800 text-[14px] leading-tight break-words whitespace-normal">
+      {{ cliente.limite_credito | currency:'MXN' }}
+    </h4>
+  </div>
+</div>
 
-    <div class="flex items-center gap-3 rounded-xl p-2.5 w-full border"
-         [ngClass]="esVencido(cliente.fecha_vencimiento_credito) 
-           ? 'bg-red-50 border-red-100' 
-           : 'bg-slate-50 border-slate-100'">
-      <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 border"
-           [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-500 border-red-100' : 'text-slate-500 border-slate-200'">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-        </svg>
-      </div>
-      <div class="flex flex-col justify-center min-w-0">
-        <span class="font-bold text-[9px] uppercase tracking-wider mb-0.5"
-              [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-600' : 'text-slate-500'">
-          {{ esVencido(cliente.fecha_vencimiento_credito) ? 'Venció el' : 'Vigente hasta' }}
-        </span>
-        <h4 class="font-bold text-[13px] leading-tight"
-            [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-700' : 'text-[#0d1f38]'">
-          {{ cliente.fecha_vencimiento_credito ? (cliente.fecha_vencimiento_credito | date:'dd MMM yyyy') : 'Sin fecha definida' }}
-        </h4>
-      </div>
-    </div>
+  <div class="flex items-center gap-3 rounded-xl p-2.5 w-full border-2"
+     [ngClass]="esVencido(cliente.fecha_vencimiento_credito) 
+       ? 'bg-red-100 border-red-400' 
+       : 'bg-slate-100 border-slate-400'">
+  <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 border-2"
+       [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-600 border-red-400' : 'text-slate-600 border-slate-400'">
+    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+    </svg>
+  </div>
+  <div class="flex flex-col justify-center min-w-0">
+    <span class="font-extrabold text-[9px] uppercase tracking-wider mb-0.5"
+          [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-700' : 'text-slate-700'">
+      {{ esVencido(cliente.fecha_vencimiento_credito) ? 'Venció el' : 'Vigente hasta' }}
+    </span>
+    <h4 class="font-extrabold text-[13px] leading-tight"
+        [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-800' : 'text-[#0d1f38]'">
+      {{ cliente.fecha_vencimiento_credito ? (cliente.fecha_vencimiento_credito | date:'dd MMM yyyy') : 'Sin fecha definida' }}
+    </h4>
+  </div>
+</div>
   </div>
 
   <ng-template #sinCredito>

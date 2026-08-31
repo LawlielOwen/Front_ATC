@@ -244,7 +244,7 @@
                 (click)="cancelarPedido()"></app-button-action>
         </ng-container>
 
-        <ng-container *ngIf="(ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente') && authService.tieneAcceso(['Administrador', 'Cotizador'])">
+        <ng-container *ngIf="(ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente') && authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])">
 
             <app-button-action 
                  *ngIf="monedaActual !== 'USD'"

@@ -1,7 +1,7 @@
-<div class="mx-6 mb-6 rounded-2xl bg-white border border-slate-300 shadow-sm overflow-hidden">
+<div class="mx-6 mb-6 rounded-2xl bg-white border-2 border-slate-400 shadow-md overflow-hidden">
   <div class="w-full overflow-x-auto">
     <table class="w-full text-left border-collapse whitespace-nowrap">
-      <thead class="bg-slate-100 border-b border-slate-300">
+      <thead class="bg-slate-200 border-b-2 border-slate-400">
         <tr>
           <th *ngFor="let col of columns"
             class="py-3.5 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest"
@@ -10,10 +10,10 @@
           </th>
         </tr>
       </thead>
-      <tbody class="bg-white divide-y divide-slate-200">
+      <tbody class="bg-white divide-y-2 divide-slate-300">
 
         <tr *ngFor="let row of data; let rowIndex = index" (click)="rowClick.emit(row)"
-          class="hover:bg-slate-100 transition-colors duration-200 group relative cursor-pointer">
+          class="even:bg-slate-100 hover:bg-slate-200 transition-colors duration-200 group relative cursor-pointer">
 
           <td *ngFor="let col of columns" class="py-4 px-4 relative"
             [ngClass]="{'text-right': col.align === 'right', 'text-center': col.align === 'center'}">
@@ -58,7 +58,7 @@
               </span>
 
               <span *ngSwitchCase="'status'"
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border border-slate-200 shadow-sm"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border border-slate-300 shadow-sm"
                 [ngClass]="getStatusColors(row[col.key])">
                 <span class="w-1.5 h-1.5 rounded-full inline-block" [ngClass]="getStatusDot(row[col.key])"></span>
                 {{ row[col.key] }}

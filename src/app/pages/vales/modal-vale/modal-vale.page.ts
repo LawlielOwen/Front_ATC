@@ -244,14 +244,17 @@ const productosValidos = [];
 for (let i = 0; i < this.productosSolicitados.length; i++) {
   const p = this.productosSolicitados[i];
   const idReferencia = this.isSoporteTecnico ? p.id_demo : p.id_producto;
-  const esManual = !idReferencia && !!(p.descripcion_manual?.trim());
+  
+  // CORRECCIÓN: Evaluar tanto descripcion_manual como Nombre
+  const textoDescripcion = p.descripcion_manual?.trim() || p.Nombre?.trim();
+  const textoCodigo = p.codigo_manual?.trim() || p.codigo_producto?.trim();
+  
+  const esManual = !idReferencia && !!textoDescripcion;
 
-  // Fila vacía: ni catalogado ni manual -> se ignora sin marcar error
   if (!idReferencia && !esManual) {
-    continue;
+    continue; // Es una fila realmente vacía, se ignora
   }
 
-  // Soporte técnico + manual: bloqueado hasta que el SP de demo lo soporte
   if (this.isSoporteTecnico && esManual) {
     toast.error(`Fila ${i + 1}: por ahora los equipos demo deben ser productos registrados.`);
     return;
@@ -268,11 +271,12 @@ for (let i = 0; i < this.productosSolicitados.length; i++) {
   } else if (idReferencia) {
     productosValidos.push({ id_producto: idReferencia, piezas: cantidadNum });
   } else {
+    // CORRECCIÓN: Asignar los textos rescatados a los campos del JSON
     productosValidos.push({
       id_producto: null,
       piezas: cantidadNum,
-      codigo_manual: p.codigo_manual?.trim() || null,
-      descripcion_manual: p.descripcion_manual?.trim() || null ,
+      codigo_manual: textoCodigo || null,
+      descripcion_manual: textoDescripcion || null,
       extra_descripcion_manual: p.extra_descripcion_manual?.trim() || null
     });
   }

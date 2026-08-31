@@ -9,7 +9,11 @@ export interface DatosAvanceProyecto {
 
 const ESTATUS_IMPLICA_COTIZADO = [2, 3, 6];
 
-export function solicitarAvanceProyecto(estatusActual?: number, cotizadoActual?: number): Promise<DatosAvanceProyecto | null> {
+export function solicitarAvanceProyecto(
+  estatusActual?: number, 
+  cotizadoActual?: number, 
+  comentarioPrevio: string = '' 
+): Promise<DatosAvanceProyecto | null> {
 
   const yaEstaCotizado = cotizadoActual === 1;
 
@@ -35,7 +39,7 @@ export function solicitarAvanceProyecto(estatusActual?: number, cotizadoActual?:
           </select>
         </div>
 
-        <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:6px;">Comentarios (Opcional)</label>
+        <label style="display:block; font-size:12px; font-weight:600; color:#334155; margin-bottom:6px;">Comentario *</label>
         <textarea id="swal-comentario" rows="3" style="width:100%; box-sizing:border-box; padding:9px 10px; border:1px solid #cbd5e1; border-radius:8px; font-size:13px; resize:none; outline:none;"></textarea>
       </div>
     `,
@@ -49,13 +53,17 @@ export function solicitarAvanceProyecto(estatusActual?: number, cotizadoActual?:
     didOpen: () => {
       const selectEstatus = document.getElementById('swal-estatus') as HTMLSelectElement;
       const wrapperCotizo = document.getElementById('swal-cotizo-wrapper') as HTMLDivElement;
+      const textareaComentario = document.getElementById('swal-comentario') as HTMLTextAreaElement;
+
+      if (comentarioPrevio) {
+        textareaComentario.value = comentarioPrevio;
+      }
 
       if (estatusActual) {
         const optionExists = Array.from(selectEstatus.options).some(opt => opt.value === estatusActual.toString());
         if (optionExists) selectEstatus.value = estatusActual.toString();
       }
 
-  
       const actualizarVisibilidadCotizo = () => {
         const estatusSeleccionado = Number(selectEstatus.value);
         const esAmbiguo = !ESTATUS_IMPLICA_COTIZADO.includes(estatusSeleccionado);
@@ -65,9 +73,15 @@ export function solicitarAvanceProyecto(estatusActual?: number, cotizadoActual?:
       selectEstatus.addEventListener('change', actualizarVisibilidadCotizo);
       actualizarVisibilidadCotizo(); 
     },
-    preConfirm: () => {
+   preConfirm: () => {
       const estatus = Number((document.getElementById('swal-estatus') as HTMLSelectElement).value);
       const comentario = (document.getElementById('swal-comentario') as HTMLTextAreaElement).value.trim();
+
+      // VALIDACIÓN: Si está vacío, lanzamos el error interno de SweetAlert
+      if (!comentario) {
+        Swal.showValidationMessage('El comentario es obligatorio para registrar el avance.');
+        return false; // Esto evita que el modal se cierre
+      }
 
       let seCotizo: number;
       if (yaEstaCotizado || ESTATUS_IMPLICA_COTIZADO.includes(estatus)) {

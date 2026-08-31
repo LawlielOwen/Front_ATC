@@ -22,17 +22,25 @@ export class MovimientoService {
             .set('limite', limite.toString());
         return this.http.get<RespuestaPaginada>(`${this.apiUrl}/movimientos`, { params });
     }
-    salidaProducto(codigo: string, cantidad: number, destino: string, id_asesor: number, id_cliente: number) {
-        const payload = {
-            codigo: codigo,
-            cantidad: cantidad,
-            destino: destino,
-            id_asesor: id_asesor,
-            id_cliente: id_cliente
-        };
+   salidaProducto(
+    codigo: string, 
+    cantidad: number, 
+    destino: string, 
+    id_asesor: number, 
+    id_cliente: number | null, 
+    clienteNoRegistrado: string | null = null
+  ) {
+    const payload = {
+        codigo: codigo,
+        cantidad: cantidad,
+        destino: destino,
+        id_asesor: id_asesor,
+        id_cliente: id_cliente,
+        clienteNoRegistrado: clienteNoRegistrado 
+    };
 
-        return this.http.post(`${this.apiUrl}/movimientos/salida`, payload);
-    }
+    return this.http.post(`${this.apiUrl}/movimientos/salida`, payload);
+  }
     movMensuales() {
         return this.http.get(`${this.apiUrl}/movimientos/count`);
     }

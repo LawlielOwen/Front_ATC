@@ -71,6 +71,7 @@ export class HistorialESPage implements OnInit {
     { label: 'Almacen', value: 'Almacen' },
     { label: 'Pedido', value: 'Pedido' },
     {label:'Demostracion', value:'Demostracion'},
+    {label:'Entregado en mostrador', value:'Entrega Mostrador'}
   ]
   mostrarSidebarMobile() {
     if (this.sidebar) {
@@ -188,7 +189,8 @@ filtroFecha(rango: { inicio: any, fin: any }) {
       maxWidth: '105vw',
       data: { tipo: 'Entrada' },
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-      panelClass: []
+      panelClass: [],
+      disableClose: true
     });
 
     dialogRef.afterClosed().subscribe((exito: boolean) => {
@@ -205,7 +207,8 @@ filtroFecha(rango: { inicio: any, fin: any }) {
       maxWidth: '105vw',
       data: { tipo: 'Salida' },
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-      panelClass: []
+      panelClass: [],
+      disableClose: true
     });
 
     dialogRef.afterClosed().subscribe((exito: boolean) => {

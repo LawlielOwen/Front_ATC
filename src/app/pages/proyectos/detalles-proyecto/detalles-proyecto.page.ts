@@ -144,36 +144,42 @@ obtenerClaseEstatus(estatus: number): string {
     });
   }
 async registrarAvance() {
-  const datosAvance = await solicitarAvanceProyecto(this.proyecto.estatus, this.proyecto.se_cotizo);
-  if (!datosAvance) return;
+  const intentarRegistro = async (comentarioPrevio: string = '') => {
+    
+    const datosAvance = await solicitarAvanceProyecto(this.proyecto.estatus, this.proyecto.se_cotizo, comentarioPrevio);
+    if (!datosAvance) return;
 
-  const idProyecto = this.proyecto.id_proyecto || this.proyecto.id;
+    const idProyecto = this.proyecto.id_proyecto || this.proyecto.id;
 
-  this.proyectosService.registrarAvance(
-    idProyecto,
-    datosAvance.comentario,
-    datosAvance.estatus,
-    datosAvance.se_cotizo,
-    'cambio_estatus'
-  ).subscribe({
-    next: (res: any) => {
-      mostrarExitoProyecto(res.mensaje || 'Avance registrado en la bitácora.');
+    this.proyectosService.registrarAvance(
+      idProyecto,
+      datosAvance.comentario,
+      datosAvance.estatus,
+      datosAvance.se_cotizo,
+      'cambio_estatus'
+    ).subscribe({
+      next: (res: any) => {
+        mostrarExitoProyecto(res.mensaje || 'Avance registrado en la bitácora.');
+        this.huboCambios = true;
 
-      this.huboCambios = true;
-
-      if (datosAvance.estatus === 6) {
-        this.dialogRef.close(true);
-      } else {
-        this.proyecto.estatus = datosAvance.estatus;
-        this.proyecto.se_cotizo = datosAvance.se_cotizo;
-        this.tabActual = 'bitacora';
-        this.cargarBitacora();
+        if (datosAvance.estatus === 6) {
+          this.dialogRef.close(true);
+        } else {
+          this.proyecto.estatus = datosAvance.estatus;
+          this.proyecto.se_cotizo = datosAvance.se_cotizo;
+          this.tabActual = 'bitacora';
+          this.cargarBitacora();
+        }
+      },
+      error: (err) => {
+        mostrarErrorProyecto('No se pudo registrar el avance. Asegúrate de incluir un comentario.');
+        intentarRegistro(datosAvance.comentario); 
       }
-    },
-    error: (err) => mostrarErrorProyecto('No se pudo registrar el avance.')
-  });
-}
+    });
+  };
 
+  intentarRegistro();
+}
 obtenerNombreEvento(entrada: any): string {
   return entrada.nombre_asesor || 'Sistema';
 }

@@ -278,28 +278,34 @@ export class ProyectosPage implements OnInit {
     });
   }
 async abrirAvanceProyecto(proyecto: any) {
-  const datosAvance = await solicitarAvanceProyecto(proyecto.estatus, proyecto.se_cotizo);
-  if (!datosAvance) return;
+  const intentarRegistro = async (comentarioPrevio: string = '') => {
+    
+    const datosAvance = await solicitarAvanceProyecto(proyecto.estatus, proyecto.se_cotizo, comentarioPrevio);
+    if (!datosAvance) return;
 
-  const idProyecto = proyecto.id_proyecto || proyecto.id;
+    const idProyecto = proyecto.id_proyecto || proyecto.id;
 
-  this.proyectosService.registrarAvance(
-    idProyecto,
-    datosAvance.comentario,
-    datosAvance.estatus,
-    datosAvance.se_cotizo,
-    'cambio_estatus'
-  ).subscribe({
-    next: (res: any) => {
-      mostrarExitoProyecto(res.mensaje || 'Avance registrado en la bitácora.');
+    this.proyectosService.registrarAvance(
+      idProyecto,
+      datosAvance.comentario,
+      datosAvance.estatus,
+      datosAvance.se_cotizo,
+      'cambio_estatus'
+    ).subscribe({
+      next: (res: any) => {
+        mostrarExitoProyecto(res.mensaje || 'Avance registrado en la bitácora.');
+        proyecto.estatus = datosAvance.estatus;
+        proyecto.se_cotizo = datosAvance.se_cotizo;
+        this.cargarProyectos();
+      },
+      error: (err) => {
+        mostrarErrorProyecto('Por favor ingresa un comentario en el avance.');
+        intentarRegistro(datosAvance.comentario); 
+      }
+    });
+  };
 
-      proyecto.estatus = datosAvance.estatus;
-      proyecto.se_cotizo = datosAvance.se_cotizo;
-
-      this.cargarProyectos();
-    },
-    error: (err) => mostrarErrorProyecto('No se pudo registrar el avance.')
-  });
+  intentarRegistro(); 
 }
   abrirOpciones(evento: { accion: string, row: any }) {
     switch (evento.accion) {

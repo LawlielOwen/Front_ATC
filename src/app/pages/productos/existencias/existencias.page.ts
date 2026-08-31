@@ -42,7 +42,7 @@ export class ExistenciasPage implements OnInit {
   productoEncontrado: any = null;
   paso: number = 1;
   cantidad: number = 0;
-  destino: 'almacen' | 'pedido' = 'almacen';
+destino: 'almacen' | 'pedido' | 'Entrega Mostrador' = 'almacen';
   tipoMovimiento: 'Entrada' | 'Salida' = 'Entrada';
   clientes: any[] = [];
   clientesFiltrados: any[] = [];
@@ -113,11 +113,7 @@ onEnterProducto(event: any) {
   get bgClass() { return this.esEntrada ? 'bg-[#1D9E75]' : 'bg-[#b91c1c]'; }
   get hoverClass() { return this.esEntrada ? 'hover:bg-[#15805d]' : 'hover:bg-[#991b1b]'; }
   get tituloModal() { return this.esEntrada ? 'Agregar existencias' : 'Registrar Salida'; }
-  get nuevoStock() {
-    return this.esEntrada
-      ? this.productoEncontrado.Stock + this.cantidad
-      : this.productoEncontrado.Stock - this.cantidad;
-  }
+
   avanzarPaso() {
     this.paso = 2;
   }
@@ -155,8 +151,9 @@ onEnterProducto(event: any) {
     }
 
     if (!this.esEntrada) {
-      if (this.cantidad > this.productoEncontrado.Stock) {
-        toast.error('No hay suficiente stock para esta salida.');
+     if (this.cantidad > this.stockActualVisible) {
+        const tipoStock = this.destino === 'almacen' ? 'stock general' : 'apartado';
+        toast.error(`No hay suficiente ${tipoStock} para esta salida. Máximo disponible: ${this.stockActualVisible}`);
         return;
       }
 
@@ -177,37 +174,45 @@ onEnterProducto(event: any) {
       });
 
     } else {
+  
+  let idCliente = null;
+  let clienteNoRegistrado = null;
+  const clienteSeleccionado = this.clienteControl.value;
 
-      let idCliente = null;
-      const clienteSeleccionado = this.clienteControl.value;
+  if (clienteSeleccionado && typeof clienteSeleccionado === 'object') {
+    idCliente = clienteSeleccionado.id || clienteSeleccionado.Id;
+  } 
+  else if (typeof clienteSeleccionado === 'string' && clienteSeleccionado.trim() !== '') {
+    clienteNoRegistrado = clienteSeleccionado.trim();
+  }
 
-      if (clienteSeleccionado && typeof clienteSeleccionado === 'object') {
-        idCliente = clienteSeleccionado.id || clienteSeleccionado.Id;
-      }
-
-      this.ms.salidaProducto(codigoP, this.cantidad, this.destino, idAsesor, idCliente).subscribe({
-        next: () => {
-          this.paso = 3;
-          toast.success('Salida registrada correctamente');
-        },
-        error: (err) => { console.error(err); toast.error('Error al registrar la salida'); }
-      });
+  this.ms.salidaProducto(codigoP, this.cantidad, this.destino, idAsesor, idCliente, clienteNoRegistrado).subscribe({
+    next: () => {
+      this.paso = 3;
+      toast.success('Salida registrada correctamente');
+    },
+    error: (err) => { 
+      console.error(err); 
+      toast.error('Error al registrar la salida'); 
+    }
+  });
     }
   }
   finalizar() {
     this.dialogRef.close(true);
   }
 
-  get opcionesDestino(): CardOption[] {
-    const opciones: CardOption[] = [
-      { value: 'pedido', titulo: 'Para pedido', descripcion: 'Suministra un pedido' }
-    ];
-
+get opcionesDestino(): CardOption[] {
     if (this.esEntrada) {
-      opciones.unshift({ value: 'almacen', titulo: 'Para almacén', descripcion: 'Se suma al stock general' });
+      return [
+        { value: 'almacen', titulo: 'Para almacén', descripcion: 'Se suma al stock general' }
+      ];
+    } else {
+      return [
+        { value: 'pedido', titulo: 'Para pedido', descripcion: 'Descuenta de apartados' },
+        { value: 'Entrega Mostrador', titulo: 'Entregar en mostrador', descripcion: 'Descuenta de stock libre' }
+      ];
     }
-
-    return opciones;
   }
   cargarClientes() {
     this.cs.getClientes(1, 1000).subscribe({
@@ -235,5 +240,20 @@ onEnterProducto(event: any) {
 
   mostrarNombreCliente(cliente: any): string {
     return cliente ? (cliente.nombre || cliente.Nombre || '') : '';
+  }
+get stockActualVisible() {
+    if (!this.productoEncontrado) return 0;
+    
+    if (this.destino === 'almacen' || this.destino === 'Entrega Mostrador') {
+      return this.productoEncontrado.Stock || 0;
+    } 
+    return this.productoEncontrado.Apartado || 0;
+  }
+
+  get nuevoStock() {
+    if (!this.productoEncontrado) return 0;
+    return this.esEntrada
+      ? this.stockActualVisible + this.cantidad
+      : this.stockActualVisible - this.cantidad;
   }
 }

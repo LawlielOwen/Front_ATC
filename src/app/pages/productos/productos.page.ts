@@ -244,7 +244,8 @@ timeoutBusqueda: any;
       width: '630px',
       maxWidth: '105vw',
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-      panelClass: []
+      panelClass: [],
+      disableClose: true
     });
     dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
       if (necesitaRecargar) {

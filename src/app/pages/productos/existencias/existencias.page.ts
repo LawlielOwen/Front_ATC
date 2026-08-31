@@ -205,7 +205,8 @@ onEnterProducto(event: any) {
 get opcionesDestino(): CardOption[] {
     if (this.esEntrada) {
       return [
-        { value: 'almacen', titulo: 'Para almacén', descripcion: 'Se suma al stock general' }
+        { value: 'almacen', titulo: 'Para almacén', descripcion: 'Se suma al stock general' },
+        { value: 'pedido', titulo: 'Para pedido', descripcion: 'Se suma al stock en apartado' }
       ];
     } else {
       return [

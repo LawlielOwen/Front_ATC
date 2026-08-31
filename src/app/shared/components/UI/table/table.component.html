@@ -1,7 +1,7 @@
-<div class="mx-6 mb-6 rounded-2xl bg-white border border-slate-200 shadow-sm overflow-hidden">
+<div class="mx-6 mb-6 rounded-2xl bg-white border border-slate-300 shadow-sm overflow-hidden">
   <div class="w-full overflow-x-auto">
     <table class="w-full text-left border-collapse whitespace-nowrap">
-      <thead class="bg-slate-50/80 border-b border-slate-500">
+      <thead class="bg-slate-100 border-b border-slate-300">
         <tr>
           <th *ngFor="let col of columns"
             class="py-3.5 px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest"
@@ -10,10 +10,10 @@
           </th>
         </tr>
       </thead>
-      <tbody class="bg-white divide-y divide-slate-100">
+      <tbody class="bg-white divide-y divide-slate-200">
 
         <tr *ngFor="let row of data; let rowIndex = index" (click)="rowClick.emit(row)"
-          class="hover:bg-slate-50/80 transition-colors duration-200 group relative cursor-pointer">
+          class="hover:bg-slate-100 transition-colors duration-200 group relative cursor-pointer">
 
           <td *ngFor="let col of columns" class="py-4 px-4 relative"
             [ngClass]="{'text-right': col.align === 'right', 'text-center': col.align === 'center'}">
@@ -26,7 +26,7 @@
             <ng-container [ngSwitch]="col.type">
 
               <div *ngSwitchCase="'avatar-text'" class="flex items-center gap-4 pl-4">
-                <div class="w-9 h-9 rounded-xl bg-slate-200 flex items-center justify-center text-[#0d1f38] font-extrabold text-[11px] flex-shrink-0 border border-slate-200 shadow-sm">
+                <div class="w-9 h-9 rounded-xl bg-slate-200 flex items-center justify-center text-[#0d1f38] font-extrabold text-[11px] flex-shrink-0 border border-slate-300 shadow-sm">
                   {{ (row[col.key] + '') | slice:0:2 | uppercase }}
                 </div>
                 <div class="flex flex-col gap-0.5 text-left">
@@ -58,14 +58,14 @@
               </span>
 
               <span *ngSwitchCase="'status'"
-                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border shadow-sm"
+                class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold border border-slate-200 shadow-sm"
                 [ngClass]="getStatusColors(row[col.key])">
                 <span class="w-1.5 h-1.5 rounded-full inline-block" [ngClass]="getStatusDot(row[col.key])"></span>
                 {{ row[col.key] }}
               </span>
 
               <span *ngSwitchCase="'pill-tipo'"
-                class="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-[11.5px] font-bold tracking-wide"
+                class="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-[11.5px] font-bold tracking-wide shadow-sm"
                 [ngClass]="{
                   'bg-[#e8f5f0] text-[#0f6e56]': row[col.key] === 'Entrada',
                   'bg-[#fde8e8] text-[#b91c1c]': row[col.key] === 'Salida'
@@ -74,7 +74,7 @@
               </span>
 
          <span *ngSwitchCase="'pill-destino'"
-  class="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-[11.5px] font-bold tracking-wide"
+  class="inline-flex items-center justify-center px-3.5 py-1 rounded-full text-[11.5px] font-bold tracking-wide shadow-sm"
   [ngClass]="{
     'bg-[#e0f2fe] text-[#0369a1]': row[col.key] === 'Almacen' || row[col.key] === 'Almacén',
     'bg-[#f3e8ff] text-[#6d28d9]': row[col.key] === 'Pedido',

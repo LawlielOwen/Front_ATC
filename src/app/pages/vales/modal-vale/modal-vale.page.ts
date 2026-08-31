@@ -13,7 +13,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
-
+import {PedidoService} from "../../../core/services/Pedidos.service";
 import { ValeService } from "../../../core/services/Vales.service";
 import { ClientesService } from '../../../core/services/clientes.service';
 import { CotizacionService } from '../../../core/services/Cotizaciones.service';
@@ -63,7 +63,8 @@ export class ModalValePage implements OnInit {
     private valeService: ValeService, 
     private cs: ClientesService, 
     private cotizacionService: CotizacionService,
-    private visitaService: VisitaService // <-- Inyectado
+    private visitaService: VisitaService,
+    private pedidoService: PedidoService
   ) { }
 
   ngOnInit() {
@@ -119,36 +120,40 @@ export class ModalValePage implements OnInit {
   }
 
   seleccionarPedido(idPedidoStr: string) {
-    if (!idPedidoStr) return this.limpiarFormulario();
+  if (!idPedidoStr) return this.limpiarFormulario();
 
-    const idPedido = parseInt(idPedidoStr);
-    const pedido = this.pedidosDisponibles.find(p => p.id === idPedido);
-    if (!pedido) return;
+  const idPedido = parseInt(idPedidoStr);
+  const pedido = this.pedidosDisponibles.find(p => p.id === idPedido);
+  if (!pedido) return;
 
-    this.pedidoSeleccionado = pedido;
-    this.clienteControl.setValue({ id: pedido.id_cliente, Nombre: pedido.nombre_cliente });
-    this.clienteControl.disable();
-    this.solicitud.id_cliente = pedido.id_cliente;
+  this.pedidoSeleccionado = pedido;
+  this.clienteControl.setValue({ id: pedido.id_cliente, Nombre: pedido.nombre_cliente });
+  this.clienteControl.disable();
+  this.solicitud.id_cliente = pedido.id_cliente;
 
-    this.cargandoProductos = true;
-    this.cotizacionService.obtenerCotizacionPorId(pedido.id_cotizacion).subscribe({
-      next: (res: any) => {
-        let detalles = Array.isArray(res) ? res : (res.data || Object.values(res).find(Array.isArray) || []);
-        
-        this.productosSolicitados = detalles.map((item: any) => ({
-          id_producto: item.id_producto,   
-          Nombre: item.nombre_producto,
-          codigo_producto: item.codigo_producto || item.Codigo_numeral || item.Codigo_japon || '',
-          piezas: item.cantidad_producto || item.cantidad
-        }));
-        this.cargandoProductos = false;
-      },
-      error: () => {
-        toast.error('No se pudieron cargar los productos del pedido.');
-        this.cargandoProductos = false;
-      }
-    });
-  }
+  this.cargandoProductos = true;
+  this.pedidoService.obtenerDetallesPedido(pedido.id).subscribe({
+    next: (res: any) => {
+      let detalles = Array.isArray(res) ? res : (res.data || Object.values(res).find(Array.isArray) || []);
+
+      this.productosSolicitados = detalles.map((item: any) => ({
+        id_producto: item.id_producto,
+        Nombre: item.nombre_producto || item.descripcion_manual || '',
+        codigo_producto: item.codigo_producto || item.Codigo_numeral || item.codigo_manual || '',
+        piezas: item.cantidad,
+
+        codigo_manual: item.codigo_manual || '',
+        descripcion_manual: item.descripcion_manual || '',
+        extra_descripcion_manual: item.extra_descripcion_manual || ''
+      }));
+      this.cargandoProductos = false;
+    },
+    error: () => {
+      toast.error('No se pudieron cargar los productos del pedido.');
+      this.cargandoProductos = false;
+    }
+  });
+}
 
 cargarVisitasDisponibles() {
     if (!this.idUsuarioActivo) return;
@@ -273,7 +278,10 @@ for (let i = 0; i < this.productosSolicitados.length; i++) {
   }
 }
 
-
+if (productosValidos.length === 0) {
+  toast.error('Agrega al menos un artículo válido a la solicitud.');
+  return;
+}
 
    if (this.isSoporteTecnico) {
       

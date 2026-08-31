@@ -235,32 +235,48 @@ cargarVisitasDisponibles() {
       toast.error('Selecciona un cliente destino');
       return;
     }
+const productosValidos = [];
+for (let i = 0; i < this.productosSolicitados.length; i++) {
+  const p = this.productosSolicitados[i];
+  const idReferencia = this.isSoporteTecnico ? p.id_demo : p.id_producto;
+  const esManual = !idReferencia && !!(p.descripcion_manual?.trim());
 
-    const productosValidos = [];
-    for (let i = 0; i < this.productosSolicitados.length; i++) {
-      const p = this.productosSolicitados[i];
-      // Dependiendo del rol usamos id_demo o id_producto
-      const idReferencia = this.isSoporteTecnico ? p.id_demo : p.id_producto;
+  // Fila vacía: ni catalogado ni manual -> se ignora sin marcar error
+  if (!idReferencia && !esManual) {
+    continue;
+  }
 
-      if (idReferencia) {
-        const cantidadNum = Number(p.piezas);
-        if (isNaN(cantidadNum) || !Number.isInteger(cantidadNum) || cantidadNum <= 0) {
-          toast.error(`Error en la fila ${i + 1}: La cantidad debe ser un número entero mayor a 0.`);
-          return;
-        }
+  // Soporte técnico + manual: bloqueado hasta que el SP de demo lo soporte
+  if (this.isSoporteTecnico && esManual) {
+    toast.error(`Fila ${i + 1}: por ahora los equipos demo deben ser productos registrados.`);
+    return;
+  }
 
-        if (this.isSoporteTecnico) {
-          productosValidos.push({ id_demo: idReferencia, piezas: cantidadNum });
-        } else {
-          productosValidos.push({ id_producto: idReferencia, piezas: cantidadNum });
-        }
-      }
-    }
+  const cantidadNum = Number(p.piezas);
+  if (isNaN(cantidadNum) || !Number.isInteger(cantidadNum) || cantidadNum <= 0) {
+    toast.error(`Error en la fila ${i + 1}: La cantidad debe ser un número entero mayor a 0.`);
+    return;
+  }
 
-    if (productosValidos.length === 0) {
-      toast.error('Agrega al menos un artículo válido a la solicitud.');
-      return;
-    }
+  if (this.isSoporteTecnico) {
+    productosValidos.push({ id_demo: idReferencia, piezas: cantidadNum });
+  } else if (idReferencia) {
+    productosValidos.push({ id_producto: idReferencia, piezas: cantidadNum });
+  } else {
+    productosValidos.push({
+      id_producto: null,
+      piezas: cantidadNum,
+      codigo_manual: p.codigo_manual?.trim() || null,
+      descripcion_manual: p.descripcion_manual?.trim() || null ,
+      extra_descripcion_manual: p.extra_descripcion_manual?.trim() || null
+    });
+  }
+}
+
+if (productosValidos.length === 0) {
+  toast.error('Agrega al menos un artículo válido a la solicitud.');
+  return;
+}
 
    if (this.isSoporteTecnico) {
       

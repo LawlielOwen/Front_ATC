@@ -215,22 +215,33 @@ private hayPreciosFaltantes(): boolean {
 }
 
 recalcularFleteItem(item: any) {
-  const precio = Number(item.precio_unitario_cotizado || 0); // siempre MXN
+  const precio = Number(item.precio_unitario_cotizado || 0); // siempre MXN interno
   const valor = Number(item.valor_flete || 0);
 
   if (item.tipo_flete === 'PORCENTAJE') {
     item.costo_flete = +(precio * (valor / 100)).toFixed(2);
   } else {
-
     const tipoCambio = Number(this.cotizacion.tipo_cambio) || 1;
-    item.costo_flete = item.moneda_flete === 'USD'
+    item.costo_flete = this.cotizacion.moneda === 'USD'
       ? +(valor * tipoCambio).toFixed(2)
       : valor;
   }
 
   this.calcularTotales();
 }
+private actualizarValorFleteSegunMoneda() {
+  const tc = Number(this.cotizacion.tipo_cambio) || 1;
 
+  this.detalles.forEach(item => {
+    if (item.tipo_flete === 'FIJO') {
+      const costoMXN = Number(item.costo_flete) || 0;
+      item.valor_flete = this.cotizacion.moneda === 'USD'
+        ? +(costoMXN / tc).toFixed(2)
+        : +costoMXN.toFixed(2);
+    }
+    // PORCENTAJE no se toca: el % no depende de la moneda
+  });
+}
 cambiarTipoFlete(item: any, tipo: 'PORCENTAJE' | 'FIJO') {
   item.tipo_flete = tipo;
   if (tipo === 'PORCENTAJE') item.moneda_flete = 'MXN'; 
@@ -490,27 +501,30 @@ if (this.hayPreciosFaltantes()) {
       });
     }
   }
-  cambiarMoneda(nuevaMoneda: string) {
-    this.cotizacion.moneda = nuevaMoneda;
+ cambiarMoneda(nuevaMoneda: string) {
+  this.cotizacion.moneda = nuevaMoneda;
 
-    if (nuevaMoneda === 'USD') {
-      this.cs.obtenerTipoCambioDelDia().subscribe({
-        next: (res) => {
-          this.cotizacion.tipo_cambio = Number(parseFloat(res.tipo_cambio).toFixed(2));
-          this.calcularTotales();
-          toast.success('Moneda cambiada a USD');
-        },
-        error: () => {
-          this.cotizacion.tipo_cambio = 18.50;
-          this.calcularTotales();
-          toast.error('No se conectó con Banxico. Usando 18.50');
-        }
-      });
-    } else {
-      this.cotizacion.tipo_cambio = 1;
-      this.calcularTotales();
-    }
+  if (nuevaMoneda === 'USD') {
+    this.cs.obtenerTipoCambioDelDia().subscribe({
+      next: (res) => {
+        this.cotizacion.tipo_cambio = Number(parseFloat(res.tipo_cambio).toFixed(2));
+        this.actualizarValorFleteSegunMoneda();
+        this.calcularTotales();
+        toast.success('Moneda cambiada a USD');
+      },
+      error: () => {
+        this.cotizacion.tipo_cambio = 18.50;
+        this.actualizarValorFleteSegunMoneda();
+        this.calcularTotales();
+        toast.error('No se conectó con Banxico. Usando 18.50');
+      }
+    });
+  } else {
+    this.cotizacion.tipo_cambio = 1;
+    this.actualizarValorFleteSegunMoneda();
+    this.calcularTotales();
   }
+}
   cargarClientes() {
     this.c.getClientes(1, 1000).subscribe({
       next: (response: any) => {

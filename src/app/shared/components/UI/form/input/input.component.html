@@ -1,7 +1,7 @@
 <div class="flex flex-col gap-1.5 w-full">
   <label 
     [class.hidden]="!label" 
-    class="text-[10px] font-semibold text-[#64748b] uppercase tracking-wider ml-1">
+    class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider ml-1">
     {{ label }}
   </label>
   
@@ -11,10 +11,6 @@
     [value]="value || ''"
     [disabled]="disabled"
     (input)="actualizarValor($event)"
-    class="bg-[#fafbfc] border border-solid
-     border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400
-      text-xs rounded-lg focus:ring-1 focus:ring-[#1D9E75]
-       appearance-none shadow-none ring-0 focus:border-[#1D9E75]
-        block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+    class="bg-white border border-slate-300 text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg shadow-sm focus:ring-1 focus:ring-[#1D9E75] appearance-none focus:border-[#1D9E75] block w-full px-3 py-2.5 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
   >
 </div>

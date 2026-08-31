@@ -3,7 +3,7 @@
         border-2 border-dashed rounded-xl 
         p-6 flex flex-col items-center 
         justify-center transition-colors cursor-pointer"
-       [ngClass]="isDragging ? 'border-[#1D9E75] bg-[#e8f5f0]' : 'border-[#94a3b8] bg-[#f8fafc] hover:border-[#003B8A] hover:bg-[#f1f5f9]'"
+       [ngClass]="isDragging ? 'border-[#1D9E75] bg-[#e8f5f0]' : 'border-[#94a3b8] bg-[#f8fafc] hover:border-[#003B8A] hover:bg-slate-200'"
         (dragover)="onDragOver($event)" (dragleave)="onDragLeave($event)" (drop)="onDrop($event)"
         (click)="!archivoActual && fileInput.click()">
         <input type="file" #fileInput class="hidden" accept=".pdf" (change)="onFileSelected($event)">

@@ -4,7 +4,7 @@
   </div>
   <div class="container-header">
     <app-header (toggleMenu)="mostrarSidebarMobile()"></app-header>
-    <ion-content style="--background :#f1f5f9;">
+    <ion-content style="--background: #e2e8f0;">
       <app-button-layout>
         <app-count [label]="'En stock'" [count]="totalStock" accentColor="#1D9E75" iconBg="#E1F5EE"  *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Almacen'])">
           <svg icono class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">

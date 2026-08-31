@@ -273,10 +273,7 @@ for (let i = 0; i < this.productosSolicitados.length; i++) {
   }
 }
 
-if (productosValidos.length === 0) {
-  toast.error('Agrega al menos un artículo válido a la solicitud.');
-  return;
-}
+
 
    if (this.isSoporteTecnico) {
       

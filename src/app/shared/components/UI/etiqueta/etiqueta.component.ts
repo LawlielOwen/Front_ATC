@@ -38,7 +38,7 @@ export class EtiquetaComponent {
       case 'azul': return 'bg-blue-100';
       case 'naranja': return 'bg-amber-100'; // Ámbar claro
       case 'verde': return 'bg-green-100';
-      default: return 'bg-slate-100';
+      default: return 'bg-slate-200';
     }
   }
 
@@ -71,7 +71,7 @@ export class EtiquetaComponent {
       case 'verde': return 'text-green-700 bg-green-100 border-green-200';
       case 'naranja': return 'text-amber-700 bg-amber-100 border-amber-300';
       case 'azul': return 'text-blue-700 bg-blue-100 border-blue-200';
-      default: return 'text-slate-700 bg-slate-100 border-slate-200';
+      default: return 'text-slate-700 bg-slate-200 border-slate-200';
     }
   }
   getBadgeText(estatus: number): string {

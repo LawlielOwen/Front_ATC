@@ -49,7 +49,7 @@ getStatusColors(status: string) {
     if (s === 'asignado') return 'bg-violet-50 text-violet-700 border-violet-200'; 
     if (s === 'contactado') return 'bg-sky-50 text-sky-700 border-sky-200'; 
     if (s === 'cotizado') return 'bg-amber-50 text-amber-700 border-amber-200'; 
-    if (s === 'cerrado') return 'bg-slate-100 text-slate-700 border-slate-300'; 
+    if (s === 'cerrado') return 'bg-slate-200 text-slate-700 border-slate-300'; 
 
     // --- Proyectos ---
     if (s === 'en progreso') return 'bg-blue-50 text-[#003B8A] border-blue-200'; // Azul corporativo ATC

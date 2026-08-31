@@ -18,7 +18,7 @@
                                     <div class="flex items-center gap-3">
 
                                         <button (click)=" irACot()"
-                                            class="appearance-none bg-transparent p-1.5 text-slate-400 hover:bg-slate-100 hover:text-[#003B8A] rounded-lg transition-colors outline-none focus:ring-2 focus:ring-slate-200"
+                                            class="appearance-none bg-transparent p-1.5 text-slate-400 hover:bg-slate-200 hover:text-[#003B8A] rounded-lg transition-colors outline-none focus:ring-2 focus:ring-slate-200"
                                             title="Volver a cotizaciones">
                                             <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5"
@@ -187,7 +187,7 @@
             <input type="number" min="0" placeholder="$0.00"
                 [readonly]="!!item.id_producto"
                 [ngClass]="item.id_producto
-                    ? 'bg-slate-100 border-slate-200 text-slate-500 cursor-not-allowed'
+                    ? 'bg-slate-200 border-slate-200 text-slate-500 cursor-not-allowed'
                     : ((!item.precio_unitario_cotizado)
                         ? 'bg-[#fafbfc] border-amber-400 focus:border-amber-500 focus:ring-amber-400 text-slate-700'
                         : 'bg-[#fafbfc] border-[#d2ddec] focus:border-[#003B8A] focus:ring-[#003B8A] text-slate-700')"
@@ -297,7 +297,7 @@
                                 <div class="space-y-2 text-[13px] text-slate-600 mb-4 font-medium">
                                     <div class="flex justify-between items-center">
                                         <span>Ítems <span
-                                                class="bg-slate-100 px-1.5 rounded text-[11px] font-bold text-[#003B8A]">{{
+                                                class="bg-slate-200 px-1.5 rounded text-[11px] font-bold text-[#003B8A]">{{
                                                 detalles.length }}</span></span>
                                     </div>
                                     <div class="flex justify-between">

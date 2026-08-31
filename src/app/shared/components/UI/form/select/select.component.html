@@ -1,5 +1,5 @@
 <div class="flex flex-col gap-1.5 w-full">
-  <label *ngIf="label" class="text-[10px] font-semibold text-slate-500 uppercase tracking-wider ml-1">
+  <label *ngIf="label" class="text-[10px] font-bold text-[#64748b] uppercase tracking-wider ml-1">
     {{ label }}
   </label>
   
@@ -7,7 +7,7 @@
     [disabled]="disabled"
     [value]="value" 
     (change)="actualizarValor($event)" 
-    class="bg-white border border-slate-300 text-[#0d1f38] text-xs rounded-lg shadow-sm focus:ring-1 focus:ring-[#1D9E75] focus:border-[#1D9E75] appearance-none block w-full px-3 py-2.5 outline-none transition-all disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed">
+    class="bg-[#fafbfc] border border-solid border-slate-300 rounded-[8px] px-3 py-2.5 text-xs text-[#0d1f38] focus:outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] appearance-none shadow-none ring-0 w-full transition-colors disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed">
     
     <ng-content></ng-content>
     

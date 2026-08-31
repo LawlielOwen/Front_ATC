@@ -313,3 +313,7 @@ input:-webkit-autofill:active {
     /* Mantiene las esquinas redondeadas o cualquier otra transición */
     transition: background-color 5000s ease-in-out 0s;
 }
+:root {
+  /* Gris con contraste seguro para cualquier monitor */
+  --ion-background-color: #e2e8f0;
+}

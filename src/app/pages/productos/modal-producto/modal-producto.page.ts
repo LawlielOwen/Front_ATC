@@ -12,7 +12,8 @@ import { CardFormComponent } from "../../../shared/components/UI/form/card-form/
 import { ProductoService } from "../../../core/services/Productos.service";
 import { Productos } from '../../../shared/model/productos.model';
 import { AuthService } from '../../../core/services/auth.service';
-
+import { MarcaService } from '../../../core/services/Marcas.service';
+import { Marcas } from '../../../shared/model/marcas.model';
 @Component({
   selector: 'app-modal-producto',
   templateUrl: './modal-producto.page.html',
@@ -45,45 +46,41 @@ export class ModalProductoPage implements OnInit {
     Caja: '',
     Stock: null as any,
     Apartado: null as any,
-    origen:'',
+    origen: '',
     id_marca: null as any
   };
 
-opcionesMarcas = [
-    { label: 'SMC', value: 1 },
-    { label: 'OMRON', value: 2 },
-    { label: 'PATLITE', value: 3 },
-    { label: 'WAGO', value: 4 },
-    { label: 'RWV', value: 5 },
-    { label: 'KLINGSPOR', value: 6 },
-    { label: 'KING TONY', value: 7 },
-    { label: 'Mighty Seven (m7)', value: 8 },
-    { label: 'Fuji Electric', value: 9 },
-    { label: 'Sumitomo Drive Technologies', value: 10 },
-    { label: 'Wenglor', value: 11 },
-    { label: 'PHOENIX CONTACT', value: 12 },
-    { label: 'PILZ', value: 13 },
-    { label: 'EUCHNER', value: 14 },
-    { label: 'CONTRINEX', value: 15 }
-  ];
-esSMC: boolean = false;
+  opcionesMarcas: Marcas[] = [];
+
+  esSMC: boolean = false;
   constructor(
     private ps: ProductoService,
     private dialogRef: MatDialogRef<ModalProductoPage>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: any,public authService: AuthService
-  ) {
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any, public authService: AuthService
+    , private marcaService: MarcaService) {
     if (this.data && this.data.producto) {
       this.isEditMode = true;
-      this.productoNuevo = { ...this.data.producto };
+     
     }
   }
   cerrar() {
     this.dialogRef.close(false)
   }
-
-  ngOnInit() {
+  cargarMarcas() {
+    this.marcaService.getMarcasActivas().subscribe({
+      next: (marcas: Marcas[]) => {
+        this.opcionesMarcas = marcas;
+          if (this.isEditMode) {
+          this.productoNuevo = { ...this.data.producto };
+        }
+      },
+      error: (err) => console.error('Error al cargar marcas', err)
+    });
   }
- procesarAccion() {
+  ngOnInit() {
+    this.cargarMarcas();
+  }
+  procesarAccion() {
     if (!this.validarCampos()) {
       return;
     }
@@ -106,7 +103,7 @@ esSMC: boolean = false;
       }
     });
   }
- actualizarProducto() {
+  actualizarProducto() {
     const idProducto = this.productoNuevo.id;
     this.ps.updateProducto(idProducto, this.productoNuevo as any).subscribe({
       next: (response) => {
@@ -119,7 +116,7 @@ esSMC: boolean = false;
       }
     });
   }
-validarCampos(): boolean {
+  validarCampos(): boolean {
     this.productoNuevo.Nombre = (this.productoNuevo.Nombre || '').toString().trim();
     this.productoNuevo.Descripcion = (this.productoNuevo.Descripcion || '').toString().trim();
     this.productoNuevo.Codigo_numeral = (this.productoNuevo.Codigo_numeral || '').toString().trim();
@@ -147,14 +144,14 @@ validarCampos(): boolean {
       toast.error('El precio debe ser un número válido mayor a 0.');
       return false;
     }
-    this.productoNuevo.Precio = precioNumerico; 
+    this.productoNuevo.Precio = precioNumerico;
 
     const stockNumerico = Number(this.productoNuevo.Stock);
     if (isNaN(stockNumerico) || !Number.isInteger(stockNumerico) || stockNumerico < 0) {
       toast.error('El stock debe ser un número entero válido (0 o mayor).');
       return false;
     }
-    this.productoNuevo.Stock = stockNumerico; 
+    this.productoNuevo.Stock = stockNumerico;
 
 
     if (this.productoNuevo.Apartado === null || this.productoNuevo.Apartado === '' || this.productoNuevo.Apartado === undefined) {
@@ -165,9 +162,9 @@ validarCampos(): boolean {
         toast.error('El stock en apartado debe ser un número entero válido (0 o mayor).');
         return false;
       }
-      this.productoNuevo.Apartado = apartadoNumerico; 
+      this.productoNuevo.Apartado = apartadoNumerico;
     }
 
-    return true; 
+    return true;
   }
 }

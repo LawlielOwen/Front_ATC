@@ -33,8 +33,8 @@
                     <app-search-layout>
                         <app-search-bar placeholder="Buscar por asesor o proveedor"
                             (onSearch)="busquedaTexto($event)"></app-search-bar>
-                        <app-filtro-dinamico [placeholder]="'Todos los proveedores'" [options]="opcionesProv"
-                            (onFilterChange)=" filtroProv($event)"></app-filtro-dinamico>
+                        <app-filtro-dinamico [placeholder]="'Todas las marcas'" [options]="opcionesMarcas"
+              (onFilterChange)="  filtroProv($event)"></app-filtro-dinamico>
                         <app-estatus [opciones]="EstatusPedidos" (onFilterChange)="filtroEstatus($event)"></app-estatus>
                         <app-filtro-fecha (onFilterChange)="filtroFecha($event)"></app-filtro-fecha>
                     </app-search-layout>

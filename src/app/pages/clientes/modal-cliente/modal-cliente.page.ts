@@ -16,6 +16,8 @@ import { ClientesService } from "../../../core/services/clientes.service"
 import { Cliente } from '../../../shared/model/clientes.model';
 import { NgxSonnerToaster } from 'ngx-sonner';
 import { FormsModule } from '@angular/forms';
+import { MarcaService } from '../../../core/services/Marcas.service';
+import { Marcas } from '../../../shared/model/marcas.model';
 @Component({
   selector: 'app-modal-cliente',
   templateUrl: './modal-cliente.page.html',
@@ -35,9 +37,8 @@ export class ModalClientePage implements OnInit {
   isUpdateCsfMode: boolean = false;
   constructor(private service: AsesoresService, private clienteService: ClientesService,
     private dialogRef: MatDialogRef<ModalClientePage>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: any
-  ) { }
-clienteNuevo: any = {
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any, private marcaService: MarcaService) { }
+  clienteNuevo: any = {
     id: 0,
     Nombre: '',
     RFC: '',
@@ -53,26 +54,11 @@ clienteNuevo: any = {
       { id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' }
     ]
   };
-opcionesMarcas = [
-    { label: 'SMC', value: 1 },
-    { label: 'OMRON', value: 2 },
-    { label: 'PATLITE', value: 3 },
-    { label: 'WAGO', value: 4 },
-    { label: 'RWV', value: 5 },
-    { label: 'KLINGSPOR', value: 6 },
-    { label: 'KING TONY', value: 7 },
-    { label: 'Mighty Seven (m7)', value: 8 },
-    { label: 'Fuji Electric', value: 9 },
-    { label: 'Sumitomo Drive Technologies', value: 10 },
-    { label: 'Wenglor', value: 11 },
-    { label: 'PHOENIX CONTACT', value: 12 },
-    { label: 'PILZ', value: 13 },
-    { label: 'EUCHNER', value: 14 },
-    { label: 'CONTRINEX', value: 15 }
-  ];
+  opcionesMarcas: { label: string, value: number }[] = [];
+
   agregarAsesor() {
-    this.clienteNuevo.asesoresAsignados.push({ 
-      id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' 
+    this.clienteNuevo.asesoresAsignados.push({
+      id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: ''
     });
   }
 
@@ -83,19 +69,20 @@ opcionesMarcas = [
   }
 
   toggleMarca(event: any, marcaLabel: string, indexAsesor: number) {
-  const asesor = this.clienteNuevo.asesoresAsignados[indexAsesor];
-  const yaEsta = asesor.marcasArray.includes(marcaLabel);
+    const asesor = this.clienteNuevo.asesoresAsignados[indexAsesor];
+    const yaEsta = asesor.marcasArray.includes(marcaLabel);
 
-  asesor.marcasArray = event.target.checked
-    ? [...asesor.marcasArray, marcaLabel]
-    : asesor.marcasArray.filter((m: string) => m !== marcaLabel);
+    asesor.marcasArray = event.target.checked
+      ? [...asesor.marcasArray, marcaLabel]
+      : asesor.marcasArray.filter((m: string) => m !== marcaLabel);
 
-  asesor.marcas_asignadas = asesor.marcasArray.join(', ');
-}
-ngOnInit() {
-  this.cargarAsesores(() => {
+    asesor.marcas_asignadas = asesor.marcasArray.join(', ');
+  }
+  ngOnInit() {
+    this.cargarMarcas();
+    this.cargarAsesores(() => {
 
-    if (this.data && this.data.id) {
+      if (this.data && this.data.id) {
         this.isEditMode = true;
         this.uploadMode = false;
         this.clienteNuevo = { ...this.data };
@@ -105,39 +92,39 @@ ngOnInit() {
             { id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' }
           ];
         }
-    }
+      }
 
-    if (this.data && this.data.modo === 'updateCsf') {
-      this.isUpdateCsfMode = true;
-      this.uploadMode = true;
-      this.clienteNuevo.id = this.data.cliente.id;
-    }
+      if (this.data && this.data.modo === 'updateCsf') {
+        this.isUpdateCsfMode = true;
+        this.uploadMode = true;
+        this.clienteNuevo.id = this.data.cliente.id;
+      }
 
-    if (this.data && this.data.nombrePrellenado) {
-      this.uploadMode = false;
-      this.clienteNuevo.Nombre = this.data.nombrePrellenado;
-    }
+      if (this.data && this.data.nombrePrellenado) {
+        this.uploadMode = false;
+        this.clienteNuevo.Nombre = this.data.nombrePrellenado;
+      }
 
-    if (!this.isEditMode && this.data?.idAsesorPrellenado) {
-      this.clienteNuevo.asesoresAsignados[0].id_asesor = this.data.idAsesorPrellenado.toString();
-    }
-  });
-}
+      if (!this.isEditMode && this.data?.idAsesorPrellenado) {
+        this.clienteNuevo.asesoresAsignados[0].id_asesor = this.data.idAsesorPrellenado.toString();
+      }
+    });
+  }
 
-cargarAsesores(callback?: () => void) {
-  this.service.getAsesores().subscribe({
-    next: (response: any) => {
-      this.asesores = response.filter((asesor: Asesor) =>
-        ['Asesor', 'Administrador'].includes(asesor.Rol) && asesor.Estatus === 1
-      );
-      if (callback) callback();
-    },
-    error: (err) => {
-      console.error('Error al cargar asesores', err);
-      if (callback) callback();
-    }
-  });
-}
+  cargarAsesores(callback?: () => void) {
+    this.service.getAsesores().subscribe({
+      next: (response: any) => {
+        this.asesores = response.filter((asesor: Asesor) =>
+          ['Asesor', 'Administrador'].includes(asesor.Rol) && asesor.Estatus === 1
+        );
+        if (callback) callback();
+      },
+      error: (err) => {
+        console.error('Error al cargar asesores', err);
+        if (callback) callback();
+      }
+    });
+  }
 
   cerrar() {
     this.dialogRef.close();
@@ -146,7 +133,7 @@ cargarAsesores(callback?: () => void) {
     this.archivoActual = archivo;
   }
 
-agregarCliente() {
+  agregarCliente() {
     const formData = new FormData();
 
     formData.append('Nombre', this.clienteNuevo.Nombre);
@@ -157,12 +144,12 @@ agregarCliente() {
     formData.append('contacto_principal', this.clienteNuevo.contacto_principal);
     formData.append('correo_contacto', this.clienteNuevo.correo_contacto);
     formData.append('CP', this.clienteNuevo.CP);
-    
-formData.append('asesores_json', JSON.stringify(this.clienteNuevo.asesoresAsignados));
+
+    formData.append('asesores_json', JSON.stringify(this.clienteNuevo.asesoresAsignados));
     formData.append('marcas_asignadas', this.clienteNuevo.marcas_asignadas || '');
 
     formData.append('tiene_credito', this.clienteNuevo.tiene_credito ? '1' : '0');
-    
+
     const limiteGuardar = this.clienteNuevo.tiene_credito ? this.clienteNuevo.limite_credito : 0;
     formData.append('limite_credito', limiteGuardar.toString());
 
@@ -205,7 +192,7 @@ formData.append('asesores_json', JSON.stringify(this.clienteNuevo.asesoresAsigna
       this.agregarCliente();
     }
   }
-procesarAccion() {
+  procesarAccion() {
     // Si estamos en el modo especial de actualizar CSF
     if (this.isUpdateCsfMode) {
       this.actualizarSoloCsf();
@@ -216,17 +203,17 @@ procesarAccion() {
     if (this.uploadMode) {
       this.procesarPDF();
     } else {
-      if (!this.validarCamposObligatorios()) return; 
-      if (!this.validarYSanitizarOpcionales()) return; 
+      if (!this.validarCamposObligatorios()) return;
+      if (!this.validarYSanitizarOpcionales()) return;
 
       if (this.isEditMode) {
         this.actualizarClienteExistente();
       } else {
-        this.agregarCliente(); 
+        this.agregarCliente();
       }
     }
   }
- actualizarClienteExistente() {
+  actualizarClienteExistente() {
     const idCliente = this.clienteNuevo.id;
     const formData = new FormData();
 
@@ -262,7 +249,7 @@ procesarAccion() {
         toast.error('Error al actualizar el cliente');
       }
     });
-}
+  }
   validarYSanitizarOpcionales(): boolean {
     if (this.clienteNuevo.contacto_principal && this.clienteNuevo.contacto_principal.trim() !== '') {
       let telLimpio = this.clienteNuevo.contacto_principal.replace(/[\s\-\(\)\+]/g, '');
@@ -295,7 +282,7 @@ procesarAccion() {
 
     return true;
   }
-validarCamposObligatorios(): boolean {
+  validarCamposObligatorios(): boolean {
     this.clienteNuevo.Nombre = (this.clienteNuevo.Nombre || '').trim();
     this.clienteNuevo.RFC = (this.clienteNuevo.RFC || '').trim().toUpperCase();
     this.clienteNuevo.Razon_social = (this.clienteNuevo.Razon_social || '').trim();
@@ -306,8 +293,8 @@ validarCamposObligatorios(): boolean {
     this.clienteNuevo.correo_contacto = (this.clienteNuevo.correo_contacto || '').trim();
 
     if (!this.clienteNuevo.Nombre || !this.clienteNuevo.RFC ||
-        !this.clienteNuevo.Razon_social || !this.clienteNuevo.Regimen_fiscal ||
-        !this.clienteNuevo.Direccion || !this.clienteNuevo.CP) {
+      !this.clienteNuevo.Razon_social || !this.clienteNuevo.Regimen_fiscal ||
+      !this.clienteNuevo.Direccion || !this.clienteNuevo.CP) {
       toast.error('Por favor, completa todos los campos obligatorios.');
       return false;
     }
@@ -341,7 +328,7 @@ validarCamposObligatorios(): boolean {
     }
 
     return true;
-}
+  }
   actualizarSoloCsf() {
     if (!this.archivoActual) {
       toast.error('Por favor, selecciona un archivo PDF primero.');
@@ -351,11 +338,19 @@ validarCamposObligatorios(): boolean {
     this.clienteService.subirCSF(this.clienteNuevo.id, this.archivoActual).subscribe({
       next: (res) => {
         toast.success(res.mensaje || 'Constancia subida correctamente');
-        this.dialogRef.close(true); 
+        this.dialogRef.close(true);
       },
       error: (err) => {
         toast.error(err.error?.error || 'Error al actualizar la constancia');
       }
+    });
+  }
+    cargarMarcas() {
+    this.marcaService.getMarcasActivas().subscribe({
+      next: (marcas: Marcas[]) => {
+        this.opcionesMarcas = marcas.map(m => ({ label: m.Nombre, value: m.id }));
+      },
+      error: (err) => console.error('Error al cargar marcas', err)
     });
   }
 }

@@ -1,5 +1,8 @@
-<ion-searchbar 
-  [placeholder]="placeholder" 
-  [debounce]="500" 
-  (ionInput)="emitirBusqueda($event)">
-</ion-searchbar>
+<div class="custom-searchbar">
+  <ion-icon name="search-outline" class="search-icon"></ion-icon>
+  <input 
+    type="text" 
+    class="search-input"
+    [placeholder]="placeholder" 
+    (input)="onInput($event)">
+</div>

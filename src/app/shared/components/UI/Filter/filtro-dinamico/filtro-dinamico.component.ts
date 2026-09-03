@@ -25,18 +25,7 @@ export class FiltroDinamicoComponent  implements OnInit {
   toggleDropdown() {
     this.isDropdownOpen = !this.isDropdownOpen;
   }
-opcionesMarcas = [
-  { label: 'Todas las marcas', value: null },
-  { label: 'SMC', value: 1 },
-  { label: 'OMRON', value: 2 },
-  { label: 'PATLITE', value: 3 },
-  { label: 'WAGO', value: 4 },
-  { label: 'RWV', value: 5 },
-  { label: 'KLINGSPOR', value: 6 },
-  { label: 'KING TONY', value: 7 },
-  { label: 'Mighty Seven (m7)', value: 8 },
-  { label: 'Fuji Electric', value: 9 }
-];
+
 
 opcionesMovimiento = [
   { label: 'Entradas y Salidas', value: 'ambos' },

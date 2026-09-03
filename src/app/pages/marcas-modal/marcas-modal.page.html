@@ -1,0 +1,65 @@
+<div class="bg-white rounded-2xl overflow-hidden w-full max-h-[85vh] flex flex-col border border-slate-200 shadow-2xl">
+  <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
+
+  <app-header-modal [label]="'Gestión de Marcas'"></app-header-modal>
+
+  <div class="p-6 overflow-y-auto bg-slate-200 flex-1">
+    <div class="flex flex-col gap-5">
+
+       <div class="sticky top-0 z-10 bg-slate-200 pb-1">
+      <app-card-form [title]="idEnEdicion ? 'Editar Marca' : 'Nueva Marca'">
+        <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+            d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+        </svg>
+
+        <div class="flex items-end gap-3 md:col-span-2">
+          <div class="flex-1">
+            <app-input tipo="text" placeholder="Ej. SMC" label="Nombre de la marca *"
+              [(value)]="nombreMarca"></app-input>
+          </div>
+
+          <app-button-action [label]="idEnEdicion ? 'Guardar' : 'Agregar'"
+            [claseCss]="idEnEdicion ? 'btn-editar' : 'btn-agregar'"
+            (click)="guardarMarca()"></app-button-action>
+
+          <app-button-action *ngIf="idEnEdicion" [label]="'Cancelar'" [claseCss]="'btn-cerrar'"
+            (click)="cancelarEdicion()"></app-button-action>
+        </div>
+      </app-card-form>
+    </div>
+
+<div class="bg-white rounded-xl border border-slate-200 shadow-sm p-4">
+  <div class="flex items-center gap-2 mb-4">
+    <svg class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7" />
+    </svg>
+    <h3 class="text-[#0d1f38] font-bold text-sm">Marcas Registradas</h3>
+  </div>
+
+  <app-container-table>
+    <div header>
+      <app-search-layout>
+        <app-search-bar placeholder="Buscar marca..." (onSearch)="busquedaTexto($event)"></app-search-bar>
+        <app-estatus [opciones]="EstatusMarcas" (onFilterChange)="filtroEstatus($event)"></app-estatus>
+      </app-search-layout>
+    </div>
+
+    <div body>
+      <app-table-skeleton *ngIf="cargando" [rows]="5"></app-table-skeleton>
+      <app-table *ngIf="!cargando" [columns]="columnasMarcas" [data]="marcas" (actionClick)="abrirOpciones($event)"></app-table>
+    </div>
+
+    <div footer>
+      <app-pagination [paginaActual]="currentPage" [totalPaginas]="totalPages" (onPageChange)="cambiarPaginaPadre($event)"></app-pagination>
+    </div>
+  </app-container-table>
+</div>
+
+    </div>
+  </div>
+
+  <app-footer-modal [paddingClass]="'p-4 px-6'">
+    <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+  </app-footer-modal>
+</div>

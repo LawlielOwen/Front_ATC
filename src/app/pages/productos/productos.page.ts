@@ -11,7 +11,7 @@ import { EstatusComponent } from '../../shared/components/UI/Filter/estatus/esta
 import { CountComponent } from '../../shared/components/UI/count/count.component'
 import { ContainerTableComponent } from '../../shared/components/layout/container-table/container-table.component';
 import { PaginationComponent } from '../../shared/components/UI/pagination/pagination.component';
-import { FiltroDinamicoComponent } from '../../shared/components/UI/Filter/filtro-dinamico/filtro-dinamico.component';
+import { FilterOption, FiltroDinamicoComponent } from '../../shared/components/UI/Filter/filtro-dinamico/filtro-dinamico.component';
 import { TableComponent, TableColumn } from '../../shared/components/UI/table/table.component';
 import { TableSkeletonComponent } from '../../shared/components/UI/table/table-skeleton/table-skeleton.component';
 import { AuthService } from '../../core/services/auth.service';
@@ -24,7 +24,8 @@ import { DetallesProductoPage } from "../productos/detalles-producto/detalles-pr
 import { ExistenciasPage } from "../productos/existencias/existencias.page";
 import { DeleteComponent } from '../../shared/components/UI/modal/delete/delete.component';
 import { toast } from 'ngx-sonner';
-
+import { MarcaService } from '../../core/services/Marcas.service';
+import { Marcas } from '../../shared/model/marcas.model';
 @Component({
   selector: 'app-productos',
   templateUrl: './productos.page.html',
@@ -54,19 +55,9 @@ columnasProductos: TableColumn[] = [];
   rolUsuario: string = '';
   user: any;
 timeoutBusqueda: any;
-  constructor(public dialog: MatDialog, private ps: ProductoService,public authService: AuthService) { }
-  opcionesMarcas = [
-    { label: 'Todas las marcas', value: null },
-    { label: 'SMC', value: 1 },
-    { label: 'OMRON', value: 2 },
-    { label: 'PATLITE', value: 3 },
-    { label: 'WAGO', value: 4 },
-    { label: 'RWV', value: 5 },
-    { label: 'KLINGSPOR', value: 6 },
-    { label: 'KING TONY', value: 7 },
-    { label: 'Mighty Seven (m7)', value: 8 },
-    { label: 'Fuji Electric', value: 9 }
-  ];
+  constructor(public dialog: MatDialog, private ps: ProductoService,public authService: AuthService , private marcaService: MarcaService) { }
+  opcionesMarcas: FilterOption[] = [];
+
   misEstatusDeProductos = [
     { label: 'Todos', value: null },
     { label: 'Activos', value: 1 },
@@ -109,11 +100,22 @@ timeoutBusqueda: any;
         type: 'actions',
         align: 'center',
         omitirBase: true,
-        menuOptions: opcionesMenuAutorizadas // <--- Le pasamos solo las acciones que su rol permite
+        menuOptions: opcionesMenuAutorizadas
       });
     }
 
     this.columnasProductos = columnasBase;
+  }
+   cargarMarcas() {
+    this.marcaService.getMarcasActivas().subscribe({
+      next: (marcas: Marcas[]) => {
+        this.opcionesMarcas = [
+          { label: 'Todas las marcas', value: null },
+          ...marcas.map(m => ({ label: m.Nombre, value: m.id }))
+        ];
+      },
+      error: (err) => console.error('Error al cargar marcas', err)
+    });
   }
   ngOnInit() {
 
@@ -304,5 +306,6 @@ timeoutBusqueda: any;
     this.cargarProductos();
     this.obtenerTotalActivos();
     this.definirColumnasPorRol();
+    this.cargarMarcas();
   }
 }

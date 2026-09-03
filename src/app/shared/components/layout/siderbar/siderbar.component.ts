@@ -3,6 +3,8 @@ import { Router, RouterModule } from '@angular/router';
 import { IonicModule } from '@ionic/angular';
 import { CommonModule } from '@angular/common';
 import { AuthService } from '../../../../core/services/auth.service';
+import { MatDialog } from '@angular/material/dialog';
+import { MarcasModalPage } from '../../../../pages/marcas-modal/marcas-modal.page';
 
 @Component({
   selector: 'app-siderbar',
@@ -18,7 +20,8 @@ export class SiderbarComponent implements OnInit {
 
   constructor(
     public authService: AuthService,
-    private router: Router
+    private router: Router,
+    private dialog: MatDialog
   ) { }
 
   ngOnInit() {
@@ -42,4 +45,11 @@ export class SiderbarComponent implements OnInit {
       || this.router.url.includes('/demos')
       || this.router.url.includes('/visitas');
   }
+  abrirGestionMarcas() {
+  this.dialog.open(MarcasModalPage, {
+    width: '850px',
+    maxWidth: '95vw',
+    backdropClass: ['bg-black/40', 'backdrop-blur-sm']
+  });
+}
 }

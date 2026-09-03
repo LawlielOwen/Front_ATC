@@ -17,6 +17,8 @@ import { MatNativeDateModule, provideNativeDateAdapter } from '@angular/material
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
 import { of } from 'rxjs';
+import { MarcaService } from '../../../core/services/Marcas.service';
+import { Marcas } from '../../../shared/model/marcas.model';
 @Component({
   selector: 'app-modal-repecion',
   templateUrl: './modal-repecion.page.html',
@@ -43,31 +45,18 @@ export class ModalRepecionPage implements OnInit {
     id_proveedor: null as any,
     fecha_estimada: '',
   }
-  opcionesProveedor = [
-      { label: 'SMC', value: 1 },
-    { label: 'OMRON', value: 2 },
-    { label: 'PATLITE', value: 3 },
-    { label: 'WAGO', value: 4 },
-    { label: 'RWV', value: 5 },
-    { label: 'KLINGSPOR', value: 6 },
-    { label: 'KING TONY', value: 7 },
-    { label: 'Mighty Seven (m7)', value: 8 },
-    { label: 'Fuji Electric', value: 9 },
-    { label: 'Sumitomo Drive Technologies', value: 10 },
-    { label: 'Wenglor', value: 11 },
-    { label: 'PHOENIX CONTACT', value: 12 },
-    { label: 'PILZ', value: 13 },
-    { label: 'EUCHNER', value: 14 },
-    { label: 'CONTRINEX', value: 15 }
-  ];
+
+    opcionesProveedor: Marcas[] = [];
+
    opcionesDestino = [
     { label: 'Almacén', value: 'Almacen' },
     { label: 'Apartado (Pedido)', value: 'Pedido' }
   ];
   constructor(private ps: ProveedorService,
-    private dialogRef: MatDialogRef<ModalRepecionPage>) { }
+    private dialogRef: MatDialogRef<ModalRepecionPage>, private marcaService: MarcaService) { }
 
  ngOnInit() {
+  this.cargarMarcas();
     this.productoControl.disable(); 
 
     this.productoControl.valueChanges.pipe(
@@ -96,7 +85,14 @@ export class ModalRepecionPage implements OnInit {
       }
     });
 }
-
+  cargarMarcas() {
+    this.marcaService.getMarcasActivas().subscribe({
+      next: (marcas: Marcas[]) => {
+        this.opcionesProveedor = marcas;
+      },
+      error: (err) => console.error('Error al cargar marcas', err)
+    });
+  }
 onCambiarProveedor() {
     this.productoControl.setValue('', { emitEvent: false });
     this.productosFiltrados = [];

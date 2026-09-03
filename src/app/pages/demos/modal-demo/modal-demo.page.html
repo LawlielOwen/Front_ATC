@@ -1,4 +1,5 @@
-<div class="bg-slate-200 rounded-[10px] overflow-hidden shadow-2xl w-full mx-auto max-h-[90vh] flex flex-col border border-gray-100">
+<div
+  class="bg-slate-200 rounded-[10px] overflow-hidden shadow-2xl w-full mx-auto max-h-[90vh] flex flex-col border border-gray-100">
   <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
 
   <app-header-modal [label]="isEditMode ? 'Editar Equipo Demo' : 'Registrar Nuevo Demo'"></app-header-modal>
@@ -34,12 +35,12 @@
 
         <div class="flex flex-col gap-4 md:col-span-2">
           <div class="flex gap-4">
-            
+
             <div class="w-1/2 flex flex-col gap-y-1">
               <app-select label="Marca *" [(value)]="demoNuevo.id_marca">
                 <option value="">Seleccione marca...</option>
-                <option *ngFor="let marca of opcionesMarcas" [value]="marca.value">
-                  {{ marca.label }}
+                <option *ngFor="let marca of opcionesMarcas" [value]="marca.id">
+                  {{ marca.Nombre }}
                 </option>
               </app-select>
             </div>

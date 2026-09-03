@@ -85,10 +85,12 @@ const routes: Routes = [
     path: 'visitas',
     loadChildren: () => import('./pages/visitas/visitas.module').then( m => m.VisitasPageModule),
     canActivate: [authGuard]
-  },  {
+  },
+  {
     path: 'proyectos',
     loadChildren: () => import('./pages/proyectos/proyectos.module').then( m => m.ProyectosPageModule)
   },
+ 
 
 
 

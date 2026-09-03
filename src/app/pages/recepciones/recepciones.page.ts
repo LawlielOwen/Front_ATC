@@ -1,11 +1,11 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { ProveedorService } from '../../core/services/Proveedores.service';
 import { CommonModule } from '@angular/common';
-import {ModalRepecionPage} from './modal-repecion/modal-repecion.page'
-import {DetallesRecepcionPage} from './detalles-recepcion/detalles-recepcion.page'
+import { ModalRepecionPage } from './modal-repecion/modal-repecion.page'
+import { DetallesRecepcionPage } from './detalles-recepcion/detalles-recepcion.page'
 
 
-import { FiltroDinamicoComponent } from '../../shared/components/UI/Filter/filtro-dinamico/filtro-dinamico.component';
+import { FiltroDinamicoComponent, FilterOption } from '../../shared/components/UI/Filter/filtro-dinamico/filtro-dinamico.component';
 import { TableComponent, TableColumn } from '../../shared/components/UI/table/table.component';
 import { TableSkeletonComponent } from '../../shared/components/UI/table/table-skeleton/table-skeleton.component';
 import { SiderbarComponent } from '../../shared/components/layout/siderbar/siderbar.component';
@@ -21,7 +21,8 @@ import { StatCardComponent } from '../../shared/components/UI/stat-card/stat-car
 import { ContainerTableComponent } from '../../shared/components/layout/container-table/container-table.component';
 import { PaginationComponent } from '../../shared/components/UI/pagination/pagination.component';
 import { FiltroFechaComponent } from '../../shared/components/UI/Filter/filtro-fecha/filtro-fecha.component';
-
+import { MarcaService } from '../../core/services/Marcas.service';
+import { Marcas } from '../../shared/model/marcas.model';
 import { MatDialog } from '@angular/material/dialog';
 import { toast } from 'ngx-sonner';
 import { notificacionService } from '../../core/services/Notificaciones.service';
@@ -35,7 +36,7 @@ import { notificacionService } from '../../core/services/Notificaciones.service'
     ButtonNewComponent, SearchBarComponent, CountComponent, ContainerTableComponent,
     SearchLayoutComponent, PaginationComponent, StatCardComponent
     , FiltroFechaComponent, CommonModule, EstatusComponent,
-    TableComponent, TableSkeletonComponent,FiltroDinamicoComponent
+    TableComponent, TableSkeletonComponent, FiltroDinamicoComponent
   ]
 })
 export class RecepcionesPage implements OnInit {
@@ -57,8 +58,9 @@ export class RecepcionesPage implements OnInit {
   rolUsuario: string = '';
   pedidosLista: any[] = [];
   proveedorActual: number | null = null;
-timeoutBusqueda: any;
-  constructor(private ps: ProveedorService,public dialog: MatDialog) { }
+  marcaActual: number | null = null;
+  timeoutBusqueda: any;
+  constructor(private ps: ProveedorService, public dialog: MatDialog, private marcaService: MarcaService) { }
   columnasPedidos: TableColumn[] = [
     {
       header: 'Proveedor',
@@ -78,8 +80,8 @@ timeoutBusqueda: any;
     },
     {
       header: 'Fechas',
-      key: 'fecha_estimada_formateada', 
-      subKey: 'fecha_solicitud_formateada', 
+      key: 'fecha_estimada_formateada',
+      subKey: 'fecha_solicitud_formateada',
       type: 'text-light'
     },
     {
@@ -95,45 +97,40 @@ timeoutBusqueda: any;
     { label: 'Pendientes', value: 0 },
     { label: 'Con incidencia', value: 2 }
   ];
-  opcionesProv = [
-    { label: 'Todos los proveedores', value: null },
-    { label: 'SMC', value: 1 },
-    { label: 'OMRON', value: 2 },
-    { label: 'PATLITE', value: 3 },
-    { label: 'WAGO', value: 4 },
-    { label: 'RWV', value: 5 },
-    { label: 'KLINGSPOR', value: 6 },
-    { label: 'KING TONY', value: 7 },
-    { label: 'Mighty Seven (m7)', value: 8 },
-    { label: 'Fuji Electric', value: 9 },
-    { label: 'Sumitomo Drive Technologies', value: 10 },
-    { label: 'Wenglor', value: 11 },
-    { label: 'PHOENIX CONTACT', value: 12 },
-    { label: 'PILZ', value: 13 },
-    { label: 'EUCHNER', value: 14 },
-    { label: 'CONTRINEX', value: 15 }
-  ];
+  opcionesMarcas: FilterOption[] = [];
+
+
   ngOnInit() {
-    this.cargarEstadisticas();
-    this.cargarPedidos();
   }
   mostrarSidebarMobile() {
     if (this.sidebar) {
       this.sidebar.toggleMenu();
     }
   }
- cargarEstadisticas() {
+
+  cargarEstadisticas() {
     this.ps.obtenerEstadisticasPedidos().subscribe({
       next: (data) => {
         const estadisticas = data[0];
         this.Totalpendientes = parseInt(estadisticas.pendientes) || 0;
         this.Totalrecibidos = parseInt(estadisticas.recibidos) || 0;
-        this.Totalincidentes = parseInt(estadisticas.con_incidencia) || 0; 
+        this.Totalincidentes = parseInt(estadisticas.con_incidencia) || 0;
         this.Totalanual = parseInt(estadisticas.total_anual) || 0;
       },
       error: (error) => {
         console.error('Error al cargar estadísticas:', error);
       }
+    });
+  }
+  cargarMarcas() {
+    this.marcaService.getMarcasActivas().subscribe({
+      next: (marcas: Marcas[]) => {
+        this.opcionesMarcas = [
+          { label: 'Todas las marcas', value: null },
+          ...marcas.map(m => ({ label: m.Nombre, value: m.id }))
+        ];
+      },
+      error: (err) => console.error('Error al cargar marcas', err)
     });
   }
   formatearFecha(fechaStr: string) {
@@ -148,7 +145,7 @@ timeoutBusqueda: any;
     };
     return mapaEstatus[estatus] || 'Desconocido';
   }
- cargarPedidos() {
+  cargarPedidos() {
     this.cargando = true;
     this.ps.buscarPedido(
       this.terminoActual,
@@ -160,28 +157,28 @@ timeoutBusqueda: any;
       this.limit
     ).subscribe({
       next: (res: any) => {
-        const listaCruda = res.pedidos || []; 
+        const listaCruda = res.pedidos || [];
 
         this.pedidosLista = listaCruda.map((pedido: any) => ({
           ...pedido,
           estatusTexto: this.obtenerTextoEstatus(pedido.Estatus),
           resumen_modelos: `${pedido.total_modelos_diferentes} Modelos`,
           resumen_piezas: `${pedido.total_piezas} piezas en total`,
-          
+
           fecha_estimada_formateada: `Estimada: ${this.formatearFecha(pedido.fecha_estimada)}`,
           fecha_solicitud_formateada: `Solicitada: ${this.formatearFecha(pedido.fecha_solicitud)}`
         }));
-        
-        this.cargando = false; 
+
+        this.cargando = false;
       },
       error: (err) => {
         console.error('Error al cargar la tabla', err);
-        this.cargando = false; 
+        this.cargando = false;
       }
     });
   }
   nuevoPedido() {
-const dialogRef = this.dialog.open(ModalRepecionPage, {
+    const dialogRef = this.dialog.open(ModalRepecionPage, {
       width: '670px',
       maxWidth: '105vw',
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
@@ -194,7 +191,7 @@ const dialogRef = this.dialog.open(ModalRepecionPage, {
       }
     });
   }
- busquedaTexto(texto: string) {
+  busquedaTexto(texto: string) {
     this.terminoActual = texto;
     this.currentPage = 1;
 
@@ -203,9 +200,9 @@ const dialogRef = this.dialog.open(ModalRepecionPage, {
     }
 
     this.timeoutBusqueda = setTimeout(() => {
-      
+
       this.cargarPedidos();
-      
+
     }, 500);
   }
   filtroEstatus(estatus: number | null) {
@@ -218,18 +215,18 @@ const dialogRef = this.dialog.open(ModalRepecionPage, {
     this.currentPage = 1;
     this.cargarPedidos();
   }
-   cambiarPaginaPadre(nuevaPagina: number) {
+  cambiarPaginaPadre(nuevaPagina: number) {
     this.currentPage = nuevaPagina;
     this.cargarPedidos();
   }
-   filtroFecha(rango: { inicio: any, fin: any }) {
+  filtroFecha(rango: { inicio: any, fin: any }) {
     this.fechaIni = rango.inicio;
     this.fechaFin = rango.fin;
     this.currentPage = 1;
     this.cargarPedidos();
   }
-  abrirDetalles(pedido: any){
-  const dialogRef = this.dialog.open(DetallesRecepcionPage, {
+  abrirDetalles(pedido: any) {
+    const dialogRef = this.dialog.open(DetallesRecepcionPage, {
       width: '750px',
       maxWidth: '95vw',
       panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
@@ -242,5 +239,10 @@ const dialogRef = this.dialog.open(ModalRepecionPage, {
         this.cargarEstadisticas();
       }
     });
+  }
+  ionViewWillEnter() {
+    this.cargarEstadisticas();
+    this.cargarPedidos();
+    this.cargarMarcas();
   }
 }

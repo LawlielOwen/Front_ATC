@@ -21,7 +21,15 @@ ngOnInit() {
     
     if (token) {
       try {
-        this.usuario = JSON.parse(atob(token.split('.')[1]));
+        const base64Url = token.split('.')[1];
+        
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        
+        const jsonPayload = decodeURIComponent(window.atob(base64).split('').map((c) => {
+            return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+        }).join(''));
+
+        this.usuario = JSON.parse(jsonPayload);
         
         const letraNombre = this.usuario?.Nombre?.charAt(0) || '';
         const letraApp = this.usuario?.app?.charAt(0) || '';
@@ -30,7 +38,7 @@ ngOnInit() {
         console.error('Error al decodificar el token', error);
       }
     }
-  }
+}
    async logOut() {
     localStorage.removeItem('token');
     localStorage.removeItem('user');

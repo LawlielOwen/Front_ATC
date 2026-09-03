@@ -1,18 +1,40 @@
-ion-searchbar {
-  --background: #ffffff;
-  --color: #414a53;
-  --border-radius: 10px;
-  --box-shadow: inset 0 0 0 1px #94a3b8 !important;
-  width: 100%;
-  height: 50px;
-  padding: 0; 
-::ng-deep .searchbar-input {
-    font-size: 14px !important;
+.custom-searchbar {
+  display: flex;
+  align-items: center;
+  width: 100%;           /* Mantiene la capacidad de adaptarse al contenedor */
+  max-width: 100%;
+  height: 43px;
+  background-color: #ffffff;
+  border: 1px solid #94a3b8;
+  border-radius: 10px;
+  padding: 0 15px;
+  box-sizing: border-box;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+
+  /* Aplica el estilo cuando el input interno está enfocado */
+  &:focus-within {
+    border-color: #00997d;
+    box-shadow: inset 0 0 0 1px #00997d;
   }
 }
-ion-searchbar.searchbar-has-focus {
-  --box-shadow: inset 0 0 0 2px #94a3b8!important; 
+
+.search-icon {
+  color: #94a3b8;
+  font-size: 20px;
+  margin-right: 10px;
 }
-ion-searchbar.ion-focused {
-  --box-shadow: inset 0 0 0 2px #00997d !important; 
+
+.search-input {
+  flex: 1;               /* Expande el input para llenar el resto de la caja */
+  height: 100%;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #414a53;
+  font-size: 14px;
+  padding: 0;
+
+  &::placeholder {
+    color: #94a3b8;
+  }
 }

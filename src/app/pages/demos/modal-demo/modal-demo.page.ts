@@ -11,7 +11,8 @@ import { SelectComponent } from "../../../shared/components/UI/form/select/selec
 import { CardFormComponent } from "../../../shared/components/UI/form/card-form/card-form.component";
 import { DemoService } from '../../../core/services/Demos.service';
 import { StockDemo } from '../../../shared/model/demo.model';
-
+import { MarcaService } from '../../../core/services/Marcas.service';
+import { Marcas } from '../../../shared/model/marcas.model';
 @Component({
   selector: 'app-modal-demo',
   templateUrl: './modal-demo.page.html',
@@ -41,36 +42,30 @@ export class ModalDemoPage implements OnInit {
     stock: null as any
   };
 
-  opcionesMarcas = [
-    { label: 'SMC', value: 1 },
-    { label: 'OMRON', value: 2 },
-    { label: 'PATLITE', value: 3 },
-    { label: 'WAGO', value: 4 },
-    { label: 'RWV', value: 5 },
-    { label: 'KLINGSPOR', value: 6 },
-    { label: 'KING TONY', value: 7 },
-    { label: 'Mighty Seven (m7)', value: 8 },
-    { label: 'Fuji Electric', value: 9 },
-    { label: 'Sumitomo Drive Technologies', value: 10 },
-    { label: 'Wenglor', value: 11 },
-    { label: 'PHOENIX CONTACT', value: 12 },
-    { label: 'PILZ', value: 13 },
-    { label: 'EUCHNER', value: 14 },
-    { label: 'CONTRINEX', value: 15 }
-  ];
+  opcionesMarcas: Marcas[] = [];
 
   constructor(
     private ds: DemoService,
     private dialogRef: MatDialogRef<ModalDemoPage>,
-    @Optional() @Inject(MAT_DIALOG_DATA) public data: any
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any, private marcaService: MarcaService
   ) {
     if (this.data && this.data.demo) {
       this.isEditMode = true;
-      this.demoNuevo = { ...this.data.demo };
     }
   }
+  cargarMarcas() {
+    this.marcaService.getMarcasActivas().subscribe({
+      next: (marcas: Marcas[]) => {
+        this.opcionesMarcas = marcas;
+        this.demoNuevo = { ...this.data.demo };
 
-  ngOnInit() {}
+      },
+      error: (err) => console.error('Error al cargar marcas', err)
+    });
+  }
+  ngOnInit() {
+     this.cargarMarcas();
+  }
 
   cerrar() {
     this.dialogRef.close(false);

@@ -5,7 +5,7 @@ export interface TableColumn {
   header: string;
   key: string;
   subKey?: string;
-  type: 'text' | 'currency' | 'status' | 'avatar-text' | 'actions' | 'stock' | 'pill-tipo' | 'pill-destino' | 'text-light' | 'cantidad-movimiento' | 'link';
+  type: 'text' | 'currency' | 'status' | 'avatar-text' | 'actions' | 'stock' | 'pill-tipo' | 'pill-destino' | 'text-light' | 'cantidad-movimiento' | 'link' | 'count';
   align?: 'left' | 'center' | 'right';
   menuOptions?: MenuOption[];
   omitirBase?: boolean;
@@ -26,15 +26,13 @@ export class TableComponent implements OnInit {
 
   ngOnInit() { }
 getStatusColors(status: string) {
-    if (!status) return 'bg-slate-100 text-slate-700 border-slate-300 shadow-sm';
-    
-    // Normalizamos el texto: minúsculas y sin acentos
+   if (!status) return 'bg-slate-100 text-slate-700 border-slate-300 shadow-sm';
     const s = status.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     
     // --- Productos ---
     if (s === 'activo') return 'bg-emerald-100 text-emerald-800 border-emerald-300 shadow-sm';
     if (s === 'sin stock') return 'bg-rose-100 text-rose-800 border-rose-300 shadow-sm animate-pulse';
-
+if (s === 'inactivo') return 'bg-red-100 text-red-700 border-red-400 shadow-sm font-bold';
     // --- Almacén ---
     if (s === 'recibido') return 'bg-[#d1fae5] text-[#065f46] border-[#6ee7b7] shadow-sm'; // Verde ATC más intenso
     if (s === 'con incidencia') return 'bg-rose-100 text-rose-800 border-rose-300 shadow-sm animate-pulse'; 
@@ -100,6 +98,8 @@ getStatusDot(status: string) {
     if (s === 'completado' || s === 'completada') return 'bg-[#1D9E75]';
     if (s === 'cancelada' || s === 'cancelado') return 'bg-rose-600';
     if (s === 'pendiente') return 'bg-slate-400'; 
+     
+    if (s === 'inactivo') return 'bg-rose-600'; 
 
     return 'bg-slate-400';
 }
@@ -115,4 +115,8 @@ getStatusDot(status: string) {
   manejarAccionMenu(accion: string, row: any) {
     this.actionClick.emit({ accion, row });
   }
+  getCountColor(cantidad: number): string {
+    if (!cantidad || cantidad === 0) return 'text-slate-400';
+    return 'text-[#003B8A]';
+}
 }

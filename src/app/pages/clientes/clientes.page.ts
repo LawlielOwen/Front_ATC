@@ -44,9 +44,13 @@ export class ClientesPage implements OnInit {
   cargando: boolean = true;
   totalActivos: number = 0;
     timeoutBusqueda: any;
-
+idAsesorActual: number | null = null;
   ngOnInit() {
+    const usuario = this.authService.obtenerUsuarioActual();
     
+    if (usuario) {
+      this.idAsesorActual = usuario.Rol === 'Administrador' ? null : usuario.id;
+    }
   }
   ionViewWillEnter() {
     this.cargarClientes();
@@ -92,13 +96,14 @@ export class ClientesPage implements OnInit {
       }
     });
   }
-  cargarClientes() {
+cargarClientes() {
     this.cargando = true;
     this.clientesService.buscarClientes(
       this.terminoActual,
       this.estatusActual,
       this.currentPage,
-      this.limit
+      this.limit,
+      this.idAsesorActual 
     ).subscribe({
       next: (response: any) => {
         this.clientes = response.clientes;

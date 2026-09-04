@@ -42,18 +42,23 @@ updateCliente(id: number, cliente: FormData): Observable<any> {
       .set('limite', limite.toString());
     return this.http.get<RespuestaPaginada>(`${this.apiUrl}/clientes`, { params });
   }
-  buscarClientes(nombre: string = '', estatus: number | null = null, pagina: number = 1, limite: number = 6): Observable<RespuestaPaginada> {
-    let params = new HttpParams()
-      .set('pagina', pagina.toString())
-      .set('limite', limite.toString());
-    if (nombre) {
-      params = params.set('busqueda', nombre);
-    }
-    if (estatus !== null) {
-      params = params.set('estatus', estatus.toString());
-    }
-    return this.http.get<RespuestaPaginada>(`${this.apiUrl}/clientes/buscar`, { params });
+ buscarClientes(nombre: string = '', estatus: number | null = null, pagina: number = 1, limite: number = 6, idAsesor: number | null = null): Observable<RespuestaPaginada> {
+  let params = new HttpParams()
+    .set('pagina', pagina.toString())
+    .set('limite', limite.toString());
+
+  if (nombre) {
+    params = params.set('busqueda', nombre);
   }
+  if (estatus !== null) {
+    params = params.set('estatus', estatus.toString());
+  }
+  if (idAsesor !== null) {
+    params = params.set('idAsesor', idAsesor.toString());
+  }
+
+  return this.http.get<RespuestaPaginada>(`${this.apiUrl}/clientes/buscar`, { params });
+}
   procesarCSF(archivo: File): Observable<any> {
     const formData = new FormData();
     formData.append('archivo', archivo);

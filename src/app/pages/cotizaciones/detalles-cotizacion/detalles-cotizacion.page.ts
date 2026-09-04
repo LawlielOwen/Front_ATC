@@ -16,6 +16,7 @@ import { NgxSonnerToaster } from 'ngx-sonner';
 import { Router } from '@angular/router';
 import { solicitarOrdenCompra, confirmarRegistroCliente } from '../../../shared/utils/cotizacion-alerts.util';
 import Swal from 'sweetalert2';
+import { AuthService } from '../../../core/services/auth.service';
 
 @Component({
   selector: 'app-detalles-cotizacion',
@@ -40,7 +41,7 @@ export class DetallesCotizacionPage implements OnInit {
   constructor(
     private cs: CotizacionService, private router: Router,
     public dialogRef: MatDialogRef<DetallesCotizacionPage>,
-    @Inject(MAT_DIALOG_DATA) public data: any, public dialog: MatDialog
+    @Inject(MAT_DIALOG_DATA) public data: any, public dialog: MatDialog, public authService: AuthService
   ) {
     this.cot = data.cot;
   }

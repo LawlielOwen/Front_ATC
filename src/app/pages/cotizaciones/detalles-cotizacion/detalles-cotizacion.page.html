@@ -201,7 +201,7 @@
                 <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cancelar'"
                     (click)="cancelarCotizacion(cot)"></app-button-action>
                 <app-button-action [label]="'Modificar'" [claseCss]="'btn-editar'"
-                    (click)="modificarCotizacion(cot)"></app-button-action>
+                    (click)="modificarCotizacion(cot)"  *ngIf="authService.tieneAcceso(['Administrador','Cotizador'])"></app-button-action>
                 <app-button-action [label]="'Aceptar'" [claseCss]="'btn-aceptar'"
                     (click)="aceptarCotizacion(cot)"></app-button-action>
             </ng-container>

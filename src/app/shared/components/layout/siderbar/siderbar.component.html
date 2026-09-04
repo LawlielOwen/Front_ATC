@@ -51,7 +51,7 @@
     </ion-tab-button>
 
     <ion-tab-button layout="icon-start" routerLink="/cotizaciones" routerLinkActive="tab-selected"
-      *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador'])">
+      *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])">
       <ion-icon name="document-text-outline"></ion-icon>
       <ion-label>Cotizaciones</ion-label>
     </ion-tab-button>

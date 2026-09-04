@@ -27,6 +27,7 @@ import Swal from 'sweetalert2';
 import { DetallesCotizacionPage } from './detalles-cotizacion/detalles-cotizacion.page'
 import { solicitarOrdenCompra, confirmarRegistroCliente } from '../../shared/utils/cotizacion-alerts.util';
 import { ModalClientePage } from '../clientes/modal-cliente/modal-cliente.page'
+import { AuthService } from '../../core/services/auth.service';
 
 @Component({
   selector: 'app-cotizaciones',
@@ -41,6 +42,7 @@ import { ModalClientePage } from '../clientes/modal-cliente/modal-cliente.page'
 })
 export class CotizacionesPage implements OnInit {
   @ViewChild(SiderbarComponent) sidebar!: SiderbarComponent;
+    user: any;
   currentPage: number = 1;
   totalPages: number = 1;
   totalRecords: number = 0;
@@ -77,48 +79,51 @@ export class CotizacionesPage implements OnInit {
       this.sidebar.toggleMenu();
     }
   }
-  constructor(private cs: CotizacionService, public dialog: MatDialog, private router: Router) { }
-  columnasCotizaciones: TableColumn[] = [
-    {
-      header: 'Folio',
-      key: 'num_cotizacion',
-      type: 'text'
-    },
-    {
-      header: 'Cliente',
-      key: 'nombre_cliente_final',
-      type: 'text-light'
-    },
-    {
-      header: 'Fecha',
-      key: 'fecha_formateada', 
-      type: 'text-light'
-    },
-    {
-      header: 'Total',
-      key: 'total_formateado', 
-      subKey: 'moneda',        
-      type: 'text-light'
-    },
-    {
-      header: 'Estatus',
-      key: 'estatusTexto',
-      type: 'status',
-      align: 'center'
-    },
-    {
+  constructor(private cs: CotizacionService, public dialog: MatDialog, private router: Router, public authService: AuthService) { }
+  columnasCotizaciones: TableColumn[] = [];
+
+  definirColumnasPorRol() {
+    // Columnas base, iguales para todos los roles
+    const columnasBase: TableColumn[] = [
+      { header: 'Folio', key: 'num_cotizacion', type: 'text' },
+      { header: 'Cliente', key: 'nombre_cliente_final', type: 'text-light' },
+      { header: 'Fecha', key: 'fecha_formateada', type: 'text-light' },
+      { header: 'Total', key: 'total_formateado', subKey: 'moneda', type: 'text-light' },
+      { header: 'Estatus', key: 'estatusTexto', type: 'status', align: 'center' }
+    ];
+
+    const usuarioActual = this.authService.obtenerUsuarioActual();
+    const esCotizadorOAdmin = this.authService.tieneAcceso(['Cotizador', 'Administrador']);
+
+    const opcionesMenuAutorizadas: any[] = [
+      { accion: 'ver_pdf', etiqueta: 'Ver PDF' },
+      {
+        accion: 'aceptar',
+        etiqueta: 'Aceptar',
+        mostrarSi: (row: any) =>
+          row.Estatus === 1 &&
+          (esCotizadorOAdmin || row.id_asesor === usuarioActual?.id)
+      },
+      {
+        accion: 'cancelar',
+        etiqueta: 'Cancelar',
+        mostrarSi: (row: any) =>
+          row.Estatus === 1 &&
+          (esCotizadorOAdmin || row.id_asesor === usuarioActual?.id)
+      }
+    ];
+
+    columnasBase.push({
       header: '',
       key: 'acciones',
       type: 'actions',
       align: 'center',
       omitirBase: true,
-      menuOptions: [    
-        { accion: 'ver_pdf', etiqueta: 'Ver PDF' },
-        { accion: 'aceptar', etiqueta: 'Aceptar', mostrarSi: (row) => row.Estatus === 1 },
-        { accion: 'cancelar', etiqueta: 'Cancelar', mostrarSi: (row) => row.Estatus === 1 }
-      ]
-    }
-  ];
+      menuOptions: opcionesMenuAutorizadas
+    });
+
+    this.columnasCotizaciones = columnasBase;
+}
   ngOnInit() {
 
   }
@@ -126,6 +131,7 @@ export class CotizacionesPage implements OnInit {
     this.establecerRangoMesActual();
     this.cargarCotizaciones();
     this.cargarEstadisticas();
+    this.definirColumnasPorRol();
   }
   irAPos() {
     this.router.navigate(['/cotizaciones/pos']);

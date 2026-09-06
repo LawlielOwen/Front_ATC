@@ -14,6 +14,10 @@ const routes: Routes = [
   {
     path: 'pos',
     loadChildren: () => import('./pos/pos.module').then( m => m.POSPageModule)
+  },
+  {
+    path: 'num-cot',
+    loadChildren: () => import('./num-cot/num-cot.module').then( m => m.NumCotPageModule)
   }
 
 ];

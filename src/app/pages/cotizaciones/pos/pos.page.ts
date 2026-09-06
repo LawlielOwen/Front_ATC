@@ -357,105 +357,12 @@ agregarItemManual() {
   }
 
 
-  guardarYDescargar() {
-    if (this.detalles.length === 0) {
-      toast.error('La cotización debe tener al menos un producto');
-      return;
-    }
-    if (this.hayPreciosFaltantes()) {
-    toast.warning('Hay una o más partidas manuales sin precio unitario capturado.');
-    return;
-  }
-    if (!this.cotizacion.id_cliente && !this.cotizacion.nombre_prospecto) {
-      toast.warning('Debes seleccionar un cliente o escribir el nombre del prospecto.');
-      return;
-    }
-       if (!this.cotizacion.id_asesor) {
-      toast.warning('Debes seleccionar un asesor antes de continuar.');
-      return;
-    }
 
-    Swal.fire({
-      title: 'Procesando...',
-      text: this.isEditMode ? 'Actualizando cotización y generando PDF' : 'Guardando cotización y generando PDF',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      heightAuto: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
-
-    const payload = {
-      ...this.cotizacion,
-      subtotal: this.subtotal_final,
-      iva: this.iva_final,
-      total: this.total_final,
-      detalles: this.detalles
-    };
-
-    if (this.isEditMode && this.cotizacionIdEdit) {
-
-      this.cs.modificarCotizacion(this.cotizacionIdEdit, payload).subscribe({
-        next: () => {
-          this.descargarPDFFlujo(this.cotizacionIdEdit!);
-        },
-        error: (err) => {
-          Swal.close();
-          toast.error('Error al actualizar la cotización');
-        }
-      });
-    } else {
-
-      this.cs.crearCotizacion(payload).subscribe({
-        next: (res: any) => {
-          const nuevoId = res.id_cotizacion;
-          this.descargarPDFFlujo(nuevoId);
-        },
-        error: (err) => {
-          Swal.close();
-          toast.error('Error al guardar la cotización');
-        }
-      });
-    }
-  }
 obtenerPrecioEnMonedaActual(montoMXN: number): number {
   const tipoCambio = Number(this.cotizacion.tipo_cambio) || 1;
   return this.cotizacion.moneda === 'USD' ? montoMXN / tipoCambio : montoMXN;
 }
-  private descargarPDFFlujo(idCotizacion: number) {
-    this.cs.descargarPDF(idCotizacion).subscribe({
-      next: (blob: Blob) => {
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Cotizacion_ATC.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
 
-        Swal.close();
-
-     
-        if (this.isEditMode) {
-          this.router.navigate(['/cotizaciones']); 
-        } else {
-          this.limpiarFormulario();
-        }
-      },
-      error: () => {
-        Swal.close();
-        toast.error('Se guardó correctamente, pero falló la generación del PDF.');
-
-        if (this.isEditMode) {
-          this.router.navigate(['/cotizaciones']);
-        } else {
-          this.limpiarFormulario();
-        }
-      }
-    });
-  }
   guardarCotizacion() {
     if (this.detalles.length === 0) {
       toast.error('La cotización debe tener al menos un producto');
@@ -581,5 +488,122 @@ if (this.hayPreciosFaltantes()) {
   irACot() {
     this.router.navigate(['/cotizaciones']);
   }
+guardarYDescargar() {
+  if (this.detalles.length === 0) {
+    toast.error('La cotización debe tener al menos un producto');
+    return;
+  }
+  if (this.hayPreciosFaltantes()) {
+    toast.warning('Hay una o más partidas manuales sin precio unitario capturado.');
+    return;
+  }
+  if (!this.cotizacion.id_cliente && !this.cotizacion.nombre_prospecto) {
+    toast.warning('Debes seleccionar un cliente o escribir el nombre del prospecto.');
+    return;
+  }
+  if (!this.cotizacion.id_asesor) {
+    toast.warning('Debes seleccionar un asesor antes de continuar.');
+    return;
+  }
 
+  Swal.fire({
+    title: 'Procesando...',
+    text: this.isEditMode ? 'Actualizando cotización y generando PDF' : 'Guardando cotización y generando PDF',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    heightAuto: false,
+    didOpen: () => {
+      Swal.showLoading();
+    }
+  });
+
+  const payload = {
+    ...this.cotizacion,
+    subtotal: this.subtotal_final,
+    iva: this.iva_final,
+    total: this.total_final,
+    detalles: this.detalles
+  };
+
+  if (this.isEditMode && this.cotizacionIdEdit) {
+
+    this.cs.modificarCotizacion(this.cotizacionIdEdit, payload).subscribe({
+      next: () => {
+        // En edición el folio no cambia; lo tomamos de la cabecera ya cargada
+        const folioExistente = this.cotizacionHeaderData?.num_cotizacion || null;
+        this.descargarPDFFlujo(this.cotizacionIdEdit!, folioExistente);
+      },
+      error: (err) => {
+        Swal.close();
+        toast.error('Error al actualizar la cotización');
+      }
+    });
+  } else {
+
+    this.cs.crearCotizacion(payload).subscribe({
+      next: (res: any) => {
+        const nuevoId = res.id_cotizacion;
+        const nuevoFolio = res.num_cotizacion || null;
+        this.descargarPDFFlujo(nuevoId, nuevoFolio);
+      },
+      error: (err) => {
+        Swal.close();
+        toast.error('Error al guardar la cotización');
+      }
+    });
+  }
+}
+
+private sanitizarNombreArchivo(texto: string): string {
+  return texto.replace(/[\/\\:*?"<>|]/g, '').trim();
+}
+
+private obtenerNombreClienteActual(): string {
+  const valorControl = this.clienteControl.value;
+
+  if (valorControl && typeof valorControl === 'object') {
+    return valorControl.Nombre || valorControl.nombre || 'Cliente';
+  }
+  if (typeof valorControl === 'string' && valorControl.trim()) {
+    return valorControl.trim();
+  }
+  return this.cotizacion.nombre_prospecto?.trim() || 'Cliente';
+}
+
+private descargarPDFFlujo(idCotizacion: number, numCotizacion?: string | null) {
+  const folio = numCotizacion || `COT-${idCotizacion}`;
+  const cliente = this.obtenerNombreClienteActual();
+  const nombreArchivo = this.sanitizarNombreArchivo(`COT.${folio} ${cliente}.pdf`);
+
+  this.cs.descargarPDF(idCotizacion).subscribe({
+    next: (blob: Blob) => {
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = nombreArchivo;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      Swal.close();
+
+      if (this.isEditMode) {
+        this.router.navigate(['/cotizaciones']);
+      } else {
+        this.limpiarFormulario();
+      }
+    },
+    error: () => {
+      Swal.close();
+      toast.error('Se guardó correctamente, pero falló la generación del PDF.');
+
+      if (this.isEditMode) {
+        this.router.navigate(['/cotizaciones']);
+      } else {
+        this.limpiarFormulario();
+      }
+    }
+  });
+}
 }

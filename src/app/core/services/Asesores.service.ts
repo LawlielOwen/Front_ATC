@@ -57,5 +57,10 @@ export class AsesoresService {
       registrarAsesor(asesor: Asesor | any){
         return this.http.post(`${this.apiUrl}/asesores/registro`, asesor);
     }
-
+  actualizarConsecutivo(idAsesor: number, consecutivo: number) {
+      return this.http.put(`${this.apiUrl}/asesores/${idAsesor}/consecutivo`, { consecutivo });
+  }
+  verificarFolioExistente(idAsesor: number, numero: number) {
+  return this.http.get(`${this.apiUrl}/asesores/${idAsesor}/verificar-folio?numero=${numero}`);
+}
 }

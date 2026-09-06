@@ -1,0 +1,113 @@
+<div class="bg-slate-200 rounded-[10px] overflow-hidden shadow-2xl w-full mx-auto max-h-[90vh] flex flex-col border border-gray-100">
+  <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
+
+  <app-header-modal [label]="'Ajustar Folio de Cotización'"></app-header-modal>
+
+  <div class="p-6 overflow-y-auto flex-1">
+    <div class="flex flex-col gap-5 animate-fade-in">
+
+      <app-card-form title="Control de Consecutivo">
+        <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+        </svg>
+
+        <div class="flex flex-col gap-4 md:col-span-2 w-full">
+
+          <div class="bg-blue-50 text-blue-800 px-4 py-3 rounded-md text-sm">
+            <label class="font-semibold block mb-1 text-blue-900">Selecciona el asesor a modificar:</label>
+            <select
+              class="w-full bg-white border border-blue-200 text-gray-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 p-2"
+              [(ngModel)]="idAsesorSeleccionado"
+              (ngModelChange)="alCambiarAsesor()"
+              [disabled]="cargando">
+              <option *ngIf="cargando" [value]="null">Cargando asesores...</option>
+              <option *ngFor="let a of asesores" [value]="a.id">
+                {{ a.Nombre }} {{ a.app }} {{ a.apm }}
+              </option>
+            </select>
+          </div>
+
+          <div *ngIf="asesorSeleccionado && !cargando" class="flex items-center gap-2.5 bg-slate-50 border border-slate-300 rounded-md px-3.5 py-3 text-sm">
+            <svg class="w-4 h-4 text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-slate-600">
+              El asesor va actualmente en el folio
+              <strong class="text-slate-800 font-bold">{{ folioActualPreview }}</strong>
+              — su próxima cotización usará ese número.
+            </span>
+          </div>
+
+          <div class="flex gap-6 items-center mt-1">
+            <div class="w-1/2 flex flex-col gap-1.5">
+              <label class="text-sm font-semibold text-gray-700">Nuevo número de folio *</label>
+              <input
+                type="number"
+                min="1"
+                class="w-full bg-white border border-solid text-slate-700 text-sm rounded-md focus:outline-none focus:ring-1 px-3.5 py-2.5 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                [ngClass]="folioDuplicado
+                  ? 'border-red-400 focus:ring-red-400 focus:border-red-500'
+                  : 'border-slate-300 focus:ring-blue-500 focus:border-blue-500'"
+                [(ngModel)]="nuevoConsecutivo"
+                (ngModelChange)="generarPreview()"
+                placeholder="Ej. 55"
+                [disabled]="!idAsesorSeleccionado">
+            </div>
+
+            <div class="w-1/2 flex flex-col gap-1.5 p-3 bg-white rounded-lg border border-dashed border-gray-400">
+              <span class="text-xs text-gray-500 font-medium">Se verá así:</span>
+              <div class="flex items-center gap-2">
+                <svg class="w-5 h-5 flex-shrink-0" [ngClass]="folioDuplicado ? 'text-red-500' : 'text-slate-300'" fill="currentColor" viewBox="0 0 24 24">
+                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                </svg>
+                <span class="text-xl font-bold text-gray-800 tracking-wider">{{ previewFolio }}</span>
+              </div>
+            </div>
+          </div>
+
+          <div *ngIf="verificandoFolio" class="text-xs text-slate-400 italic px-1 flex items-center gap-1.5">
+            <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            Verificando folio...
+          </div>
+
+          <div *ngIf="folioDuplicado && !verificandoFolio"
+               class="flex items-start gap-2 bg-red-50 border border-red-300 text-red-700 rounded-md px-3.5 py-2.5 text-xs">
+            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>
+              <strong>Atención:</strong> el folio <strong>{{ previewFolio }}</strong> ya existe en el historial de este asesor.
+              Puedes guardarlo de todas formas, pero se generará un folio duplicado.
+            </span>
+          </div>
+
+          <div *ngIf="asesorSeleccionado && !folioDuplicado && nuevoConsecutivo !== consecutivoActualOriginal && nuevoConsecutivo >= 1"
+               class="flex items-start gap-2 bg-amber-100 border border-amber-500 text-amber-800 rounded-md px-3.5 py-2.5 text-xs">
+            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+            <span>
+  <strong>Atención:</strong> el folio <strong>{{ previewFolio }}</strong> ya fue usado por este asesor
+  <strong>este año</strong>. Puedes guardarlo de todas formas, pero se generará un folio duplicado.
+</span>
+          </div>
+
+        </div>
+      </app-card-form>
+
+    </div>
+  </div>
+
+  <app-footer-modal [paddingClass]="'p-4 px-6'">
+    <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
+    <app-button-action
+      [label]="'Guardar Cambios'"
+      [disabled]="guardando || !idAsesorSeleccionado"
+      [claseCss]="'btn-agregar'"
+      (click)="guardarConsecutivo()">
+    </app-button-action>
+  </app-footer-modal>
+</div>

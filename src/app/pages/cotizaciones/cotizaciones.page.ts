@@ -28,7 +28,7 @@ import { DetallesCotizacionPage } from './detalles-cotizacion/detalles-cotizacio
 import { solicitarOrdenCompra, confirmarRegistroCliente } from '../../shared/utils/cotizacion-alerts.util';
 import { ModalClientePage } from '../clientes/modal-cliente/modal-cliente.page'
 import { AuthService } from '../../core/services/auth.service';
-
+import {NumCotPage} from "./num-cot/num-cot.page";
 @Component({
   selector: 'app-cotizaciones',
   templateUrl: './cotizaciones.page.html',
@@ -267,6 +267,25 @@ export class CotizacionesPage implements OnInit {
       }
     });
   }
+  ajustarFolio() {
+
+  const usuarioActual = this.authService.obtenerUsuarioActual();
+
+  const dialogRef = this.dialog.open(NumCotPage, {
+    width: '600px', 
+    maxWidth: '95vw',
+    panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+    backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+    data: usuarioActual
+  });
+
+  dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
+    if (necesitaRecargar) {
+      this.cargarCotizaciones();
+      this.cargarEstadisticas();
+    }
+  });
+}
   cancelarCotizacion(cot: any) {
     const dialogRef = this.dialog.open(DeleteComponent, {
       width: '400px',
@@ -362,47 +381,43 @@ aceptarCotizacion(cot: any) {
   });
 }
 
-  abrirPdf(idCotizacion: number) {
-    Swal.fire({
-      title: 'Abriendo documento...',
-      text: 'Por favor espera un momento',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      heightAuto: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
+abrirPdf(cotizacion: any) {
+  const numCot = cotizacion.num_cotizacion || `COT-${cotizacion.id}`;
+  const cliente = cotizacion.nombre_cliente_final || cotizacion.nombre_prospecto || 'Cliente';
+  const nombreArchivo = `COT.${numCot} ${cliente}.pdf`.trim().replace(/[\/\\:*?"<>|]/g, '');
 
-    this.cs.verPdfCotizacion(idCotizacion).subscribe({
-      next: (blob: Blob) => {
-        Swal.close();
+  Swal.fire({
+    title: 'Generando documento...',
+    text: 'Por favor espera un momento',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => Swal.showLoading()
+  });
 
-        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(pdfBlob);
+  this.cs.verPdfCotizacion(cotizacion.id).subscribe({
+    next: (blob: Blob) => {
+      Swal.close();
 
-        const a = document.createElement('a');
-        a.href = fileURL;
-        a.target = '_blank'; 
+      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(pdfBlob);
 
-        document.body.appendChild(a);
-        a.click(); 
+      const a = document.createElement('a');
+      a.href = fileURL;
 
-        document.body.removeChild(a);
+      a.download = nombreArchivo;
 
-        setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
-      },
-      error: (err) => {
-        Swal.close();
-        console.error('Error al obtener el PDF:', err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo cargar el documento.'
-        });
-      }
-    });
-  }
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
+    },
+    error: (err) => {
+      Swal.close();
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cargar el documento.' });
+    }
+  });
+}
 
   abrirOpciones(evento: { accion: string, row: any }) {
     switch (evento.accion) {
@@ -432,4 +447,5 @@ private formatearFechaISO(fecha: Date): string {
   const dia = fecha.getDate().toString().padStart(2, '0');
   return `${anio}-${mes}-${dia}`;
 }
+
 }

@@ -200,69 +200,43 @@ cargarDetallesCot() {
       }
     });
   }
-abrirPdf(idCotizacion: number) {
-    // 1. Mostramos el loading primero
-    Swal.fire({
-      title: 'Generando documento...',
-      text: 'Por favor espera un momento',
-      allowOutsideClick: false,
-      allowEscapeKey: false,
-      heightAuto: false,
-      scrollbarPadding: false,
-      didOpen: () => {
-        Swal.showLoading();
-      }
-    });
+abrirPdf(cotizacion: any) {
+  const numCot = cotizacion.num_cotizacion || `COT-${cotizacion.id}`;
+  const cliente = cotizacion.nombre_cliente_final || cotizacion.nombre_prospecto || 'Cliente';
+  const nombreArchivo = `COT.${numCot} ${cliente}.pdf`.trim().replace(/[\/\\:*?"<>|]/g, '');
 
-    this.cs.verPdfCotizacion(idCotizacion).subscribe({
-      next: (blob: Blob) => {
-        // 2. Cerramos el loading en cuanto llega el PDF
-        Swal.close(); 
+  Swal.fire({
+    title: 'Generando documento...',
+    text: 'Por favor espera un momento',
+    allowOutsideClick: false,
+    allowEscapeKey: false,
+    didOpen: () => Swal.showLoading()
+  });
 
-        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-        const fileURL = URL.createObjectURL(pdfBlob);
+  this.cs.verPdfCotizacion(cotizacion.id).subscribe({
+    next: (blob: Blob) => {
+      Swal.close();
 
-        // 3. AHORA SÍ abrimos la ventana nueva
-        const nuevaVentana = window.open('', '_blank');
+      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+      const fileURL = URL.createObjectURL(pdfBlob);
 
-        if (nuevaVentana) {
-          // Si el navegador permitió abrir la ventana, inyectamos el PDF
-          nuevaVentana.document.open();
-          nuevaVentana.document.write(`
-            <html>
-              <head><title>Cotización PDF</title></head>
-              <body style="margin: 0; padding: 0; overflow: hidden; height: 100vh;">
-                <embed src="${fileURL}" type="application/pdf" width="100%" height="100%" style="border: none;" />
-              </body>
-            </html>
-          `);
-          nuevaVentana.document.close();
-        } else {
-          // Si el navegador bloqueó el pop-up, avisamos al usuario
-          Swal.fire({
-            icon: 'warning',
-            title: 'Ventana bloqueada',
-            text: 'Tu navegador bloqueó el PDF. Por favor, permite las ventanas emergentes (pop-ups) en la barra superior.',
-            heightAuto: false,
-            scrollbarPadding: false
-          });
-        }
+      const a = document.createElement('a');
+      a.href = fileURL;
 
-        setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
-      },
-      error: (err) => {
-        Swal.close();
-        console.error('Error al obtener el PDF:', err);
-        Swal.fire({
-          icon: 'error',
-          title: 'Error',
-          text: 'No se pudo cargar el documento.',
-          heightAuto: false,
-          scrollbarPadding: false
-        });
-      }
-    });
-  }
+      a.download = nombreArchivo;
+
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
+    },
+    error: (err) => {
+      Swal.close();
+      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cargar el documento.' });
+    }
+  });
+}
   modificarCotizacion(cot: any) {
     this.cerrar();
     this.router.navigate(['/cotizaciones/pos', cot.id], { state: { cotizacionData: cot } });

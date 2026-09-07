@@ -210,6 +210,8 @@ abrirPdf(cotizacion: any) {
     text: 'Por favor espera un momento',
     allowOutsideClick: false,
     allowEscapeKey: false,
+    heightAuto: false,        // Evita que cambie la altura del body y empuje el modal
+    scrollbarPadding: false,  // Evita el padding automático que genera la franja blanca
     didOpen: () => Swal.showLoading()
   });
 
@@ -225,19 +227,28 @@ abrirPdf(cotizacion: any) {
         a.href = fileURL;
         a.download = nombreArchivo;
         
+        // Ocultar completamente el enlace para evitar parpadeos en el DOM
         a.style.display = 'none';
+        a.style.position = 'absolute';
+        a.style.visibility = 'hidden';
 
         document.body.appendChild(a);
         a.click();
         document.body.removeChild(a);
 
         setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
-      }, 700); // 700 milisegundos dan el tiempo exacto para una animación suave
+      }, 500); 
     },
     error: (err) => {
       setTimeout(() => {
         Swal.close();
-        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cargar el documento.' });
+        Swal.fire({ 
+          icon: 'error', 
+          title: 'Error', 
+          text: 'No se pudo cargar el documento.',
+          heightAuto: false,        // También es necesario en las alertas de error
+          scrollbarPadding: false 
+        });
       }, 500);
     }
   });

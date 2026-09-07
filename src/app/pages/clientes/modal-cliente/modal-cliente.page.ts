@@ -184,8 +184,8 @@ export class ModalClientePage implements OnInit {
           if (response.direccion) this.clienteNuevo.Direccion = response.direccion;
           this.uploadMode = false;
         },
-        error: () => {
-          toast.error('El documento parece ser un escaneo. Por favor, sube el PDF original o utiliza el Registro Manual.');
+        error: (err) => {
+          toast.error(err.error?.error || 'Error al procesar la constancia. Intenta de nuevo o usa el Registro Manual.');
         }
       });
     } else {

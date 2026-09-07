@@ -51,7 +51,7 @@ export class ModalProductoPage implements OnInit {
   };
 
   opcionesMarcas: Marcas[] = [];
-
+estanterias: string[] = Array.from({ length: 30 }, (_, i) => (i + 1).toString().padStart(2, '0'));
   esSMC: boolean = false;
   constructor(
     private ps: ProductoService,

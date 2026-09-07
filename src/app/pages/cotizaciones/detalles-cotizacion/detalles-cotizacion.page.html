@@ -195,7 +195,7 @@
 
         <div class="flex gap-2.5">
             <app-button-action [label]="'Ver PDF'" [claseCss]="'btn-pdf'"
-                (click)="abrirPdf(cot?.id)"></app-button-action>
+                (click)="abrirPdf(cot)"></app-button-action>
 
             <ng-container *ngIf="cot?.estatusTexto === 'Pendiente' || cot?.Estatus === 1">
                 <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cancelar'"

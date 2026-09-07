@@ -22,6 +22,11 @@
             </app-search-bar>
             <app-estatus (onFilterChange)="filtroEstatus($event)">
             </app-estatus>
+             <app-filtro-dinamico *ngIf="puedeFiltrarPorAsesor"
+    placeholder="Todos los asesores"
+    [options]="opcionesAsesores"
+    (onFilterChange)="filtroAsesor($event)">
+  </app-filtro-dinamico>
           </app-search-layout>
           <app-card-layout>
             <ng-container *ngIf="cargando">

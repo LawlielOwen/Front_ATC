@@ -3,12 +3,14 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
 import { Asesor } from "../../shared/model/asesor.model";
 import { Observable } from 'rxjs';
+
 export interface RespuestaPaginadaAsesores {
     a: Asesor[];
     total: number;
     paginas: number;
     paginaActual: number;
 }
+
 @Injectable({
     providedIn: 'root',
 })
@@ -16,9 +18,11 @@ export class AsesoresService {
     private apiUrl = environment.apiurl;
 
     constructor(private http: HttpClient) { }
+
     getAsesor() {
         return this.http.get<Asesor>(`${this.apiUrl}/asesores`);
     }
+
     getAsesores(rol?: string): Observable<Asesor[]> {
         let params = new HttpParams();
         if (rol) {
@@ -26,10 +30,11 @@ export class AsesoresService {
         }
         return this.http.get<Asesor[]>(`${this.apiUrl}/asesores/rol`, { params });
     }
+
     addAsesor(asesor: Asesor | any) {
         return this.http.post(`${this.apiUrl}/asesores`, asesor);
     }
-  
+
     updateAsesor(id: number, asesor: Asesor | any) {
         return this.http.put(`${this.apiUrl}/asesores/${id}`, asesor);
     }
@@ -54,13 +59,21 @@ export class AsesoresService {
     cantidadAsesoresActivos(): Observable<{ total: number }> {
         return this.http.get<{ total: number }>(`${this.apiUrl}/asesores/count`);
     }
-      registrarAsesor(asesor: Asesor | any){
+
+    registrarAsesor(asesor: Asesor | any) {
         return this.http.post(`${this.apiUrl}/asesores/registro`, asesor);
     }
-  actualizarConsecutivo(idAsesor: number, consecutivo: number) {
-      return this.http.put(`${this.apiUrl}/asesores/${idAsesor}/consecutivo`, { consecutivo });
-  }
-  verificarFolioExistente(idAsesor: number, numero: number) {
-  return this.http.get(`${this.apiUrl}/asesores/${idAsesor}/verificar-folio?numero=${numero}`);
-}
+
+    obtenerConsecutivoGlobal(): Observable<{ consecutivo: number }> {
+        return this.http.get<{ consecutivo: number }>(`${this.apiUrl}/asesores/consecutivo-folio`);
+    }
+
+    actualizarConsecutivoGlobal(consecutivo: number) {
+        return this.http.put(`${this.apiUrl}/asesores/consecutivo-folio`, { consecutivo });
+    }
+
+    verificarFolioGlobalExistente(numero: number) {
+        const params = new HttpParams().set('numero', numero.toString());
+        return this.http.get(`${this.apiUrl}/asesores/verificar-folio`, { params });
+    }
 }

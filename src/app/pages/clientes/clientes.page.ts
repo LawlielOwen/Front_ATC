@@ -19,7 +19,9 @@ import { MatDialog } from '@angular/material/dialog';
 import { CountComponent } from '../../shared/components/UI/count/count.component'
 import { CardSkeletonComponent } from '../../shared/components/UI/card/card-skeleton/card-skeleton.component';
 import { AuthService } from '../../core/services/auth.service';
-
+import {AsesoresService} from "../../core/services/Asesores.service";
+import { FilterOption, FiltroDinamicoComponent } from '../../shared/components/UI/Filter/filtro-dinamico/filtro-dinamico.component';
+import { Asesor } from '../../shared/model/asesor.model';
 @Component({
   selector: 'app-clientes',
   templateUrl: './clientes.page.html',
@@ -29,11 +31,11 @@ import { AuthService } from '../../core/services/auth.service';
     ButtonNewComponent, SearchBarComponent,
     EstatusComponent, ButtonLayoutComponent, SearchLayoutComponent, CardComponent,
     CardLayoutComponent, PaginationComponent, CommonModule,
-    CardSkeletonComponent, CountComponent]
+    CardSkeletonComponent, CountComponent, FiltroDinamicoComponent]
 })
 export class ClientesPage implements OnInit {
   @ViewChild(SiderbarComponent) sidebar!: SiderbarComponent;
-  constructor(public dialog: MatDialog, private clientesService: ClientesService,public authService: AuthService) { }
+  constructor(public dialog: MatDialog, private clientesService: ClientesService,public authService: AuthService, private asesoresService: AsesoresService) { }
   currentPage: number = 1;
   totalPages: number = 1;
   totalRecords: number = 0;
@@ -45,13 +47,48 @@ export class ClientesPage implements OnInit {
   totalActivos: number = 0;
     timeoutBusqueda: any;
 idAsesorActual: number | null = null;
-  ngOnInit() {
-    const usuario = this.authService.obtenerUsuarioActual();
-    
-    if (usuario) {
-      this.idAsesorActual = usuario.Rol === 'Administrador' ? null : usuario.id;
-    }
+puedeFiltrarPorAsesor: boolean = false;
+opcionesAsesores: FilterOption[] = [];
+
+ngOnInit() {
+  const usuario = this.authService.obtenerUsuarioActual();
+
+  if (usuario) {
+
+    this.idAsesorActual = usuario.Rol === 'Asesor' ? usuario.id : null;
+    this.puedeFiltrarPorAsesor = usuario.Rol !== 'Asesor';
   }
+
+  if (this.puedeFiltrarPorAsesor) {
+    this.cargarOpcionesAsesores();
+  }
+}
+
+cargarOpcionesAsesores() {
+  this.asesoresService.getAsesores().subscribe({
+    next: (response: any) => {
+      const activos = response.filter((asesor: Asesor) =>
+        ['Asesor', 'Administrador'].includes(asesor.Rol) && asesor.Estatus === 1
+      );
+
+      this.opcionesAsesores = [
+        { label: 'Todos los asesores', value: null },
+        ...activos.map((a: any) => ({
+          label: `${a.Nombre} ${a.app || ''}`.trim(),
+          value: a.id
+        }))
+      ];
+    },
+    error: (err) => console.error('Error al cargar asesores', err)
+  });
+}
+
+filtroAsesor(idAsesorSeleccionado: number | null) {
+  this.idAsesorActual = idAsesorSeleccionado;
+  this.currentPage = 1;
+  this.cargarClientes();
+}
+
   ionViewWillEnter() {
     this.cargarClientes();
     this.obtenerTotalActivos();

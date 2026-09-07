@@ -215,25 +215,30 @@ abrirPdf(cotizacion: any) {
 
   this.cs.verPdfCotizacion(cotizacion.id).subscribe({
     next: (blob: Blob) => {
-      Swal.close();
+      setTimeout(() => {
+        Swal.close();
 
-      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-      const fileURL = URL.createObjectURL(pdfBlob);
+        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(pdfBlob);
 
-      const a = document.createElement('a');
-      a.href = fileURL;
+        const a = document.createElement('a');
+        a.href = fileURL;
+        a.download = nombreArchivo;
+        
+        a.style.display = 'none';
 
-      a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
 
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
+        setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
+      }, 700); // 700 milisegundos dan el tiempo exacto para una animación suave
     },
     error: (err) => {
-      Swal.close();
-      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cargar el documento.' });
+      setTimeout(() => {
+        Swal.close();
+        Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cargar el documento.' });
+      }, 500);
     }
   });
 }

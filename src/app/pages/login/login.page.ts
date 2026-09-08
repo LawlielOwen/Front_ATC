@@ -31,7 +31,7 @@ export class LoginPage implements OnInit {
 
     this.loginService.loginUser(this.username, this.password).subscribe(
       (response: any) => {
-        
+        console.log("✅ Respuesta exitosa del servidor:", response);
         localStorage.setItem('token', response.token); 
 
         let payload;

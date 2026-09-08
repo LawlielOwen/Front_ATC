@@ -213,7 +213,7 @@ flex: 1;
     font-size: 0.88rem;
   }
 
-  .input-group {
+.input-group {
     margin-bottom: 1.4rem;
 
     label {
@@ -232,12 +232,14 @@ flex: 1;
     }
 
     ion-input {
-      --background: #f8fafc;
-      --border-color: #e2e8f0;
-      --border-width: 1.5px;
+      /* COLORES MÁS OSCUROS PARA MONITORES ANTIGUOS */
+      --background: #f1f5f9; /* Fondo gris un poco más sólido */
+      --border-color: #94a3b8; /* Borde gris oscuro en lugar de gris tenue */
+      --border-width: 2px; /* Borde ligeramente más grueso para que no se pierda */
       --border-radius: 10px;
-      --placeholder-color: #b0bec5;
-      --padding-start: 22px; 
+      --placeholder-color: #64748b; /* Texto de fondo más visible */
+      
+      --padding-start: 44px; /* Aumentado para que el texto no pise el ícono izquierdo */
       --padding-end: 44px;   
       color: #0f1f3d;
       font-size: 14px;
@@ -246,7 +248,7 @@ flex: 1;
       transition: --border-color 0.18s;
 
       &:hover {
-        --border-color: #94a3b8;
+        --border-color: #475569; /* Gris casi negro al pasar el mouse */
       }
     }
 
@@ -256,7 +258,7 @@ flex: 1;
 
     ion-input.ion-focused {
       --border-color: #003B8A;
-      --background: #fff;
+      --background: #ffffff;
     }
 
     ion-input.ion-focused::part(native) {
@@ -266,11 +268,11 @@ flex: 1;
 
     .ico-left {
       position: absolute;
-      left: 13px;
+      left: 14px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 17px;
-      color: #94a3b8;
+      font-size: 19px; /* Íconos un poquito más grandes */
+      color: #64748b; /* Íconos más oscuros para mayor contraste */
       z-index: 2;
       pointer-events: none;
       transition: color 0.2s;
@@ -278,11 +280,11 @@ flex: 1;
 
     .ico-right {
       position: absolute;
-      right: 13px;
+      right: 14px;
       top: 50%;
       transform: translateY(-50%);
-      font-size: 17px;
-      color: #94a3b8;
+      font-size: 19px;
+      color: #64748b; /* Íconos más oscuros */
       cursor: pointer;
       z-index: 2;
       transition: color 0.2s;

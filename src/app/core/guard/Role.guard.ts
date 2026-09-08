@@ -9,7 +9,6 @@ export function roleGuard(rolesPermitidos: string[]): CanActivateFn {
     const token = localStorage.getItem('token');
 
     if (!token) {
-      localStorage.clear();
       router.navigate(['/login']);
       return false;
     }

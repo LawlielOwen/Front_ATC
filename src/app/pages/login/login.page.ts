@@ -37,22 +37,31 @@ export class LoginPage implements OnInit {
         let payload;
         try {
           payload = JSON.parse(atob(response.token.split('.')[1]));
+          console.log("🔍 1. Payload completo del token:", payload); // Veremos qué trae exactamente
         } catch (error) {
-          toast.error('Error al procesar la autenticación.');
+          console.error("❌ Error al procesar la autenticación.");
           return;
         }
 
-        const rolUsuario = payload.Rol;
+        // ATRAE EL ROL SIN IMPORTAR SI VIENE EN MAYÚSCULA O MINÚSCULA
+        const rolUsuario = payload.rol || payload.Rol || payload.ROL;
+        console.log("🔍 2. Rol extraído para el switch:", rolUsuario);
 
         if (!rolUsuario) {
+          console.error("❌ 3. EL ROL ESTÁ VACÍO. Borrando token y deteniendo redirección.");
           localStorage.removeItem('token');
-          toast.warning('Tu cuenta está en revisión. Un administrador debe activarla y asignarte un rol para poder ingresar.');
+          toast.warning('Tu cuenta está en revisión. Un administrador debe activarla.');
           return; 
         }
         
+        console.log("✅ 4. Rol válido. Intentando redirigir al Router...");
+
+        // Usamos .then() para ver si el Guard está bloqueando el paso
         switch (rolUsuario) {
           case 'Administrador':
-            this.router.navigate(['/dashboard']);
+            this.router.navigate(['/dashboard']).then(exito => {
+              if(!exito) console.error("🛑 EL AUTHGUARD BLOQUEÓ LA ENTRADA AL DASHBOARD");
+            });
             break;
             
           case 'Cotizador':   
@@ -69,7 +78,8 @@ export class LoginPage implements OnInit {
             break;
             
           default:
-            toast.error('Tu rol no tiene una pantalla asignada. Contacta a soporte.'); 
+            console.error("❌ 5. El rol no coincide con ninguno del Switch:", rolUsuario);
+            toast.error('Tu rol no tiene una pantalla asignada.'); 
             break;
         }
       },

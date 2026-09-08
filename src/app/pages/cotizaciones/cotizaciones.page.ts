@@ -96,7 +96,7 @@ export class CotizacionesPage implements OnInit {
     const esCotizadorOAdmin = this.authService.tieneAcceso(['Cotizador', 'Administrador']);
 
     const opcionesMenuAutorizadas: any[] = [
-      { accion: 'ver_pdf', etiqueta: 'Ver PDF' },
+      { accion: 'ver_pdf', etiqueta:   'Ver PDF' },
       {
         accion: 'aceptar',
         etiqueta: 'Aceptar',
@@ -391,30 +391,43 @@ abrirPdf(cotizacion: any) {
     text: 'Por favor espera un momento',
     allowOutsideClick: false,
     allowEscapeKey: false,
+    heightAuto: false,       
+    scrollbarPadding: false, 
     didOpen: () => Swal.showLoading()
   });
 
   this.cs.verPdfCotizacion(cotizacion.id).subscribe({
     next: (blob: Blob) => {
-      Swal.close();
+      setTimeout(() => {
+        Swal.close();
 
-      const pdfBlob = new Blob([blob], { type: 'application/pdf' });
-      const fileURL = URL.createObjectURL(pdfBlob);
+        const pdfBlob = new Blob([blob], { type: 'application/pdf' });
+        const fileURL = URL.createObjectURL(pdfBlob);
 
-      const a = document.createElement('a');
-      a.href = fileURL;
+        const a = document.createElement('a');
+        a.href = fileURL;
+        a.download = nombreArchivo;
+        
+        a.style.display = 'none';
 
-      a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
 
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-
-      setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
+        setTimeout(() => URL.revokeObjectURL(fileURL), 10000);
+      }, 500);
     },
     error: (err) => {
-      Swal.close();
-      Swal.fire({ icon: 'error', title: 'Error', text: 'No se pudo cargar el documento.' });
+      setTimeout(() => {
+        Swal.close();
+        Swal.fire({ 
+          icon: 'error', 
+          title: 'Error', 
+          text: 'No se pudo cargar el documento.',
+          heightAuto: false,       // CLAVE 5: Mantener el fix en el modal de error
+          scrollbarPadding: false 
+        });
+      }, 500);
     }
   });
 }

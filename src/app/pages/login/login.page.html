@@ -45,7 +45,7 @@
             <label>Usuario</label>
             <div class="input-wrapper">
               <ion-icon name="person-outline" class="ico-left"></ion-icon>
-              <ion-input type="text" placeholder="Nombre de usuario" fill="outline" [(ngModel)]="username" name="username">
+              <ion-input type="text" placeholder="Nombre de usuario"  [(ngModel)]="username" name="username">
               </ion-input>
             </div>
           </div>
@@ -55,7 +55,7 @@
             <div class="input-wrapper">
               <ion-icon name="lock-closed-outline" class="ico-left"></ion-icon>
               <ion-input [type]="mostrarContra ? 'text' : 'password'" placeholder="••••••••" 
-              fill="outline" [(ngModel)]="password" name="password">
+               [(ngModel)]="password" name="password">
               </ion-input>
               <ion-icon [name]="mostrarContra ? 'eye-off-outline' : 'eye-outline'" (click)="mostrarContra = !mostrarContra" class="ico-right" id="togglePass"></ion-icon>
             </div>

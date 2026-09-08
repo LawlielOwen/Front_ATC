@@ -40,8 +40,7 @@
           <h2 class="login-title">Inicia sesión</h2>
           <p class="login-subtitle">Accede con tus credenciales corporativas</p>
         </div>
-        
-        <form (ngSubmit)="login()" (keydown.enter)="$event.preventDefault()">
+        <form>
           <div class="input-group">
             <label>Usuario</label>
             <div class="input-wrapper">
@@ -62,9 +61,9 @@
             </div>
           </div>
 
-         
+      
 
-          <ion-button expand="block" class="btn-login" type="submit">
+          <ion-button expand="block" class="btn-login" (click)="login()">
             Ingresar
             <ion-icon name="arrow-forward-outline" slot="end"></ion-icon>
           </ion-button>

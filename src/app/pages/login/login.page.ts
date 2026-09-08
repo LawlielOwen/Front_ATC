@@ -31,37 +31,27 @@ export class LoginPage implements OnInit {
 
     this.loginService.loginUser(this.username, this.password).subscribe(
       (response: any) => {
-        console.log("✅ Respuesta exitosa del servidor:", response);
         localStorage.setItem('token', response.token); 
 
         let payload;
         try {
           payload = JSON.parse(atob(response.token.split('.')[1]));
-          console.log("🔍 1. Payload completo del token:", payload); // Veremos qué trae exactamente
         } catch (error) {
-          console.error("❌ Error al procesar la autenticación.");
+          toast.error('Error al procesar la autenticación.');
           return;
         }
 
-        // ATRAE EL ROL SIN IMPORTAR SI VIENE EN MAYÚSCULA O MINÚSCULA
-        const rolUsuario = payload.rol || payload.Rol || payload.ROL;
-        console.log("🔍 2. Rol extraído para el switch:", rolUsuario);
+        const rolUsuario = payload.Rol;
 
         if (!rolUsuario) {
-          console.error("❌ 3. EL ROL ESTÁ VACÍO. Borrando token y deteniendo redirección.");
           localStorage.removeItem('token');
-          toast.warning('Tu cuenta está en revisión. Un administrador debe activarla.');
+          toast.warning('Tu cuenta está en revisión. Un administrador debe activarla y asignarte un rol para poder ingresar.');
           return; 
         }
         
-        console.log("✅ 4. Rol válido. Intentando redirigir al Router...");
-
-        // Usamos .then() para ver si el Guard está bloqueando el paso
         switch (rolUsuario) {
           case 'Administrador':
-            this.router.navigate(['/dashboard']).then(exito => {
-              if(!exito) console.error("🛑 EL AUTHGUARD BLOQUEÓ LA ENTRADA AL DASHBOARD");
-            });
+            this.router.navigate(['/dashboard']);
             break;
             
           case 'Cotizador':   
@@ -78,8 +68,7 @@ export class LoginPage implements OnInit {
             break;
             
           default:
-            console.error("❌ 5. El rol no coincide con ninguno del Switch:", rolUsuario);
-            toast.error('Tu rol no tiene una pantalla asignada.'); 
+            toast.error('Tu rol no tiene una pantalla asignada. Contacta a soporte.'); 
             break;
         }
       },

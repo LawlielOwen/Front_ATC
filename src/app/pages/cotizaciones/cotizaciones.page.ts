@@ -82,8 +82,8 @@ export class CotizacionesPage implements OnInit {
   constructor(private cs: CotizacionService, public dialog: MatDialog, private router: Router, public authService: AuthService) { }
   columnasCotizaciones: TableColumn[] = [];
 
-  definirColumnasPorRol() {
-    // Columnas base, iguales para todos los roles
+ definirColumnasPorRol() {
+    // Columnas base, iguales para todos los roles (incluyendo Asesores)
     const columnasBase: TableColumn[] = [
       { header: 'Folio', key: 'num_cotizacion', type: 'text' },
       { header: 'Cliente', key: 'nombre_cliente_final', type: 'text-light' },
@@ -92,38 +92,36 @@ export class CotizacionesPage implements OnInit {
       { header: 'Estatus', key: 'estatusTexto', type: 'status', align: 'center' }
     ];
 
-    const usuarioActual = this.authService.obtenerUsuarioActual();
     const esCotizadorOAdmin = this.authService.tieneAcceso(['Cotizador', 'Administrador']);
 
-    const opcionesMenuAutorizadas: any[] = [
-      { accion: 'ver_pdf', etiqueta:   'Ver PDF' },
-      {
-        accion: 'aceptar',
-        etiqueta: 'Aceptar',
-        mostrarSi: (row: any) =>
-          row.Estatus === 1 &&
-          (esCotizadorOAdmin || row.id_asesor === usuarioActual?.id)
-      },
-      {
-        accion: 'cancelar',
-        etiqueta: 'Cancelar',
-        mostrarSi: (row: any) =>
-          row.Estatus === 1 &&
-          (esCotizadorOAdmin || row.id_asesor === usuarioActual?.id)
-      }
-    ];
+    if (esCotizadorOAdmin) {
+      
+      const opcionesMenuAutorizadas: any[] = [
+        {
+          accion: 'aceptar',
+          etiqueta: 'Aceptar',
+          mostrarSi: (row: any) => row.Estatus === 1 // Ya no necesitamos validar el rol aquí adentro
+        },
+        {
+          accion: 'cancelar',
+          etiqueta: 'Cancelar',
+          mostrarSi: (row: any) => row.Estatus === 1 
+        }
+      ];
 
-    columnasBase.push({
-      header: '',
-      key: 'acciones',
-      type: 'actions',
-      align: 'center',
-      omitirBase: true,
-      menuOptions: opcionesMenuAutorizadas
-    });
+      columnasBase.push({
+        header: '',
+        key: 'acciones',
+        type: 'actions',
+        align: 'center',
+        omitirBase: true,
+        menuOptions: opcionesMenuAutorizadas
+      });
+    }
 
+    // Guardamos la configuración final
     this.columnasCotizaciones = columnasBase;
-}
+  }
   ngOnInit() {
 
   }

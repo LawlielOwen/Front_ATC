@@ -176,51 +176,55 @@
         </app-card-details>
         
         <!-- 4. LÍNEA DE CRÉDITO -->
+        
         <app-card-details titulo="Línea de Crédito">
           <svg icono class="w-3.5 h-3.5 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
           </svg>
           
           <div *ngIf="cliente.tiene_credito; else sinCredito" class="flex flex-col gap-2 mt-2 w-full">
-            <div class="flex items-center gap-3 bg-emerald-100 border-2 border-emerald-400 rounded-xl p-2.5 w-full">
-              <div class="w-10 h-10 rounded-full bg-white text-emerald-700 flex items-center justify-center font-bold shadow-sm flex-shrink-0 border-2 border-emerald-400">
+            <div class="flex items-center gap-3 bg-emerald-200 border-2 border-emerald-600 rounded-xl p-2.5 w-full">
+              <div class="w-10 h-10 rounded-full bg-white text-emerald-800 flex items-center justify-center font-bold shadow-sm flex-shrink-0 border-2 border-emerald-600">
                 <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div class="flex flex-col justify-center min-w-0">
-                <span class="text-emerald-800 font-extrabold text-[9px] uppercase tracking-wider mb-0.5">Límite Autorizado</span>
-                <h4 class="font-extrabold text-emerald-800 text-[14px] leading-tight break-words whitespace-normal">
+                <span class="text-emerald-900 font-extrabold text-[9px] uppercase tracking-wider mb-0.5">Límite Autorizado</span>
+                <h4 class="font-extrabold text-emerald-900 text-[14px] leading-tight break-words whitespace-normal">
                   {{ cliente.limite_credito | currency:'MXN' }}
                 </h4>
               </div>
             </div>
 
-            <div class="flex items-center gap-3 rounded-xl p-2.5 w-full border-2" [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'bg-red-100 border-red-400' : 'bg-slate-100 border-slate-400'">
-              <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 border-2" [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-600 border-red-400' : 'text-slate-600 border-slate-400'">
+            <div class="flex items-center gap-3 rounded-xl p-2.5 w-full border-2" [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'bg-red-200 border-red-600' : 'bg-slate-200 border-slate-500'">
+              <div class="w-8 h-8 rounded-full bg-white flex items-center justify-center flex-shrink-0 border-2" [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-700 border-red-600' : 'text-slate-700 border-slate-500'">
                 <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                 </svg>
               </div>
               <div class="flex flex-col justify-center min-w-0">
-                <span class="font-extrabold text-[9px] uppercase tracking-wider mb-0.5" [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-700' : 'text-slate-700'">
+                <span class="font-extrabold text-[9px] uppercase tracking-wider mb-0.5" [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-800' : 'text-slate-800'">
                   {{ esVencido(cliente.fecha_vencimiento_credito) ? 'Venció el' : 'Vigente hasta' }}
                 </span>
-                <h4 class="font-extrabold text-[13px] leading-tight" [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-800' : 'text-[#0d1f38]'">
+                <h4 class="font-extrabold text-[13px] leading-tight" [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-900' : 'text-[#0d1f38]'">
                   {{ cliente.fecha_vencimiento_credito ? (cliente.fecha_vencimiento_credito | date:'dd MMM yyyy') : 'Sin fecha definida' }}
                 </h4>
+                <span *ngIf="cliente.fecha_vencimiento_credito" class="text-[10px] font-extrabold mt-0.5" [ngClass]="esVencido(cliente.fecha_vencimiento_credito) ? 'text-red-700' : 'text-emerald-700'">
+                  {{ calcularDiasCredito(cliente.fecha_vencimiento_credito) }}
+                </span>
               </div>
             </div>
           </div>
 
           <ng-template #sinCredito>
-            <div class="flex items-center gap-2 bg-slate-50/50 border border-slate-200 border-dashed rounded-lg p-1.5 w-full overflow-hidden mx-auto md:mx-0 mt-2">
-              <div class="w-7 h-7 rounded-md bg-slate-200 flex items-center justify-center flex-shrink-0">
-                <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div class="flex items-center gap-2 bg-slate-100 border-2 border-slate-300 border-dashed rounded-lg p-1.5 w-full overflow-hidden mx-auto md:mx-0 mt-2">
+              <div class="w-7 h-7 rounded-md bg-slate-300 flex items-center justify-center flex-shrink-0">
+                <svg class="w-4 h-4 text-slate-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
                 </svg>
               </div>
-              <p class="text-[10px] text-slate-500 font-medium pr-3 leading-none">
+              <p class="text-[10px] text-slate-700 font-bold pr-3 leading-none">
                 Sin crédito asignado
               </p>
             </div>

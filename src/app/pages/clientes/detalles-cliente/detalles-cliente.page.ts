@@ -165,4 +165,37 @@ abrirModalActualizarCsf(cliente: any) {
     if (!nombresString) return ['Sin asignar'];
     return nombresString.split(' | ');
   }
+  calcularDiasCredito(fecha: string | null): string {
+    if (!fecha) return 'Sin fecha definida';
+
+    const hoy = new Date(new Date().toDateString());
+    const fechaLimite = new Date(fecha);
+    fechaLimite.setHours(0, 0, 0, 0);
+
+    const diffMs = fechaLimite.getTime() - hoy.getTime();
+    const diffDias = Math.round(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDias < 0) {
+        return `Vencido hace ${this.formatearDias(Math.abs(diffDias))}`;
+    }
+
+    if (diffDias === 0) return 'Vence hoy';
+
+    return `Vigente por ${this.formatearDias(diffDias)}`;
+}
+
+private formatearDias(totalDias: number): string {
+    const meses = Math.floor(totalDias / 30);
+    const dias = totalDias % 30;
+
+    if (meses === 0) {
+        return `${dias} día${dias !== 1 ? 's' : ''}`;
+    }
+
+    if (dias === 0) {
+        return `${meses} mes${meses !== 1 ? 'es' : ''}`;
+    }
+
+    return `${meses} mes${meses !== 1 ? 'es' : ''} con ${dias} día${dias !== 1 ? 's' : ''}`;
+}
 }

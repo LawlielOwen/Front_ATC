@@ -18,6 +18,7 @@ import { Router } from '@angular/router';
 import Swal from 'sweetalert2';
 import { Asesor } from "../../../shared/model/asesor.model"
 import { AsesoresService } from "../../../core/services/Asesores.service";
+
 type TipoFlete = 'PORCENTAJE' | 'FIJO' | 'NINGUNO';
 
 interface OrigenConfig {
@@ -26,6 +27,7 @@ interface OrigenConfig {
   valor_flete: number; 
   nota?: string;        
 }
+
 @Component({
   selector: 'app-pos',
   templateUrl: './pos.page.html',
@@ -36,7 +38,6 @@ interface OrigenConfig {
     MatFormFieldModule, ReactiveFormsModule,
   ]
 })
-
 export class POSPage implements OnInit {
   
   isEditMode: boolean = false;
@@ -52,29 +53,34 @@ export class POSPage implements OnInit {
   productoControl = new FormControl('');
   productosFiltrados: any[] = [];
   readonly ORIGENES_SMC: string[] = [
-  'FABRICACION LOCAL',
-  'JPN A',
-  'JPN B',
-  'CHINA A',
-  'CHINA B',
-  'IDP'
-];
+  'FABRICACION LOCAL', 'JPN A', 'JPN B', 'CHINA A', 'CHINA B', 'IDP'
+  ];
+
+  // --- NUEVO: Control para la interfaz expansible del cliente ---
+  mostrarDetallesCliente: boolean = false;
 
   cotizacion = {
     id_asesor: 0,
     id_cliente: null,
     nombre_prospecto: '',
     contacto: '',
+    // --- NUEVOS CAMPOS DEL CLIENTE ---
+    direccion: '',
+    correo: '',
+    nombre_contacto: '',
+    // ---------------------------------
     ciudad_destino: '',
     moneda: 'MONEDA NACIONAL',
     tipo_cambio: 1,
     vigencia_dias: 15
   };
+  
   subtotal_final: number = 0;
   iva_final: number = 0;
   total_final: number = 0;
   detalles: any[] = [];
-  public data: any
+  public data: any;
+
   constructor(
     private cs: CotizacionService,
     private c: ClientesService,
@@ -96,13 +102,14 @@ export class POSPage implements OnInit {
 
       if (typeof valorBuscado === 'object' && valorBuscado !== null) {
         this.cotizacion.id_cliente = valorBuscado.id || valorBuscado.Id || valorBuscado.ID;
-        this.cotizacion.nombre_prospecto = ''; // Limpiamos el texto libre
+        this.cotizacion.nombre_prospecto = ''; 
       }
       else if (typeof valorBuscado === 'string') {
-        this.cotizacion.id_cliente = null; // No hay ID porque no está en la BD
-        this.cotizacion.nombre_prospecto = valorBuscado; // Guardamos lo que tecleó
+        this.cotizacion.id_cliente = null; 
+        this.cotizacion.nombre_prospecto = valorBuscado; 
       }
     });
+
     this.productoControl.valueChanges.pipe(
       debounceTime(300),
       distinctUntilChanged(),
@@ -120,6 +127,7 @@ export class POSPage implements OnInit {
         }
       }
     });
+
     this.cargarAsesores();
     this.route.paramMap.subscribe(params => {
       const idStr = params.get('id');
@@ -130,6 +138,7 @@ export class POSPage implements OnInit {
       }
     });
   }
+
   cargarCotizacionParaEditar(id: number) {
     if (this.cotizacionHeaderData) {
       const cabecera = this.cotizacionHeaderData;
@@ -143,11 +152,21 @@ export class POSPage implements OnInit {
         id_cliente: cabecera.id_cliente,
         nombre_prospecto: nombreReal,
         contacto: cabecera.contacto || '',
+        // --- NUEVOS CAMPOS DEL CLIENTE (Mapeo) ---
+        direccion: cabecera.direccion || '',
+        correo: cabecera.correo || '',
+        nombre_contacto: cabecera.nombre_contacto || '',
+        // -----------------------------------------
         ciudad_destino: cabecera.ciudad_destino || '',
         moneda: cabecera.moneda || 'MONEDA NACIONAL',
         tipo_cambio: cabecera.tipo_cambio || 1,
         vigencia_dias: cabecera.vigencia_dias || 15
       };
+
+      // Si los nuevos campos tienen algo de información, abrimos el acordeón automáticamente
+      if (this.cotizacion.direccion || this.cotizacion.correo || this.cotizacion.nombre_contacto) {
+          this.mostrarDetallesCliente = true;
+      }
 
       setTimeout(() => {
         const esClienteOficial = cabecera.id_cliente && cabecera.id_cliente !== 0 && cabecera.id_cliente !== 'null';
@@ -160,7 +179,6 @@ export class POSPage implements OnInit {
             this.clienteControl.setValue(clienteEncontrado);
           }
         } else if (nombreReal) {
-
           this.clienteControl.setValue(nombreReal);
         }
       }, 300);
@@ -176,28 +194,30 @@ export class POSPage implements OnInit {
         } else {
           detallesCrudos = Object.values(res).find(Array.isArray) || [];
         }
-this.detalles = detallesCrudos.map((item: any) => ({
-  id_producto: item.id_producto,
 
-  nombre_producto: item.nombre_producto,
-  codigo_producto: item.codigo_producto || item.Codigo_numeral || '',
-  Codigo_japon: item.Codigo_japon,
-  Codigo_numeral: item.Codigo_numeral,
-  Marca: item.marca_producto || item.Marca,
-
-  cantidad_producto: item.cantidad_producto,
-  precio_unitario_cotizado: item.precio_unitario_cotizado,
-  origen: item.origen || '',
-  tiempo_entrega: item.tiempo_entrega || '',
-  tipo_flete: item.tipo_flete || 'FIJO',
-  valor_flete: item.valor_flete || 0,
-  moneda_flete: item.moneda_flete || 'MXN',
-  costo_flete: item.costo_flete || 0,
-
-  descripcion_manual: !item.id_producto ? item.nombre_producto : '',
-  extra_descripcion_manual: !item.id_producto ? item.extra_descripcion : '',
-  codigo_manual: !item.id_producto ? item.codigo_producto : ''
-}));
+        this.detalles = detallesCrudos.map((item: any) => ({
+          id_producto: item.id_producto,
+          nombre_producto: item.nombre_producto,
+          codigo_producto: item.codigo_producto || item.Codigo_numeral || '',
+          Codigo_japon: item.Codigo_japon,
+          Codigo_numeral: item.Codigo_numeral,
+          Marca: item.marca_producto || item.Marca,
+          cantidad_producto: item.cantidad_producto,
+          precio_unitario_cotizado: item.precio_unitario_cotizado,
+          origen: item.origen || '',
+          tiempo_entrega: item.tiempo_entrega || '',
+          tipo_flete: item.tipo_flete || 'FIJO',
+          valor_flete: item.valor_flete || 0,
+          moneda_flete: item.moneda_flete || 'MXN',
+          costo_flete: item.costo_flete || 0,
+          descripcion_manual: !item.id_producto ? item.nombre_producto : '',
+          extra_descripcion_manual: !item.id_producto ? item.extra_descripcion : '',
+          codigo_manual: !item.id_producto ? item.codigo_producto : '',
+          
+          // --- NUEVOS CAMPOS DEL PRODUCTO ---
+          observaciones: item.observaciones || '', 
+          mostrarObs: !!item.observaciones // Si trae observaciones, lo mostramos abierto por defecto
+        }));
 
         this.calcularTotales();
       },
@@ -207,51 +227,54 @@ this.detalles = detallesCrudos.map((item: any) => ({
       }
     });
   }
+
   esSMC(item: any): boolean {
-  return !!item.Marca?.toUpperCase().includes('SMC');
-}
-private hayPreciosFaltantes(): boolean {
-  return this.detalles.some(item => !item.id_producto && !item.precio_unitario_cotizado);
-}
-
-recalcularFleteItem(item: any) {
-  const precio = Number(item.precio_unitario_cotizado || 0); // siempre MXN interno
-  const valor = Number(item.valor_flete || 0);
-
-  if (item.tipo_flete === 'PORCENTAJE') {
-    item.costo_flete = +(precio * (valor / 100)).toFixed(2);
-  } else {
-    const tipoCambio = Number(this.cotizacion.tipo_cambio) || 1;
-    item.costo_flete = this.cotizacion.moneda === 'USD'
-      ? +(valor * tipoCambio).toFixed(2)
-      : valor;
+    return !!item.Marca?.toUpperCase().includes('SMC');
   }
 
-  this.calcularTotales();
-}
-private actualizarValorFleteSegunMoneda() {
-  const tc = Number(this.cotizacion.tipo_cambio) || 1;
+  private hayPreciosFaltantes(): boolean {
+    return this.detalles.some(item => !item.id_producto && !item.precio_unitario_cotizado);
+  }
 
-  this.detalles.forEach(item => {
-    if (item.tipo_flete === 'FIJO') {
-      const costoMXN = Number(item.costo_flete) || 0;
-      item.valor_flete = this.cotizacion.moneda === 'USD'
-        ? +(costoMXN / tc).toFixed(2)
-        : +costoMXN.toFixed(2);
+  recalcularFleteItem(item: any) {
+    const precio = Number(item.precio_unitario_cotizado || 0); 
+    const valor = Number(item.valor_flete || 0);
+
+    if (item.tipo_flete === 'PORCENTAJE') {
+      item.costo_flete = +(precio * (valor / 100)).toFixed(2);
+    } else {
+      const tipoCambio = Number(this.cotizacion.tipo_cambio) || 1;
+      item.costo_flete = this.cotizacion.moneda === 'USD'
+        ? +(valor * tipoCambio).toFixed(2)
+        : valor;
     }
-    // PORCENTAJE no se toca: el % no depende de la moneda
-  });
-}
-cambiarTipoFlete(item: any, tipo: 'PORCENTAJE' | 'FIJO') {
-  item.tipo_flete = tipo;
-  if (tipo === 'PORCENTAJE') item.moneda_flete = 'MXN'; 
-  this.recalcularFleteItem(item);
-}
+    this.calcularTotales();
+  }
 
-cambiarMonedaFlete(item: any, moneda: 'MXN' | 'USD') {
-  item.moneda_flete = moneda;
-  this.recalcularFleteItem(item);
-}
+  private actualizarValorFleteSegunMoneda() {
+    const tc = Number(this.cotizacion.tipo_cambio) || 1;
+
+    this.detalles.forEach(item => {
+      if (item.tipo_flete === 'FIJO') {
+        const costoMXN = Number(item.costo_flete) || 0;
+        item.valor_flete = this.cotizacion.moneda === 'USD'
+          ? +(costoMXN / tc).toFixed(2)
+          : +costoMXN.toFixed(2);
+      }
+    });
+  }
+
+  cambiarTipoFlete(item: any, tipo: 'PORCENTAJE' | 'FIJO') {
+    item.tipo_flete = tipo;
+    if (tipo === 'PORCENTAJE') item.moneda_flete = 'MXN'; 
+    this.recalcularFleteItem(item);
+  }
+
+  cambiarMonedaFlete(item: any, moneda: 'MXN' | 'USD') {
+    item.moneda_flete = moneda;
+    this.recalcularFleteItem(item);
+  }
+
   cargarAsesores() {
     this.service.getAsesores().subscribe({
       next: (response: any) => {
@@ -263,15 +286,25 @@ cambiarMonedaFlete(item: any, moneda: 'MXN' | 'USD') {
       error: (err) => console.error('Error al cargar asesores', err)
     });
   }
-  onClienteSeleccionado(cliente: any) {
+
+ onClienteSeleccionado(cliente: any) {
     if (!cliente || typeof cliente !== 'object') return;
 
     if (cliente.id_asesor) {
       this.cotizacion.id_asesor = cliente.id_asesor;
     }
-
+    
     this.cotizacion.contacto = cliente.contacto_principal || '';
+
+    this.cotizacion.direccion = cliente.Direccion || cliente.direccion || '';
+    this.cotizacion.correo = cliente.correo_contacto || cliente.correo || '';
+    this.cotizacion.nombre_contacto = cliente.nombre_contacto || '';
+
+    if (this.cotizacion.direccion || this.cotizacion.correo || this.cotizacion.nombre_contacto) {
+        this.mostrarDetallesCliente = true;
+    }
   }
+
   onEnterProducto(event: any) {
     const termino = event.target.value?.trim();
     if (!termino) return;
@@ -282,51 +315,55 @@ cambiarMonedaFlete(item: any, moneda: 'MXN' | 'USD') {
       toast.info('Por favor, selecciona un producto de la lista desplegada.');
     }
   }
+
   seleccionarProducto(producto: any) {
     this.agregarItem(producto);
-
-    // Limpiamos el buscador inmediatamente para que quede listo para el siguiente producto
     this.productoControl.setValue('', { emitEvent: false });
     this.productosFiltrados = [];
   }
 
-// 1. Agregar un producto que SÍ está en la Base de Datos
- agregarItem(productoDB: any) {
-  this.detalles.push({
-    id_producto: productoDB.id,
-    codigo_producto: productoDB.Codigo_numeral || productoDB.Nombre || '',
-    nombre_producto: productoDB.Nombre,
-    Marca: productoDB.Marca || productoDB.nombre_marca || '',
-    cantidad_producto: 1,
-    precio_unitario_cotizado: productoDB.Precio || 0,
-    origen: '',              
-    tipo_flete: 'FIJO',
-    moneda_flete: 'MXN',
-    valor_flete: 0,
-    costo_flete: 0,
-    tiempo_entrega: ''
-  });
-  this.calcularTotales();
-}
+  agregarItem(productoDB: any) {
+    this.detalles.push({
+      id_producto: productoDB.id,
+      codigo_producto: productoDB.Codigo_numeral || productoDB.Nombre || '',
+      nombre_producto: productoDB.Nombre,
+      Marca: productoDB.Marca || productoDB.nombre_marca || '',
+      cantidad_producto: 1,
+      precio_unitario_cotizado: productoDB.Precio || 0,
+      origen: '',              
+      tipo_flete: 'FIJO',
+      moneda_flete: 'MXN',
+      valor_flete: 0,
+      costo_flete: 0,
+      tiempo_entrega: '',
+      // --- NUEVOS CAMPOS DEL PRODUCTO ---
+      observaciones: '',
+      mostrarObs: false // Inicia cerrado
+    });
+    this.calcularTotales();
+  }
 
-agregarItemManual() {
-  this.detalles.push({
-    id_producto: null,
-    codigo_manual: '',
-    descripcion_manual: '',
-    extra_descripcion_manual: '',
-    Marca: '',
-    cantidad_producto: 1,
-    precio_unitario_cotizado: 0,
-    origen: '',
-    tipo_flete: 'FIJO',
-    moneda_flete: 'MXN',
-    valor_flete: 0,
-    costo_flete: 0,
-    tiempo_entrega: ''
-  });
-  this.calcularTotales();
-}
+  agregarItemManual() {
+    this.detalles.push({
+      id_producto: null,
+      codigo_manual: '',
+      descripcion_manual: '',
+      extra_descripcion_manual: '',
+      Marca: '',
+      cantidad_producto: 1,
+      precio_unitario_cotizado: 0,
+      origen: '',
+      tipo_flete: 'FIJO',
+      moneda_flete: 'MXN',
+      valor_flete: 0,
+      costo_flete: 0,
+      tiempo_entrega: '',
+      // --- NUEVOS CAMPOS DEL PRODUCTO ---
+      observaciones: '',
+      mostrarObs: false // Inicia cerrado
+    });
+    this.calcularTotales();
+  }
 
   calcularTotales() {
     let subtotalMXN = 0;
@@ -349,34 +386,32 @@ agregarItemManual() {
         this.iva_final = subtotalMXN * 0.16;
         this.total_final = subtotalMXN * 1.16;
     }
-}
+  }
 
   eliminarItem(index: number) {
     this.detalles.splice(index, 1);
     this.calcularTotales();
   }
 
-
-
-obtenerPrecioEnMonedaActual(montoMXN: number): number {
-  const tipoCambio = Number(this.cotizacion.tipo_cambio) || 1;
-  return this.cotizacion.moneda === 'USD' ? montoMXN / tipoCambio : montoMXN;
-}
+  obtenerPrecioEnMonedaActual(montoMXN: number): number {
+    const tipoCambio = Number(this.cotizacion.tipo_cambio) || 1;
+    return this.cotizacion.moneda === 'USD' ? montoMXN / tipoCambio : montoMXN;
+  }
 
   guardarCotizacion() {
     if (this.detalles.length === 0) {
       toast.error('La cotización debe tener al menos un producto');
       return;
     }
-if (this.hayPreciosFaltantes()) {
-    toast.warning('Hay una o más partidas manuales sin precio unitario capturado.');
-    return;
-  }
+    if (this.hayPreciosFaltantes()) {
+      toast.warning('Hay una o más partidas manuales sin precio unitario capturado.');
+      return;
+    }
     if (!this.cotizacion.id_cliente && !this.cotizacion.nombre_prospecto) {
       toast.warning('Debes seleccionar un cliente o escribir el nombre de un cliente.');
       return;
     }
-      if (!this.cotizacion.id_asesor) {
+    if (!this.cotizacion.id_asesor) {
       toast.warning('Debes seleccionar un asesor antes de continuar.');
       return;
     }
@@ -389,7 +424,6 @@ if (this.hayPreciosFaltantes()) {
     };
 
     if (this.isEditMode && this.cotizacionIdEdit) {
-
       this.cs.modificarCotizacion(this.cotizacionIdEdit, payload).subscribe({
         next: (res) => {
           toast.success('Cotización actualizada con éxito.');
@@ -398,7 +432,6 @@ if (this.hayPreciosFaltantes()) {
         error: (err) => toast.error('Error al actualizar la cotización')
       });
     } else {
-
       this.cs.crearCotizacion(payload).subscribe({
         next: (res) => {
           toast.success('Cotización creada con éxito. Folio generado.');
@@ -408,30 +441,32 @@ if (this.hayPreciosFaltantes()) {
       });
     }
   }
- cambiarMoneda(nuevaMoneda: string) {
-  this.cotizacion.moneda = nuevaMoneda;
 
-  if (nuevaMoneda === 'USD') {
-    this.cs.obtenerTipoCambioDelDia().subscribe({
-      next: (res) => {
-        this.cotizacion.tipo_cambio = Number(parseFloat(res.tipo_cambio).toFixed(2));
-        this.actualizarValorFleteSegunMoneda();
-        this.calcularTotales();
-        toast.success('Moneda cambiada a USD');
-      },
-      error: () => {
-        this.cotizacion.tipo_cambio = 18.50;
-        this.actualizarValorFleteSegunMoneda();
-        this.calcularTotales();
-        toast.error('No se conectó con Banxico. Usando 18.50');
-      }
-    });
-  } else {
-    this.cotizacion.tipo_cambio = 1;
-    this.actualizarValorFleteSegunMoneda();
-    this.calcularTotales();
+  cambiarMoneda(nuevaMoneda: string) {
+    this.cotizacion.moneda = nuevaMoneda;
+
+    if (nuevaMoneda === 'USD') {
+      this.cs.obtenerTipoCambioDelDia().subscribe({
+        next: (res) => {
+          this.cotizacion.tipo_cambio = Number(parseFloat(res.tipo_cambio).toFixed(2));
+          this.actualizarValorFleteSegunMoneda();
+          this.calcularTotales();
+          toast.success('Moneda cambiada a USD');
+        },
+        error: () => {
+          this.cotizacion.tipo_cambio = 18.50;
+          this.actualizarValorFleteSegunMoneda();
+          this.calcularTotales();
+          toast.error('No se conectó con Banxico. Usando 18.50');
+        }
+      });
+    } else {
+      this.cotizacion.tipo_cambio = 1;
+      this.actualizarValorFleteSegunMoneda();
+      this.calcularTotales();
+    }
   }
-}
+
   cargarClientes() {
     this.c.getClientes(1, 1000).subscribe({
       next: (response: any) => {
@@ -447,6 +482,7 @@ if (this.hayPreciosFaltantes()) {
       }
     });
   }
+
   private _filtrarClientes(valorBuscado: any): any[] {
     const filtro = (typeof valorBuscado === 'string' ? valorBuscado : '').toLowerCase();
 
@@ -458,13 +494,12 @@ if (this.hayPreciosFaltantes()) {
 
   mostrarNombreCliente(cliente: any): string {
     if (!cliente) return '';
-
     if (typeof cliente === 'string') {
       return cliente;
     }
-
     return cliente.nombre || cliente.Nombre || cliente.nombre_cliente_final || '';
   }
+
   limpiarFormulario() {
     this.clienteControl.setValue('');
     this.cotizacion = {
@@ -472,138 +507,139 @@ if (this.hayPreciosFaltantes()) {
       id_cliente: null,
       nombre_prospecto: '',
       contacto: '',
+      direccion: '',
+      correo: '',
+      nombre_contacto: '',
       ciudad_destino: '',
       moneda: 'MONEDA NACIONAL',
       tipo_cambio: 1,
       vigencia_dias: 15
     };
-
+    
+    this.mostrarDetallesCliente = false; // Cerramos el acordeón al limpiar
     this.detalles = [];
     this.subtotal_final = 0;
     this.iva_final = 0;
     this.total_final = 0;
   }
- 
 
   irACot() {
     this.router.navigate(['/cotizaciones']);
   }
-guardarYDescargar() {
-  if (this.detalles.length === 0) {
-    toast.error('La cotización debe tener al menos un producto');
-    return;
-  }
-  if (this.hayPreciosFaltantes()) {
-    toast.warning('Hay una o más partidas manuales sin precio unitario capturado.');
-    return;
-  }
-  if (!this.cotizacion.id_cliente && !this.cotizacion.nombre_prospecto) {
-    toast.warning('Debes seleccionar un cliente o escribir el nombre del prospecto.');
-    return;
-  }
-  if (!this.cotizacion.id_asesor) {
-    toast.warning('Debes seleccionar un asesor antes de continuar.');
-    return;
-  }
 
-  Swal.fire({
-    title: 'Procesando...',
-    text: this.isEditMode ? 'Actualizando cotización y generando PDF' : 'Guardando cotización y generando PDF',
-    allowOutsideClick: false,
-    allowEscapeKey: false,
-    heightAuto: false,
-    didOpen: () => {
-      Swal.showLoading();
+  guardarYDescargar() {
+    if (this.detalles.length === 0) {
+      toast.error('La cotización debe tener al menos un producto');
+      return;
     }
-  });
+    if (this.hayPreciosFaltantes()) {
+      toast.warning('Hay una o más partidas manuales sin precio unitario capturado.');
+      return;
+    }
+    if (!this.cotizacion.id_cliente && !this.cotizacion.nombre_prospecto) {
+      toast.warning('Debes seleccionar un cliente o escribir el nombre del prospecto.');
+      return;
+    }
+    if (!this.cotizacion.id_asesor) {
+      toast.warning('Debes seleccionar un asesor antes de continuar.');
+      return;
+    }
 
-  const payload = {
-    ...this.cotizacion,
-    subtotal: this.subtotal_final,
-    iva: this.iva_final,
-    total: this.total_final,
-    detalles: this.detalles
-  };
-
-  if (this.isEditMode && this.cotizacionIdEdit) {
-
-    this.cs.modificarCotizacion(this.cotizacionIdEdit, payload).subscribe({
-      next: () => {
-        // En edición el folio no cambia; lo tomamos de la cabecera ya cargada
-        const folioExistente = this.cotizacionHeaderData?.num_cotizacion || null;
-        this.descargarPDFFlujo(this.cotizacionIdEdit!, folioExistente);
-      },
-      error: (err) => {
-        Swal.close();
-        toast.error('Error al actualizar la cotización');
+    Swal.fire({
+      title: 'Procesando...',
+      text: this.isEditMode ? 'Actualizando cotización y generando PDF' : 'Guardando cotización y generando PDF',
+      allowOutsideClick: false,
+      allowEscapeKey: false,
+      heightAuto: false,
+      didOpen: () => {
+        Swal.showLoading();
       }
     });
-  } else {
 
-    this.cs.crearCotizacion(payload).subscribe({
-      next: (res: any) => {
-        const nuevoId = res.id_cotizacion;
-        const nuevoFolio = res.num_cotizacion || null;
-        this.descargarPDFFlujo(nuevoId, nuevoFolio);
-      },
-      error: (err) => {
+    const payload = {
+      ...this.cotizacion,
+      subtotal: this.subtotal_final,
+      iva: this.iva_final,
+      total: this.total_final,
+      detalles: this.detalles
+    };
+
+    if (this.isEditMode && this.cotizacionIdEdit) {
+      this.cs.modificarCotizacion(this.cotizacionIdEdit, payload).subscribe({
+        next: () => {
+          const folioExistente = this.cotizacionHeaderData?.num_cotizacion || null;
+          this.descargarPDFFlujo(this.cotizacionIdEdit!, folioExistente);
+        },
+        error: (err) => {
+          Swal.close();
+          toast.error('Error al actualizar la cotización');
+        }
+      });
+    } else {
+      this.cs.crearCotizacion(payload).subscribe({
+        next: (res: any) => {
+          const nuevoId = res.id_cotizacion;
+          const nuevoFolio = res.num_cotizacion || null;
+          this.descargarPDFFlujo(nuevoId, nuevoFolio);
+        },
+        error: (err) => {
+          Swal.close();
+          toast.error('Error al guardar la cotización');
+        }
+      });
+    }
+  }
+
+  private sanitizarNombreArchivo(texto: string): string {
+    return texto.replace(/[\/\\:*?"<>|]/g, '').trim();
+  }
+
+  private obtenerNombreClienteActual(): string {
+    const valorControl = this.clienteControl.value;
+
+    if (valorControl && typeof valorControl === 'object') {
+      return valorControl.Nombre || valorControl.nombre || 'Cliente';
+    }
+    if (typeof valorControl === 'string' && valorControl.trim()) {
+      return valorControl.trim();
+    }
+    return this.cotizacion.nombre_prospecto?.trim() || 'Cliente';
+  }
+
+  private descargarPDFFlujo(idCotizacion: number, numCotizacion?: string | null) {
+    const folio = numCotizacion || `COT-${idCotizacion}`;
+    const cliente = this.obtenerNombreClienteActual();
+    const nombreArchivo = this.sanitizarNombreArchivo(`COT.${folio} ${cliente}.pdf`);
+
+    this.cs.descargarPDF(idCotizacion).subscribe({
+      next: (blob: Blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = nombreArchivo;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+
         Swal.close();
-        toast.error('Error al guardar la cotización');
+
+        if (this.isEditMode) {
+          this.router.navigate(['/cotizaciones']);
+        } else {
+          this.limpiarFormulario();
+        }
+      },
+      error: () => {
+        Swal.close();
+        toast.error('Se guardó correctamente, pero falló la generación del PDF.');
+
+        if (this.isEditMode) {
+          this.router.navigate(['/cotizaciones']);
+        } else {
+          this.limpiarFormulario();
+        }
       }
     });
   }
-}
-
-private sanitizarNombreArchivo(texto: string): string {
-  return texto.replace(/[\/\\:*?"<>|]/g, '').trim();
-}
-
-private obtenerNombreClienteActual(): string {
-  const valorControl = this.clienteControl.value;
-
-  if (valorControl && typeof valorControl === 'object') {
-    return valorControl.Nombre || valorControl.nombre || 'Cliente';
-  }
-  if (typeof valorControl === 'string' && valorControl.trim()) {
-    return valorControl.trim();
-  }
-  return this.cotizacion.nombre_prospecto?.trim() || 'Cliente';
-}
-
-private descargarPDFFlujo(idCotizacion: number, numCotizacion?: string | null) {
-  const folio = numCotizacion || `COT-${idCotizacion}`;
-  const cliente = this.obtenerNombreClienteActual();
-  const nombreArchivo = this.sanitizarNombreArchivo(`COT.${folio} ${cliente}.pdf`);
-
-  this.cs.descargarPDF(idCotizacion).subscribe({
-    next: (blob: Blob) => {
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = nombreArchivo;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
-
-      Swal.close();
-
-      if (this.isEditMode) {
-        this.router.navigate(['/cotizaciones']);
-      } else {
-        this.limpiarFormulario();
-      }
-    },
-    error: () => {
-      Swal.close();
-      toast.error('Se guardó correctamente, pero falló la generación del PDF.');
-
-      if (this.isEditMode) {
-        this.router.navigate(['/cotizaciones']);
-      } else {
-        this.limpiarFormulario();
-      }
-    }
-  });
-}
 }

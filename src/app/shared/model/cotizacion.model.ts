@@ -8,7 +8,13 @@ export interface Cotizacion {
     id_cliente?: number | null;
     nombre_cliente_final: string;  
     rfc_cliente?: string | null;
-    contacto: string;
+    
+    // Nuevos campos agregados
+    direccion?: string | null;
+    nombre_contacto?: string | null;
+    correo?: string | null;
+    
+    contacto: string; // Funciona como teléfono
     ciudad_destino: string;
     moneda: string;
     vigencia_dias: number;
@@ -18,7 +24,6 @@ export interface Cotizacion {
     total: number;
     total_tipos_productos: number;
     total_piezas: number;
-
 }
 
 export interface DetalleCotizacion {
@@ -29,6 +34,7 @@ export interface DetalleCotizacion {
     codigo_producto: string;
     nombre_producto: string;
     extra_descripcion?: string;
+    observaciones?: string; // NUEVO CAMPO
     marca_producto?: string;
 
     cantidad_producto: number;

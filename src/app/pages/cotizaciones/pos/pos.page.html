@@ -39,10 +39,12 @@
                                         Limpiar
                                     </button>
                                 </div>
-                                <div class="grid grid-cols-2 gap-4 mb-6">
+
+                                <!-- FILA DE CLIENTE (Fija) -->
+                                <div class="grid grid-cols-2 gap-4 mb-2">
                                     <input type="text" [formControl]="clienteControl" [matAutocomplete]="auto"
                                         placeholder="Ingresa nombre del cliente registrado o no registrado"
-                                        class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+                                        class="appearance-none shadow-none ring-0 bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
 
                                     <mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente"
                                         (optionSelected)="onClienteSeleccionado($event.option.value)">
@@ -54,22 +56,59 @@
                                             *ngIf="clienteControl.value && typeof clienteControl.value === 'string' && clientesFiltrados.length === 0"
                                             [value]="clienteControl.value">
                                             <span class="italic text-slate-500">Usar como cliente eventual:</span>
-                                            <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value
-                                                }}</span>
+                                            <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value }}</span>
                                         </mat-option>
                                     </mat-autocomplete>
 
                                     <input type="text" placeholder="Telefono (opcional)"
-                                        class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                        class="appearance-none shadow-none ring-0 bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                                         [(ngModel)]="cotizacion.contacto">
                                 </div>
+
+                                <div class="flex justify-end mb-4">
+                                    <button (click)="mostrarDetallesCliente = !mostrarDetallesCliente"
+                                        class="appearance-none shadow-none ring-0 flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-bold text-slate-600 bg-slate-100 border border-slate-200 rounded-lg hover:bg-blue-50 hover:text-[#003B8A] hover:border-[#003B8A]/30 transition-colors focus:outline-none focus:ring-2 focus:ring-slate-200">
+                                        <svg *ngIf="!mostrarDetallesCliente" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4" />
+                                        </svg>
+                                        <svg *ngIf="mostrarDetallesCliente" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4" />
+                                        </svg>
+                                        {{ mostrarDetallesCliente ? 'Ocultar datos extra' : 'Añadir dirección, correo y contacto' }}
+                                    </button>
+                                </div>
+
+                                <div *ngIf="mostrarDetallesCliente"
+                                    class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 bg-slate-100 p-4 rounded-xl border-2 border-slate-300 transition-all">
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Contacto</label>
+                                        <input type="text" placeholder="Nombre del contacto (Ej. Juan Pérez)"
+                                            class="appearance-none shadow-none ring-0 bg-white border border-solid border-slate-300 text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-2 focus:ring-[#003B8A] focus:border-[#003B8A]/30 block w-full px-3 py-2.5 outline-none transition-colors"
+                                            [(ngModel)]="cotizacion.nombre_contacto">
+                                    </div>
+
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Correo</label>
+                                        <input type="email" placeholder="Correo electrónico"
+                                            class="appearance-none shadow-none ring-0 bg-white border border-solid border-slate-300 text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-2 focus:ring-[#003B8A] focus:border-[#003B8A]/30 block w-full px-3 py-2.5 outline-none transition-colors"
+                                            [(ngModel)]="cotizacion.correo">
+                                    </div>
+
+                                    <div class="flex flex-col gap-1">
+                                        <label class="text-[10px] font-bold text-slate-500 uppercase">Dirección</label>
+                                        <input type="text" placeholder="Dirección completa"
+                                            class="appearance-none shadow-none ring-0 bg-white border border-solid border-slate-300 text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-2 focus:ring-[#003B8A] focus:border-[#003B8A]/30 block w-full px-3 py-2.5 outline-none transition-colors"
+                                            [(ngModel)]="cotizacion.direccion">
+                                    </div>
+                                </div>
+
                                 <div class="flex gap-3 mb-6">
-                                    <!-- Buscador de Productos (Existente) -->
+                                    <!-- Buscador de Productos -->
                                     <div class="relative flex-1">
                                         <input type="text" [formControl]="productoControl"
                                             [matAutocomplete]="autoProducto"
                                             placeholder="Buscar por nombre, Cód. Japón o Cód. Numeral..."
-                                            class="bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] appearance-none shadow-none ring-0 focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                            class="appearance-none shadow-none ring-0 bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                                             (keyup.enter)="onEnterProducto($event)">
 
                                         <mat-autocomplete #autoProducto="matAutocomplete"
@@ -101,7 +140,7 @@
                                     </div>
 
                                     <button type="button" (click)="agregarItemManual()"
-                                        class="flex items-center justify-center gap-1.5 bg-white border border-slate-200 hover:border-[#003B8A] text-[#003B8A] hover:bg-slate-50 text-xs font-bold px-4 py-2.5 rounded-lg transition-all shadow-sm whitespace-nowrap">
+                                        class="appearance-none shadow-sm ring-0 flex items-center justify-center gap-1.5 bg-white border border-slate-200 hover:border-[#003B8A] text-[#003B8A] hover:bg-slate-50 text-xs font-bold px-4 py-2.5 rounded-lg transition-all whitespace-nowrap">
                                         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                 d="M12 4v16m8-8H4" />
@@ -109,173 +148,192 @@
                                         Partida Manual
                                     </button>
                                 </div>
-                               <div class="rounded-lg border border-slate-200 bg-white shadow-sm mt-4">
 
-    <!-- ENCABEZADOS -->
-    <div class="bg-[#003B8A] rounded-t-lg grid grid-cols-[30px_minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,1.2fr)_40px] gap-3 py-3.5 px-4 items-center">
-        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">N.</span>
-        <span class="text-[10px] font-bold text-white uppercase tracking-widest">Producto</span>
-        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">Origen</span>
-        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">T. Entrega</span>
-        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-right">P. Unit.</span>
-        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-right">Flete</span>
-        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">Cant.</span>
-        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-right">Subtotal</span>
-        <span></span>
-    </div>
+                                <div class="rounded-lg border border-slate-200 bg-white shadow-sm mt-4">
 
-    <!-- FILAS -->
-    <div *ngFor="let item of detalles; let i = index"
-        class="grid grid-cols-[30px_minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,1.2fr)_40px] gap-3 py-3 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center group">
+                                    <!-- ENCABEZADOS -->
+                                    <div class="bg-[#003B8A] rounded-t-lg grid grid-cols-[30px_minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,1.2fr)_40px] gap-3 py-3.5 px-4 items-center">
+                                        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">N.</span>
+                                        <span class="text-[10px] font-bold text-white uppercase tracking-widest">Producto</span>
+                                        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">Origen</span>
+                                        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">T. Entrega</span>
+                                        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-right">P. Unit.</span>
+                                        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-right">Flete</span>
+                                        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-center">Cant.</span>
+                                        <span class="text-[10px] font-bold text-white uppercase tracking-widest text-right">Subtotal</span>
+                                        <span></span>
+                                    </div>
 
-        <!-- 1. Número -->
-        <div class="text-[12px] font-semibold text-slate-400 text-center">{{ i + 1 }}</div>
+                                    <!-- FILAS -->
+                                    <div *ngFor="let item of detalles; let i = index"
+                                        class="grid grid-cols-[30px_minmax(0,2.5fr)_minmax(0,1.2fr)_minmax(0,1.2fr)_minmax(0,1fr)_minmax(0,1fr)_60px_minmax(0,1.2fr)_40px] gap-3 py-3 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center group">
 
-        <!-- 2. Producto (Dinámico: BD vs Manual) -->
-        <div class="flex flex-col justify-center pr-2 overflow-hidden gap-1">
+                                        <!-- 1. Número -->
+                                        <div class="text-[12px] font-semibold text-slate-400 text-center">{{ i + 1 }}</div>
 
-            <ng-container *ngIf="item.id_producto">
-                <span class="text-[13px] font-bold text-[#0d1f38] leading-tight truncate" title="{{ item.nombre_producto }}">
-                    {{ item.nombre_producto }}
-                </span>
-                <span class="text-[10px] font-semibold text-slate-400 truncate" title="Modelo">
-                    {{ item.codigo_producto || 'Sin Cód.' }}
-                </span>
-            </ng-container>
+                                        <!-- 2. Producto (Dinámico: BD vs Manual) + Botón Observaciones -->
+                                        <div class="flex flex-col justify-center pr-2 overflow-hidden gap-1 w-full">
+                                            <div class="flex justify-between items-start gap-2 w-full">
 
-            <ng-container *ngIf="!item.id_producto">
-                <textarea rows="2" placeholder="Extra Descripción"
-                    class="appearance-none w-full bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8]  rounded-md outline-none text-[11px] font-normal text-slate-600 py-1.5 px-2 transition-colors resize-none leading-snug"
-                    [(ngModel)]="item.extra_descripcion_manual"></textarea>
+                                                <!-- Datos del Producto -->
+                                                <div class="flex flex-col flex-1 min-w-0">
+                                                    <ng-container *ngIf="item.id_producto">
+                                                        <span class="text-[13px] font-bold text-[#0d1f38] leading-tight truncate" title="{{ item.nombre_producto }}">
+                                                            {{ item.nombre_producto }}
+                                                        </span>
+                                                        <span class="text-[10px] font-semibold text-slate-400 truncate" title="Modelo">
+                                                            {{ item.codigo_producto || 'Sin Cód.' }}
+                                                        </span>
+                                                    </ng-container>
 
-                <div class="flex gap-1.5">
-                    <input type="text" placeholder="Descripción"
-                        class="appearance-none w-full bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] rounded-md outline-none text-[10px] font-normal text-slate-600 py-1.5 px-2 transition-colors"
-                        [(ngModel)]="item.descripcion_manual">
+                                                    <ng-container *ngIf="!item.id_producto">
+                                                        <textarea rows="2" placeholder="Extra Descripción"
+                                                            class="appearance-none shadow-none ring-0 w-full bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] rounded-md outline-none text-[11px] font-normal text-slate-600 py-1.5 px-2 transition-colors resize-none leading-snug mb-1"
+                                                            [(ngModel)]="item.extra_descripcion_manual"></textarea>
 
-                    <input type="text" placeholder="Código Interno"
-                        class="appearance-none w-full bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] rounded-md outline-none text-[10px] font-normal text-slate-600 py-1.5 px-2 transition-colors"
-                        [(ngModel)]="item.codigo_manual">
-                </div>
-            </ng-container>
+                                                        <div class="flex gap-1.5">
+                                                            <input type="text" placeholder="Descripción"
+                                                                class="appearance-none shadow-none ring-0 w-full bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] rounded-md outline-none text-[10px] font-normal text-slate-600 py-1.5 px-2 transition-colors"
+                                                                [(ngModel)]="item.descripcion_manual">
 
-        </div>
+                                                            <input type="text" placeholder="Código Interno"
+                                                                class="appearance-none shadow-none ring-0 w-full bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] rounded-md outline-none text-[10px] font-normal text-slate-600 py-1.5 px-2 transition-colors"
+                                                                [(ngModel)]="item.codigo_manual">
+                                                        </div>
+                                                    </ng-container>
+                                                </div>
 
-        <!-- 3. Origen -->
-        <div class="flex justify-center items-center px-1 w-full">
+                                                <!-- Botón Toggle de Observaciones -->
+                                                <button (click)="item.mostrarObs = !item.mostrarObs"
+                                                        [ngClass]="item.mostrarObs || item.observaciones ? 'text-[#003B8A] bg-blue-50' : 'text-slate-300 hover:text-[#003B8A] hover:bg-slate-100'"
+                                                        class="appearance-none shadow-none ring-0 p-1.5 rounded transition-colors focus:outline-none flex-shrink-0 mt-0.5"
+                                                        title="Añadir observaciones">
+                                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                                                    </svg>
+                                                </button>
+                                            </div>
 
-          <select *ngIf="esSMC(item)" [(ngModel)]="item.origen"
-    [ngClass]="item.origen ? 'text-slate-700' : 'text-slate-400 font-normal'"
-    class="appearance-none w-full max-w-[130px] h-[36px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-center px-2 pr-6 transition-colors uppercase cursor-pointer">
-    <option value="" disabled selected>Selecciona origen</option>
-    <option *ngFor="let o of ORIGENES_SMC" [value]="o">{{ o }}</option>
-</select>
+                                            <!-- INPUT DE OBSERVACIONES (Expansible) -->
+                                            <div *ngIf="item.mostrarObs" class="w-full mt-1.5 transition-all">
+                                                <input type="text" placeholder="Añadir observación para el PDF (Opcional)..."
+       class="appearance-none shadow-none ring-0 w-full bg-amber-50 border-2 border-solid border-amber-300 focus:border-amber-500 focus:ring-0 focus:outline-none rounded-md text-[11px] font-medium text-amber-900 py-2 px-2.5 outline-none transition-colors placeholder:text-amber-600/70"
+       [(ngModel)]="item.observaciones">
+                                            </div>
+                                        </div>
 
-            <input *ngIf="!esSMC(item)" type="text" placeholder="Ej. AVION"
-                class="appearance-none w-full max-w-[120px] h-[30px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center px-2 transition-colors uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-400"
-                [(ngModel)]="item.origen">
-        </div>
+                                        <!-- 3. Origen -->
+                                        <div class="flex justify-center items-center px-1 w-full">
+                                            <select *ngIf="esSMC(item)" [(ngModel)]="item.origen"
+                                                [ngClass]="item.origen ? 'text-slate-700' : 'text-slate-400 font-normal'"
+                                                class="appearance-none shadow-none ring-0 w-full max-w-[130px] h-[36px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-center px-2 pr-6 transition-colors uppercase cursor-pointer">
+                                                <option value="" disabled selected>Selecciona origen</option>
+                                                <option *ngFor="let o of ORIGENES_SMC" [value]="o">{{ o }}</option>
+                                            </select>
 
-        <!-- 4. Tiempo de Entrega -->
-        <div class="flex justify-center items-center px-1">
-            <input type="text" placeholder="Ej. 1-2 DÍAS"
-                class="appearance-none w-full max-w-[95px] h-[30px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center px-2 transition-colors uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-400"
-                [(ngModel)]="item.tiempo_entrega">
-        </div>
+                                            <input *ngIf="!esSMC(item)" type="text" placeholder="Ej. AVION"
+                                                class="appearance-none shadow-none ring-0 w-full max-w-[120px] h-[30px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center px-2 transition-colors uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-400"
+                                                [(ngModel)]="item.origen">
+                                        </div>
 
-       <div class="flex flex-col items-end pr-1 gap-0.5">
-            <input type="number" min="0" placeholder="$0.00"
-                [readonly]="!!item.id_producto"
-                [ngClass]="item.id_producto
-                    ? 'bg-slate-200 border-slate-200 text-slate-500 cursor-not-allowed'
-                    : ((!item.precio_unitario_cotizado)
-                        ? 'bg-[#fafbfc] border-amber-400 focus:border-amber-500 focus:ring-amber-400 text-slate-700'
-                        : 'bg-[#fafbfc] border-[#d2ddec] focus:border-[#003B8A] focus:ring-[#003B8A] text-slate-700')"
-                class="appearance-none w-full max-w-[90px] h-[30px] text-right border border-solid hover:border-[#a8bcd8] focus:ring-1 rounded-md outline-none text-[13px] font-semibold px-2 transition-colors disabled:hover:border-slate-200"
-                [(ngModel)]="item.precio_unitario_cotizado" (change)="recalcularFleteItem(item)"
-                [title]="item.id_producto ? 'Precio fijado por catálogo' : ''">
+                                        <!-- 4. Tiempo de Entrega -->
+                                        <div class="flex justify-center items-center px-1">
+                                            <input type="text" placeholder="Ej. 1-2 DÍAS"
+                                                class="appearance-none shadow-none ring-0 w-full max-w-[95px] h-[30px] bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[11px] font-bold text-slate-700 text-center px-2 transition-colors uppercase placeholder:normal-case placeholder:font-normal placeholder:text-slate-400"
+                                                [(ngModel)]="item.tiempo_entrega">
+                                        </div>
 
-        </div>
-  <!-- 6. Costo Flete: % o $, moneda heredada de la cotización -->
-<div class="flex flex-col items-end pr-1 gap-1 min-w-0">
+                                        <!-- 5. Precio Unitario -->
+                                        <div class="flex flex-col items-end pr-1 gap-0.5">
+                                            <input type="number" min="0" placeholder="$0.00"
+                                                [readonly]="!!item.id_producto"
+                                                [ngClass]="item.id_producto
+                                                    ? 'bg-slate-200 border-slate-200 text-slate-500 cursor-not-allowed'
+                                                    : ((!item.precio_unitario_cotizado)
+                                                        ? 'bg-[#fafbfc] border-amber-400 focus:border-amber-500 focus:ring-amber-400 text-slate-700'
+                                                        : 'bg-[#fafbfc] border-[#d2ddec] focus:border-[#003B8A] focus:ring-[#003B8A] text-slate-700')"
+                                                class="appearance-none shadow-none ring-0 w-full max-w-[90px] h-[30px] text-right border border-solid hover:border-[#a8bcd8] focus:ring-1 rounded-md outline-none text-[13px] font-semibold px-2 transition-colors disabled:hover:border-slate-200"
+                                                [(ngModel)]="item.precio_unitario_cotizado" (change)="recalcularFleteItem(item)"
+                                                [title]="item.id_producto ? 'Precio fijado por catálogo' : ''">
+                                        </div>
 
-    <!-- Toggle % / $ -->
-    <div class="flex bg-[#e2e8f0] rounded p-0.5 w-[64px] h-[22px] flex-shrink-0">
-        <button type="button" (click)="cambiarTipoFlete(item, 'PORCENTAJE')"
-            [ngClass]="item.tipo_flete === 'PORCENTAJE' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400 hover:text-slate-600'"
-            class="flex-1 rounded-sm text-[10px] leading-none transition-all cursor-pointer">%</button>
-        <button type="button" (click)="cambiarTipoFlete(item, 'FIJO')"
-            [ngClass]="item.tipo_flete === 'FIJO' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400 hover:text-slate-600'"
-            class="flex-1 rounded-sm text-[10px] leading-none transition-all cursor-pointer">$</button>
-    </div>
+                                        <!-- 6. Costo Flete -->
+                                        <div class="flex flex-col items-end pr-1 gap-1 min-w-0">
+                                            <div class="flex bg-[#e2e8f0] rounded p-0.5 w-[64px] h-[22px] flex-shrink-0">
+                                                <button type="button" (click)="cambiarTipoFlete(item, 'PORCENTAJE')"
+                                                    [ngClass]="item.tipo_flete === 'PORCENTAJE' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400 hover:text-slate-600'"
+                                                    class="appearance-none shadow-none ring-0 flex-1 rounded-sm text-[10px] leading-none transition-all cursor-pointer">%</button>
+                                                <button type="button" (click)="cambiarTipoFlete(item, 'FIJO')"
+                                                    [ngClass]="item.tipo_flete === 'FIJO' ? 'bg-white text-[#003B8A] shadow-sm font-bold' : 'bg-transparent text-slate-400 hover:text-slate-600'"
+                                                    class="appearance-none shadow-none ring-0 flex-1 rounded-sm text-[10px] leading-none transition-all cursor-pointer">$</button>
+                                            </div>
 
-    <!-- Input con sufijo de moneda (solo informativo, heredado de la cotización) -->
-    <div class="relative w-full max-w-[70px]">
-        <input type="number" min="0"
-            [placeholder]="item.tipo_flete === 'PORCENTAJE' ? 'Ej. 11' : '0.00'"
-            class="appearance-none w-full h-[26px] text-right bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[12px] font-semibold text-slate-600 pl-1 pr-8 transition-colors"
-            [(ngModel)]="item.valor_flete" (change)="recalcularFleteItem(item)">
-        <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] font-bold text-slate-400 pointer-events-none select-none">
-            {{ item.tipo_flete === 'PORCENTAJE' ? '%' : (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') }}
-        </span>
-    </div>
+                                            <div class="relative w-full max-w-[70px]">
+                                                <input type="number" min="0"
+                                                    [placeholder]="item.tipo_flete === 'PORCENTAJE' ? 'Ej. 11' : '0.00'"
+                                                    class="appearance-none shadow-none ring-0 w-full h-[26px] text-right bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-md outline-none text-[12px] font-semibold text-slate-600 pl-1 pr-8 transition-colors"
+                                                    [(ngModel)]="item.valor_flete" (change)="recalcularFleteItem(item)">
+                                                <span class="absolute right-1.5 top-1/2 -translate-y-1/2 text-[8px] font-bold text-slate-400 pointer-events-none select-none">
+                                                    {{ item.tipo_flete === 'PORCENTAJE' ? '%' : (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') }}
+                                                </span>
+                                            </div>
 
-    <!-- Equivalente en la moneda de cotización (referencia visual) -->
-    <span class="text-[9px] text-slate-400 pr-0.5 truncate max-w-full">
-        = {{ obtenerPrecioEnMonedaActual(item.costo_flete) | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
-    </span>
-</div>
-        <!-- 7. Cantidad -->
-        <div class="flex justify-center">
-            <input type="number" min="1"
-                class="appearance-none w-full max-w-[50px] h-[30px] text-center bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] rounded-md text-[13px] font-black text-[#003B8A] outline-none focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] transition-colors m-0"
-                [(ngModel)]="item.cantidad_producto" (change)="calcularTotales()">
-        </div>
+                                            <span class="text-[9px] text-slate-400 pr-0.5 truncate max-w-full">
+                                                = {{ obtenerPrecioEnMonedaActual(item.costo_flete) | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
+                                            </span>
+                                        </div>
 
-        <!-- 8. Subtotal -->
-        <div class="text-[13px] font-bold text-[#003B8A] text-right whitespace-nowrap">
-    {{ obtenerPrecioEnMonedaActual(item.subtotal_partida) | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
-</div>
+                                        <!-- 7. Cantidad -->
+                                        <div class="flex justify-center">
+                                            <input type="number" min="1"
+                                                class="appearance-none shadow-none ring-0 w-full max-w-[50px] h-[30px] text-center bg-[#fafbfc] border border-solid border-[#d2ddec] hover:border-[#a8bcd8] rounded-md text-[13px] font-black text-[#003B8A] outline-none focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] transition-colors m-0"
+                                                [(ngModel)]="item.cantidad_producto" (change)="calcularTotales()">
+                                        </div>
 
-        <!-- 9. Botón Eliminar -->
-        <div class="flex justify-end items-center">
-            <button (click)="eliminarItem(i)" class="text-slate-300 hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-md hover:bg-red-50" title="Eliminar partida">
-                <svg class="w-4 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                </svg>
-            </button>
-        </div>
-    </div>
+                                        <!-- 8. Subtotal -->
+                                        <div class="text-[13px] font-bold text-[#003B8A] text-right whitespace-nowrap">
+                                            {{ obtenerPrecioEnMonedaActual(item.subtotal_partida) | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}
+                                        </div>
 
-    <!-- State Vacio -->
-    <div *ngIf="detalles.length === 0" class="py-12 flex flex-col items-center justify-center text-slate-400">
-        <svg class="w-12 h-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-        </svg>
-        <p class="text-[13px] font-medium italic">No hay productos. Utiliza el buscador o agrega una partida manual.</p>
-    </div>
-</div>
+                                        <!-- 9. Botón Eliminar -->
+                                        <div class="flex justify-end items-center">
+                                            <button (click)="eliminarItem(i)" class="appearance-none shadow-none ring-0 text-slate-300 hover:text-red-500 transition-colors flex items-center justify-center p-1.5 rounded-md hover:bg-red-50" title="Eliminar partida">
+                                                <svg class="w-4 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </div>
+
+                                    <!-- State Vacio -->
+                                    <div *ngIf="detalles.length === 0" class="py-12 flex flex-col items-center justify-center text-slate-400">
+                                        <svg class="w-12 h-12 mb-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                        </svg>
+                                        <p class="text-[13px] font-medium italic">No hay productos. Utiliza el buscador o agrega una partida manual.</p>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
+                        <!-- PANEL DERECHO (Resumen) -->
                         <div class="lg:col-span-3 space-y-4">
 
                             <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-5">
                                 <h3 class="text-md font-bold text-slate-800 mb-4">Resumen</h3>
 
                                 <div class="mb-5">
-                                    <p class="text-[11px] font-bold text-slate-400 uppercase mb-2">Divisa de Cotización
-                                    </p>
+                                    <p class="text-[11px] font-bold text-slate-400 uppercase mb-2">Divisa de Cotización</p>
                                     <div class="flex bg-[#e2e8f0] p-1 rounded-lg w-full h-[38px] relative mb-3">
                                         <button (click)="cambiarMoneda('MONEDA NACIONAL')"
                                             [ngClass]="cotizacion.moneda === 'MONEDA NACIONAL' ? 'bg-white text-[#003B8A] shadow-md font-bold' : 'bg-transparent text-[#475569] hover:text-[#0f172a]'"
-                                            class="flex-1 px-2 py-1 text-[11px] tracking-wide rounded-md transition-all duration-300 ease-in-out flex items-center justify-center">
+                                            class="appearance-none ring-0 flex-1 px-2 py-1 text-[11px] tracking-wide rounded-md transition-all duration-300 ease-in-out flex items-center justify-center">
                                             MXN
                                         </button>
 
                                         <button (click)="cambiarMoneda('USD')"
                                             [ngClass]="cotizacion.moneda === 'USD' ? 'bg-white text-[#003B8A] shadow-md font-bold' : 'bg-transparent text-[#475569] hover:text-[#0f172a]'"
-                                            class="flex-1 px-2 py-1 text-[11px] tracking-wide rounded-md transition-all duration-300 ease-in-out flex items-center justify-center">
+                                            class="appearance-none ring-0 flex-1 px-2 py-1 text-[11px] tracking-wide rounded-md transition-all duration-300 ease-in-out flex items-center justify-center">
                                             USD
                                         </button>
                                     </div>
@@ -283,11 +341,9 @@
                                     <div class="flex items-center gap-2 text-[12px] text-slate-600"
                                         *ngIf="cotizacion.moneda === 'USD'">
                                         <span>1 USD = </span>
-
                                         <input type="number" step="0.01"
-                                            class="w-20 border border-slate-300 rounded p-1 text-center outline-none focus:border-[#003B8A]"
+                                            class="appearance-none shadow-none ring-0 w-20 border border-slate-300 rounded p-1 text-center outline-none focus:border-[#003B8A]"
                                             [(ngModel)]="cotizacion.tipo_cambio" (ngModelChange)="calcularTotales()">
-
                                         <span>MXN</span>
                                     </div>
                                 </div>
@@ -296,41 +352,30 @@
 
                                 <div class="space-y-2 text-[13px] text-slate-600 mb-4 font-medium">
                                     <div class="flex justify-between items-center">
-                                        <span>Ítems <span
-                                                class="bg-slate-200 px-1.5 rounded text-[11px] font-bold text-[#003B8A]">{{
-                                                detalles.length }}</span></span>
+                                        <span>Ítems <span class="bg-slate-200 px-1.5 rounded text-[11px] font-bold text-[#003B8A]">{{ detalles.length }}</span></span>
                                     </div>
                                     <div class="flex justify-between">
                                         <span>Subtotal</span>
-                                        <span class="font-bold text-slate-800">{{ subtotal_final | currency:
-                                            (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}</span>
+                                        <span class="font-bold text-slate-800">{{ subtotal_final | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}</span>
                                     </div>
                                     <div class="flex justify-between items-center">
-                                        <span>IVA <span
-                                                class="text-yellow-700 bg-yellow-100 px-1 rounded text-[11px] font-bold">16%</span></span>
-                                        <span class="font-bold text-slate-800">{{ iva_final | currency:
-                                            (cotizacion.moneda ===
-                                            'USD' ? 'USD' : 'MXN') : '$' }}</span>
+                                        <span>IVA <span class="text-yellow-700 bg-yellow-100 px-1 rounded text-[11px] font-bold">16%</span></span>
+                                        <span class="font-bold text-slate-800">{{ iva_final | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}</span>
                                     </div>
                                 </div>
                                 <div class="bg-[#003B8A] rounded-xl p-4 text-white shadow-md">
-                                    <p class="text-[11px] font-bold opacity-90 uppercase tracking-wider">TOTAL {{
-                                        cotizacion.moneda === 'USD' ? 'USD' : 'MXN' }}</p>
-                                    <p class="text-3xl font-black my-1 tracking-tight">{{ total_final | currency:
-                                        (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}</p>
+                                    <p class="text-[11px] font-bold opacity-90 uppercase tracking-wider">TOTAL {{ cotizacion.moneda === 'USD' ? 'USD' : 'MXN' }}</p>
+                                    <p class="text-3xl font-black my-1 tracking-tight">{{ total_final | currency: (cotizacion.moneda === 'USD' ? 'USD' : 'MXN') : '$' }}</p>
                                     <p class="text-[11px] opacity-80 font-medium" *ngIf="cotizacion.moneda === 'USD'">
-                                        Equivalente: {{ (total_final * cotizacion.tipo_cambio) | currency:'MXN':'$' }}
-                                        MXN
+                                        Equivalente: {{ (total_final * cotizacion.tipo_cambio) | currency:'MXN':'$' }} MXN
                                     </p>
                                 </div>
                                 <hr class="border-slate-100 my-4">
 
                                 <div class="space-y-4">
                                     <div>
-                                        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Condiciones de
-                                            pago (Vigencia)</p>
-                                        <select
-                                            class="w-full border border-slate-200 rounded-lg p-2 text-[13px] text-slate-700 outline-none focus:border-[#003B8A]"
+                                        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Condiciones de pago (Vigencia)</p>
+                                        <select class="appearance-none shadow-none ring-0 w-full border border-slate-200 rounded-lg p-2 text-[13px] text-slate-700 outline-none focus:border-[#003B8A]"
                                             [(ngModel)]="cotizacion.vigencia_dias">
                                             <option value="7">7 días</option>
                                             <option value="15">15 días</option>
@@ -338,21 +383,14 @@
                                         </select>
                                     </div>
                                     <div>
-                                        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Ciudad de destino
-                                        </p>
+                                        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Ciudad de destino</p>
                                         <input type="text" placeholder="Ingrese la ciudad..."
-                                            class="bg-[#fafbfc] border border-solid
-                                             border-[#d2ddec] bg-clip-padding text-[#0d1f38]
-                                              placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 
-                                              focus:ring-[#003B8A] appearance-none shadow-none ring-0
-                                               focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+                                            class="appearance-none shadow-none ring-0 bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
                                             [(ngModel)]="cotizacion.ciudad_destino">
                                     </div>
                                     <div>
-                                        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Seleccionar
-                                            asesor</p>
-                                        <select
-                                            class="w-full border border-slate-200 rounded-lg p-2 text-[13px] text-slate-700 outline-none focus:border-[#003B8A]"
+                                        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Seleccionar asesor</p>
+                                        <select class="appearance-none shadow-none ring-0 w-full border border-slate-200 rounded-lg p-2 text-[13px] text-slate-700 outline-none focus:border-[#003B8A]"
                                             [(ngModel)]="cotizacion.id_asesor">
                                             <option value="">Seleccione un asesor...</option>
                                             <option *ngFor="let asesor of asesores" [value]="asesor.id">
@@ -364,14 +402,13 @@
                             </div>
 
                             <div class="space-y-2 mt-4">
-                                <button
-                                    class="w-full bg-[#003B8A] hover:bg-blue-800 text-white font-semibold py-3 rounded-lg shadow-sm transition text-sm"
+                                <button class="appearance-none shadow-sm ring-0 w-full bg-[#003B8A] hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition text-sm"
                                     (click)="guardarCotizacion()">
                                     {{ isEditMode ? 'Actualizar cotización' : 'Guardar cotización' }}
                                 </button>
 
                                 <button (click)="guardarYDescargar()"
-                                    class="w-full bg-[#008f5d] hover:bg-green-700 text-white font-semibold py-3 rounded-lg shadow-sm transition text-sm">
+                                    class="appearance-none shadow-sm ring-0 w-full bg-[#008f5d] hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition text-sm">
                                     {{ isEditMode ? 'Actualizar y descargar PDF' : 'Guardar y descargar PDF' }}
                                 </button>
                             </div>

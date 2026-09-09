@@ -45,11 +45,13 @@ export class ModalClientePage implements OnInit {
     Razon_social: '',
     Regimen_fiscal: '',
     Direccion: '',
-    contacto_principal: '',
+    contacto_principal: '',      
+    nombre_contacto: '',         
     correo_contacto: '',
     CP: '',
     tiene_credito: false,
     limite_credito: null,
+    fecha_vencimiento_credito: '',
     asesoresAsignados: [
       { id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' }
     ]
@@ -78,7 +80,7 @@ export class ModalClientePage implements OnInit {
 
     asesor.marcas_asignadas = asesor.marcasArray.join(', ');
   }
-  ngOnInit() {
+ngOnInit() {
     this.cargarMarcas();
     this.cargarAsesores(() => {
 
@@ -86,6 +88,10 @@ export class ModalClientePage implements OnInit {
         this.isEditMode = true;
         this.uploadMode = false;
         this.clienteNuevo = { ...this.data };
+
+        if (this.clienteNuevo.fecha_vencimiento_credito) {
+          this.clienteNuevo.fecha_vencimiento_credito = this.clienteNuevo.fecha_vencimiento_credito.toString().split('T')[0];
+        }
 
         if (!Array.isArray(this.clienteNuevo.asesoresAsignados) || this.clienteNuevo.asesoresAsignados.length === 0) {
           this.clienteNuevo.asesoresAsignados = [
@@ -103,6 +109,10 @@ export class ModalClientePage implements OnInit {
       if (this.data && this.data.nombrePrellenado) {
         this.uploadMode = false;
         this.clienteNuevo.Nombre = this.data.nombrePrellenado;
+        this.clienteNuevo.Direccion = this.data.direccionPrellenada || '';
+        this.clienteNuevo.correo_contacto = this.data.correoPrellenado || '';
+        this.clienteNuevo.contacto_principal = this.data.telefonoPrellenado || '';
+        this.clienteNuevo.nombre_contacto = this.data.nombreContactoPrellenado || '';
       }
 
       if (!this.isEditMode && this.data?.idAsesorPrellenado) {
@@ -133,7 +143,7 @@ export class ModalClientePage implements OnInit {
     this.archivoActual = archivo;
   }
 
-  agregarCliente() {
+ agregarCliente() {
     const formData = new FormData();
 
     formData.append('Nombre', this.clienteNuevo.Nombre);
@@ -142,6 +152,7 @@ export class ModalClientePage implements OnInit {
     formData.append('Regimen_fiscal', this.clienteNuevo.Regimen_fiscal);
     formData.append('Direccion', this.clienteNuevo.Direccion);
     formData.append('contacto_principal', this.clienteNuevo.contacto_principal);
+    formData.append('nombre_contacto', this.clienteNuevo.nombre_contacto || ''); 
     formData.append('correo_contacto', this.clienteNuevo.correo_contacto);
     formData.append('CP', this.clienteNuevo.CP);
 
@@ -152,6 +163,9 @@ export class ModalClientePage implements OnInit {
 
     const limiteGuardar = this.clienteNuevo.tiene_credito ? this.clienteNuevo.limite_credito : 0;
     formData.append('limite_credito', limiteGuardar.toString());
+    
+    const fechaVencimiento = this.clienteNuevo.tiene_credito && this.clienteNuevo.fecha_vencimiento_credito ? this.clienteNuevo.fecha_vencimiento_credito : '';
+    formData.append('fecha_vencimiento_credito', fechaVencimiento);
 
     if (this.archivoActual) {
       formData.append('archivo', this.archivoActual);
@@ -164,6 +178,49 @@ export class ModalClientePage implements OnInit {
       },
       error: (err) => {
         toast.error('Error al guardar el cliente');
+      }
+    });
+  }
+
+  actualizarClienteExistente() {
+    const idCliente = this.clienteNuevo.id;
+    const formData = new FormData();
+
+    formData.append('Nombre', this.clienteNuevo.Nombre);
+    formData.append('RFC', this.clienteNuevo.RFC);
+    formData.append('Razon_social', this.clienteNuevo.Razon_social);
+    formData.append('Regimen_fiscal', this.clienteNuevo.Regimen_fiscal);
+    formData.append('Direccion', this.clienteNuevo.Direccion);
+    formData.append('contacto_principal', this.clienteNuevo.contacto_principal);
+    formData.append('nombre_contacto', this.clienteNuevo.nombre_contacto || ''); 
+    formData.append('correo_contacto', this.clienteNuevo.correo_contacto);
+    formData.append('CP', this.clienteNuevo.CP);
+
+    formData.append('asesores_json', JSON.stringify(this.clienteNuevo.asesoresAsignados));
+
+    formData.append('tiene_credito', this.clienteNuevo.tiene_credito ? '1' : '0');
+    
+    const limiteGuardar = this.clienteNuevo.tiene_credito ? this.clienteNuevo.limite_credito : 0;
+    formData.append('limite_credito', limiteGuardar.toString());
+
+    const fechaVencimiento = this.clienteNuevo.tiene_credito && this.clienteNuevo.fecha_vencimiento_credito ? this.clienteNuevo.fecha_vencimiento_credito : '';
+    formData.append('fecha_vencimiento_credito', fechaVencimiento);
+
+    formData.append('nombre_constancia', this.clienteNuevo.nombre_constancia || '');
+    formData.append('ruta_constancia', this.clienteNuevo.ruta_constancia || '');
+
+    if (this.archivoActual) {
+      formData.append('archivo', this.archivoActual);
+    }
+
+    this.clienteService.updateCliente(idCliente, formData).subscribe({
+      next: (response) => {
+        toast.success('Cliente actualizado correctamente');
+        this.dialogRef.close(true);
+      },
+      error: (err) => {
+        console.error(err);
+        toast.error('Error al actualizar el cliente');
       }
     });
   }
@@ -213,43 +270,7 @@ export class ModalClientePage implements OnInit {
       }
     }
   }
-  actualizarClienteExistente() {
-    const idCliente = this.clienteNuevo.id;
-    const formData = new FormData();
-
-    formData.append('Nombre', this.clienteNuevo.Nombre);
-    formData.append('RFC', this.clienteNuevo.RFC);
-    formData.append('Razon_social', this.clienteNuevo.Razon_social);
-    formData.append('Regimen_fiscal', this.clienteNuevo.Regimen_fiscal);
-    formData.append('Direccion', this.clienteNuevo.Direccion);
-    formData.append('contacto_principal', this.clienteNuevo.contacto_principal);
-    formData.append('correo_contacto', this.clienteNuevo.correo_contacto);
-    formData.append('CP', this.clienteNuevo.CP);
-
-    formData.append('asesores_json', JSON.stringify(this.clienteNuevo.asesoresAsignados));
-
-    formData.append('tiene_credito', this.clienteNuevo.tiene_credito ? '1' : '0');
-    const limiteGuardar = this.clienteNuevo.tiene_credito ? this.clienteNuevo.limite_credito : 0;
-    formData.append('limite_credito', limiteGuardar.toString());
-
-    formData.append('nombre_constancia', this.clienteNuevo.nombre_constancia || '');
-    formData.append('ruta_constancia', this.clienteNuevo.ruta_constancia || '');
-
-    if (this.archivoActual) {
-      formData.append('archivo', this.archivoActual);
-    }
-
-    this.clienteService.updateCliente(idCliente, formData).subscribe({
-      next: (response) => {
-        toast.success('Cliente actualizado correctamente');
-        this.dialogRef.close(true);
-      },
-      error: (err) => {
-        console.error(err);
-        toast.error('Error al actualizar el cliente');
-      }
-    });
-  }
+ 
   validarYSanitizarOpcionales(): boolean {
     if (this.clienteNuevo.contacto_principal && this.clienteNuevo.contacto_principal.trim() !== '') {
       let telLimpio = this.clienteNuevo.contacto_principal.replace(/[\s\-\(\)\+]/g, '');
@@ -282,7 +303,7 @@ export class ModalClientePage implements OnInit {
 
     return true;
   }
-  validarCamposObligatorios(): boolean {
+ validarCamposObligatorios(): boolean {
     this.clienteNuevo.Nombre = (this.clienteNuevo.Nombre || '').trim();
     this.clienteNuevo.RFC = (this.clienteNuevo.RFC || '').trim().toUpperCase();
     this.clienteNuevo.Razon_social = (this.clienteNuevo.Razon_social || '').trim();
@@ -291,7 +312,8 @@ export class ModalClientePage implements OnInit {
     this.clienteNuevo.CP = (this.clienteNuevo.CP || '').trim();
     this.clienteNuevo.contacto_principal = (this.clienteNuevo.contacto_principal || '').trim();
     this.clienteNuevo.correo_contacto = (this.clienteNuevo.correo_contacto || '').trim();
-
+    this.clienteNuevo.nombre_contacto = (this.clienteNuevo.nombre_contacto || '').trim();
+    
     if (!this.clienteNuevo.Nombre || !this.clienteNuevo.RFC ||
       !this.clienteNuevo.Razon_social || !this.clienteNuevo.Regimen_fiscal ||
       !this.clienteNuevo.Direccion || !this.clienteNuevo.CP) {
@@ -319,10 +341,44 @@ export class ModalClientePage implements OnInit {
       return false;
     }
 
+    // --- NUEVA VALIDACIÓN COMPLETA PARA EL CRÉDITO ---
     if (this.clienteNuevo.tiene_credito) {
       const limite = Number(this.clienteNuevo.limite_credito);
       if (isNaN(limite) || limite <= 0) {
         toast.error('Si el cliente tiene crédito, debes asignar un límite mayor a $0.00.');
+        return false;
+      }
+
+      // 1. Que no esté vacía
+      if (!this.clienteNuevo.fecha_vencimiento_credito || this.clienteNuevo.fecha_vencimiento_credito.trim() === '') {
+        toast.error('Debes asignar una fecha de vencimiento para el crédito.');
+        return false;
+      }
+
+      // Desarmamos la fecha 'YYYY-MM-DD' para evitar desfases de zona horaria
+      const partesFecha = this.clienteNuevo.fecha_vencimiento_credito.split('-');
+      const anioIngresado = Number(partesFecha[0]);
+      const mesIngresado = Number(partesFecha[1]) - 1; // Los meses en JS empiezan en 0
+      const diaIngresado = Number(partesFecha[2]);
+
+      const fechaVencimiento = new Date(anioIngresado, mesIngresado, diaIngresado);
+      
+      const hoy = new Date();
+      hoy.setHours(0, 0, 0, 0); 
+
+      if (isNaN(fechaVencimiento.getTime())) {
+        toast.error('La fecha de vencimiento ingresada no es válida.');
+        return false;
+      }
+
+      if (fechaVencimiento < hoy) {
+        toast.error('La fecha de vencimiento no puede ser anterior al día de hoy.');
+        return false;
+      }
+
+      const anioMaximo = hoy.getFullYear() + 20; 
+      if (anioIngresado > anioMaximo) {
+        toast.error(`La fecha de vencimiento es demasiado lejana (máximo permitido: año ${anioMaximo}).`);
         return false;
       }
     }

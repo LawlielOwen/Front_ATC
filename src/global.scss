@@ -317,3 +317,9 @@ input:-webkit-autofill:active {
   /* Gris con contraste seguro para cualquier monitor */
   --ion-background-color: #e2e8f0;
 }
+.input-base {
+  @apply appearance-none shadow-none ring-0 outline-none bg-[#fafbfc] 
+         border border-solid border-[#d2ddec] text-[#0d1f38] 
+         placeholder:text-slate-400 text-xs rounded-lg px-3 py-2.5 
+         transition-colors focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A];
+}

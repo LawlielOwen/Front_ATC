@@ -137,13 +137,15 @@ cargarDetallesCot() {
       }
     });
   }
-  aceptarCotizacion(cot: any) {
+aceptarCotizacion(cot: any) {
     if (!cot.id_cliente) {
       confirmarRegistroCliente(cot.nombre_prospecto || cot.Cliente).then((deseaRegistrar) => {
         if (!deseaRegistrar) return;
+        
         const nombreCliente = cot.nombre_cliente_final && cot.nombre_cliente_final !== 'Sin Nombre'
           ? cot.nombre_cliente_final
           : (cot.nombre_prospecto || cot.Cliente || '');
+
         const dialogRef = this.dialog.open(ModalClientePage, {
           width: '630px',
           maxWidth: '105vw',
@@ -151,7 +153,11 @@ cargarDetallesCot() {
           backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
           data: {
             nombrePrellenado: nombreCliente,
-            idAsesorPrellenado: cot.id_asesor
+            idAsesorPrellenado: cot.id_asesor,
+            direccionPrellenada: cot.direccion,
+            correoPrellenado: cot.correo,
+            telefonoPrellenado: cot.contacto,
+            nombreContactoPrellenado: cot.nombre_contacto
           }
         });
 

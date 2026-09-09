@@ -273,15 +273,32 @@ ngOnInit() {
  
   validarYSanitizarOpcionales(): boolean {
     if (this.clienteNuevo.contacto_principal && this.clienteNuevo.contacto_principal.trim() !== '') {
-      let telLimpio = this.clienteNuevo.contacto_principal.replace(/[\s\-\(\)\+]/g, '');
+      const telOriginal = this.clienteNuevo.contacto_principal.trim();
+
+      const tieneCodigoPais = telOriginal.startsWith('+');
 
 
-      const regexTelefono = /^\d{10,15}$/;
-      if (!regexTelefono.test(telLimpio)) {
-        toast.error('El contacto principal debe ser un número telefónico válido.');
-        return false;
+      let telLimpio = telOriginal.replace(/\D/g, '');
+
+      if (tieneCodigoPais) {
+        telLimpio = '+' + telLimpio;
       }
 
+      const regexConCodigoPais = /^\+\d{8,15}$/;
+      const regexSinMas = /^\d{10,15}$/;
+
+      const esValido = tieneCodigoPais
+        ? regexConCodigoPais.test(telLimpio)
+        : regexSinMas.test(telLimpio);
+
+      if (!esValido) {
+        toast.error(
+          tieneCodigoPais
+            ? 'El número con código de país debe llevar "+" seguido de entre 8 y 15 dígitos.'
+            : 'El contacto principal debe ser un número telefónico válido (10 a 15 dígitos).'
+        );
+        return false;
+      }
 
       this.clienteNuevo.contacto_principal = telLimpio;
     } else {
@@ -290,7 +307,6 @@ ngOnInit() {
 
     if (this.clienteNuevo.correo_contacto && this.clienteNuevo.correo_contacto.trim() !== '') {
       this.clienteNuevo.correo_contacto = this.clienteNuevo.correo_contacto.trim();
-
 
       const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
       if (!regexEmail.test(this.clienteNuevo.correo_contacto)) {
@@ -302,8 +318,7 @@ ngOnInit() {
     }
 
     return true;
-  }
- validarCamposObligatorios(): boolean {
+  } validarCamposObligatorios(): boolean {
     this.clienteNuevo.Nombre = (this.clienteNuevo.Nombre || '').trim();
     this.clienteNuevo.RFC = (this.clienteNuevo.RFC || '').trim().toUpperCase();
     this.clienteNuevo.Razon_social = (this.clienteNuevo.Razon_social || '').trim();

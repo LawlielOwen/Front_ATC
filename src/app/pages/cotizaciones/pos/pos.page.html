@@ -40,30 +40,35 @@
                                     </button>
                                 </div>
 
-                                <!-- FILA DE CLIENTE (Fija) -->
                                 <div class="grid grid-cols-2 gap-4 mb-2">
-                                    <input type="text" [formControl]="clienteControl" [matAutocomplete]="auto"
-                                        placeholder="Ingresa nombre del cliente registrado o no registrado"
-                                        class="appearance-none shadow-none ring-0 bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
+    <div class="w-full relative">
+        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Nombre del cliente</p>
+        <input type="text" [formControl]="clienteControl" [matAutocomplete]="auto"
+            placeholder="Ingresa nombre del cliente registrado o no registrado"
+            class="appearance-none shadow-none ring-0 bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed">
 
-                                    <mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente"
-                                        (optionSelected)="onClienteSeleccionado($event.option.value)">
-                                        <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
-                                            {{ c.nombre || c.Nombre }}
-                                        </mat-option>
+        <mat-autocomplete #auto="matAutocomplete" [displayWith]="mostrarNombreCliente"
+            (optionSelected)="onClienteSeleccionado($event.option.value)">
+            <mat-option *ngFor="let c of clientesFiltrados" [value]="c">
+                {{ c.nombre || c.Nombre }}
+            </mat-option>
 
-                                        <mat-option
-                                            *ngIf="clienteControl.value && typeof clienteControl.value === 'string' && clientesFiltrados.length === 0"
-                                            [value]="clienteControl.value">
-                                            <span class="italic text-slate-500">Usar como cliente eventual:</span>
-                                            <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value }}</span>
-                                        </mat-option>
-                                    </mat-autocomplete>
+            <mat-option
+                *ngIf="clienteControl.value && typeof clienteControl.value === 'string' && clientesFiltrados.length === 0"
+                [value]="clienteControl.value">
+                <span class="italic text-slate-500">Usar como cliente eventual:</span>
+                <span class="font-bold ml-1 text-[#003B8A]">{{ clienteControl.value }}</span>
+            </mat-option>
+        </mat-autocomplete>
+    </div>
 
-                                    <input type="text" placeholder="Telefono (opcional)"
-                                        class="appearance-none shadow-none ring-0 bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                                        [(ngModel)]="cotizacion.contacto">
-                                </div>
+    <div class="w-full">
+        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Teléfono</p>
+        <input type="text" placeholder="Teléfono (opcional)"
+            class="appearance-none shadow-none ring-0 bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+            [(ngModel)]="cotizacion.contacto">
+    </div>
+</div>
 
                                 <div class="flex justify-end mb-4">
                                     <button (click)="mostrarDetallesCliente = !mostrarDetallesCliente"
@@ -102,52 +107,51 @@
                                     </div>
                                 </div>
 
-                                <div class="flex gap-3 mb-6">
-                                    <!-- Buscador de Productos -->
-                                    <div class="relative flex-1">
-                                        <input type="text" [formControl]="productoControl"
-                                            [matAutocomplete]="autoProducto"
-                                            placeholder="Buscar por nombre, Cód. Japón o Cód. Numeral..."
-                                            class="appearance-none shadow-none ring-0 bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
-                                            (keyup.enter)="onEnterProducto($event)">
+                                <div class="flex items-end gap-3 mb-6 mt-4">
+    <div class="relative flex-1">
+        <p class="text-[11px] font-bold text-slate-400 uppercase mb-1">Buscador de productos</p>
+        <input type="text" [formControl]="productoControl"
+            [matAutocomplete]="autoProducto"
+            placeholder="Buscar por nombre, Cód. Japón o Cód. Numeral..."
+            class="appearance-none shadow-none ring-0 bg-[#fafbfc] border border-solid border-[#d2ddec] bg-clip-padding text-[#0d1f38] placeholder:text-slate-400 text-xs rounded-lg focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A] block w-full px-3 py-2.5 outline-none transition-colors disabled:bg-gray-100 disabled:text-gray-400 disabled:cursor-not-allowed"
+            (keyup.enter)="onEnterProducto($event)">
 
-                                        <mat-autocomplete #autoProducto="matAutocomplete"
-                                            (optionSelected)="seleccionarProducto($event.option.value)">
-                                            <mat-option *ngFor="let p of productosFiltrados" [value]="p"
-                                                class="h-auto py-2">
-                                                <div class="flex flex-col py-1">
-                                                    <div class="flex justify-between items-center w-full gap-4">
-                                                        <span class="text-xs font-bold text-[#0d1f38] truncate flex-1">
-                                                            {{ p.Nombre }}
-                                                        </span>
-                                                        <span
-                                                            class="text-xs font-black text-[#003B8A] whitespace-nowrap flex-shrink-0">
-                                                            {{ p.Precio | currency: (cotizacion.moneda === 'USD' ? 'USD'
-                                                            : 'MXN') : '$' }}
-                                                        </span>
-                                                    </div>
-                                                    <div
-                                                        class="text-[10px] text-slate-400 font-semibold mt-0.5 flex gap-2">
-                                                        <span>JP: <span class="text-slate-600">{{ p.Codigo_japon || '--'
-                                                                }}</span></span>
-                                                        <span class="text-slate-300">|</span>
-                                                        <span>Num: <span class="text-slate-600">{{ p.Codigo_numeral ||
-                                                                '--' }}</span></span>
-                                                    </div>
-                                                </div>
-                                            </mat-option>
-                                        </mat-autocomplete>
-                                    </div>
+        <mat-autocomplete #autoProducto="matAutocomplete"
+            (optionSelected)="seleccionarProducto($event.option.value)">
+            <mat-option *ngFor="let p of productosFiltrados" [value]="p"
+                class="h-auto py-2">
+                <div class="flex flex-col py-1">
+                    <div class="flex justify-between items-center w-full gap-4">
+                        <span class="text-xs font-bold text-[#0d1f38] truncate flex-1">
+                            {{ p.Nombre }}
+                        </span>
+                        <span
+                            class="text-xs font-black text-[#003B8A] whitespace-nowrap flex-shrink-0">
+                            {{ p.Precio | currency: (cotizacion.moneda === 'USD' ? 'USD'
+                            : 'MXN') : '$' }}
+                        </span>
+                    </div>
+                    <div class="text-[10px] text-slate-400 font-semibold mt-0.5 flex gap-2">
+                        <span>JP: <span class="text-slate-600">{{ p.Codigo_japon || '--'
+                                }}</span></span>
+                        <span class="text-slate-300">|</span>
+                        <span>Num: <span class="text-slate-600">{{ p.Codigo_numeral ||
+                                '--' }}</span></span>
+                    </div>
+                </div>
+            </mat-option>
+        </mat-autocomplete>
+    </div>
 
-                                    <button type="button" (click)="agregarItemManual()"
-                                        class="appearance-none shadow-sm ring-0 flex items-center justify-center gap-1.5 bg-white border border-slate-200 hover:border-[#003B8A] text-[#003B8A] hover:bg-slate-50 text-xs font-bold px-4 py-2.5 rounded-lg transition-all whitespace-nowrap">
-                                        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                d="M12 4v16m8-8H4" />
-                                        </svg>
-                                        Partida Manual
-                                    </button>
-                                </div>
+    <button type="button" (click)="agregarItemManual()"
+        class="appearance-none shadow-sm ring-0 flex items-center justify-center gap-1.5 bg-white border border-slate-200 hover:border-[#003B8A] text-[#003B8A] hover:bg-slate-50 text-xs font-bold px-4 py-2.5 rounded-lg transition-all whitespace-nowrap">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M12 4v16m8-8H4" />
+        </svg>
+        Partida Manual
+    </button>
+</div>
 
                                 <div class="rounded-lg border border-slate-200 bg-white shadow-sm mt-4">
 

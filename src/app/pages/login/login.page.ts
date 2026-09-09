@@ -5,6 +5,7 @@ import { Router } from '@angular/router';
 import { Login } from '../../core/services/login.service';
 import { toast, NgxSonnerToaster } from 'ngx-sonner';
 import { RouterModule } from '@angular/router';
+import { SessionService } from '../../core/services/Session.Service'; 
 
 @Component({
   selector: 'app-login',
@@ -18,7 +19,11 @@ export class LoginPage implements OnInit {
   password: string = '';
   mostrarContra: boolean = false;
 
-  constructor(private router: Router, private loginService: Login) { }
+  constructor(
+    private router: Router,
+    private loginService: Login,
+    private sessionService: SessionService
+  ) { }
 
   ngOnInit() { }
 
@@ -47,6 +52,9 @@ export class LoginPage implements OnInit {
           toast.warning('Tu cuenta está en revisión. Un administrador debe activarla.');
           return; 
         }
+
+        // Arranca el monitoreo de expiración del token justo al iniciar sesión.
+        this.sessionService.programarExpiracion(response.token);
 
         switch (rolUsuario) {
           case 'Administrador':

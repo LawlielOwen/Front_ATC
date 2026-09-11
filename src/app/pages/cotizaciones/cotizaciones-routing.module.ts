@@ -18,6 +18,10 @@ const routes: Routes = [
   {
     path: 'num-cot',
     loadChildren: () => import('./num-cot/num-cot.module').then( m => m.NumCotPageModule)
+  },
+  {
+    path: 'modal-vincular-cliente',
+    loadChildren: () => import('./modal-vincular-cliente/modal-vincular-cliente.module').then( m => m.ModalVincularClientePageModule)
   }
 
 ];

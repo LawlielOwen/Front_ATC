@@ -47,3 +47,26 @@ export function confirmarRegistroCliente(nombreCliente?: string): Promise<boolea
     heightAuto: false
   }).then((result) => result.isConfirmed);
 }
+export function elegirAccionCliente(nombreCliente?: string): Promise<'nuevo' | 'existente' | null> {
+  return Swal.fire({
+    icon: 'warning',
+    title: 'Cliente no registrado',
+    html: `<b>${nombreCliente || 'Este cliente'}</b> aún no está dado de alta como cliente oficial. ` +
+          `Debes registrarlo o vincularlo a uno existente antes de convertir la cotización en un pedido.`,
+    showDenyButton: true,
+    showCancelButton: true,
+    confirmButtonText: 'Registrar cliente nuevo',
+    denyButtonText: 'Vincular cliente existente',
+    cancelButtonText: 'Cerrar',
+    confirmButtonColor: '#003B8A',
+    denyButtonColor: '#1D9E75',
+    cancelButtonColor: '#94a3b8',
+    reverseButtons: true,
+    allowOutsideClick: false,
+    heightAuto: false
+  }).then((result) => {
+    if (result.isConfirmed) return 'nuevo';
+    if (result.isDenied) return 'existente';
+    return null;
+  });
+}

@@ -14,10 +14,10 @@ import { ModalClientePage } from '../../clientes/modal-cliente/modal-cliente.pag
 import { CotizacionService } from '../../../core/services/Cotizaciones.service'
 import { NgxSonnerToaster } from 'ngx-sonner';
 import { Router } from '@angular/router';
-import { solicitarOrdenCompra, confirmarRegistroCliente } from '../../../shared/utils/cotizacion-alerts.util';
+import { solicitarOrdenCompra, elegirAccionCliente} from '../../../shared/utils/cotizacion-alerts.util';
 import Swal from 'sweetalert2';
 import { AuthService } from '../../../core/services/auth.service';
-
+import { ModalVincularClientePage } from '../modal-vincular-cliente/modal-vincular-cliente.page';
 @Component({
   selector: 'app-detalles-cotizacion',
   templateUrl: './detalles-cotizacion.page.html',
@@ -137,51 +137,71 @@ cargarDetallesCot() {
       }
     });
   }
-aceptarCotizacion(cot: any) {
-    if (!cot.id_cliente) {
-      confirmarRegistroCliente(cot.nombre_prospecto || cot.Cliente).then((deseaRegistrar) => {
-        if (!deseaRegistrar) return;
-        
-        const nombreCliente = cot.nombre_cliente_final && cot.nombre_cliente_final !== 'Sin Nombre'
-          ? cot.nombre_cliente_final
-          : (cot.nombre_prospecto || cot.Cliente || '');
+async aceptarCotizacion(cot: any) {
+  if (!cot.id_cliente) {
+    const nombreProspecto = cot.nombre_cliente_final || cot.nombre_prospecto || cot.Cliente || '';
+    const accion = await elegirAccionCliente(nombreProspecto);
+    if (!accion) return; // cerró el diálogo
 
-        const dialogRef = this.dialog.open(ModalClientePage, {
-          width: '630px',
-          maxWidth: '105vw',
-          panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
-          backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-          data: {
-            nombrePrellenado: nombreCliente,
-            idAsesorPrellenado: cot.id_asesor,
-            direccionPrellenada: cot.direccion,
-            correoPrellenado: cot.correo,
-            telefonoPrellenado: cot.contacto,
-            nombreContactoPrellenado: cot.nombre_contacto
-          }
-        });
-
-        dialogRef.afterClosed().subscribe((nuevoIdCliente) => {
-          if (nuevoIdCliente && typeof nuevoIdCliente === 'number') {
-            solicitarOrdenCompra().then((ordenCompra) => {
-              if (ordenCompra !== null) {
-                this.vincularYConvertir(cot.id, nuevoIdCliente, ordenCompra);
-              }
-            });
-          }
-        });
+    if (accion === 'existente') {
+      const dialogRef = this.dialog.open(ModalVincularClientePage, {
+        width: '650px',
+        maxWidth: '105vw',
+        panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+        backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+        data: { nombreProspecto }
       });
 
+      dialogRef.afterClosed().subscribe((idClienteExistente: number | null) => {
+        if (idClienteExistente) {
+          solicitarOrdenCompra().then((ordenCompra) => {
+            if (ordenCompra !== null) {
+              this.vincularYConvertir(cot.id, idClienteExistente, ordenCompra);
+            }
+          });
+        }
+      });
       return;
     }
 
-    solicitarOrdenCompra().then((ordenCompra) => {
-      if (ordenCompra !== null) {
-        this.ejecutarConversionSp(cot.id, ordenCompra);
+    // accion === 'nuevo' -> tu flujo actual, sin cambios
+    const nombreCliente = cot.nombre_cliente_final && cot.nombre_cliente_final !== 'Sin Nombre'
+      ? cot.nombre_cliente_final
+      : (cot.nombre_prospecto || cot.Cliente || '');
+
+    const dialogRef = this.dialog.open(ModalClientePage, {
+      width: '630px',
+      maxWidth: '105vw',
+      panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      data: {
+        nombrePrellenado: nombreCliente,
+        idAsesorPrellenado: cot.id_asesor,
+        direccionPrellenada: cot.direccion,
+        correoPrellenado: cot.correo,
+        telefonoPrellenado: cot.contacto,
+        nombreContactoPrellenado: cot.nombre_contacto
       }
     });
+
+    dialogRef.afterClosed().subscribe((nuevoIdCliente) => {
+      if (nuevoIdCliente && typeof nuevoIdCliente === 'number') {
+        solicitarOrdenCompra().then((ordenCompra) => {
+          if (ordenCompra !== null) {
+            this.vincularYConvertir(cot.id, nuevoIdCliente, ordenCompra);
+          }
+        });
+      }
+    });
+    return;
   }
 
+  solicitarOrdenCompra().then((ordenCompra) => {
+    if (ordenCompra !== null) {
+      this.ejecutarConversionSp(cot.id, ordenCompra);
+    }
+  });
+}
   vincularYConvertir(idCotizacion: number, idNuevoCliente: number, orden_compra: string = '') {
     this.cs.vincularClienteCotizacion(idCotizacion, idNuevoCliente).subscribe({
       next: () => {

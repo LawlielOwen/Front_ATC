@@ -25,10 +25,12 @@ import { Router } from '@angular/router';
 import { CotizacionService } from '../../core/services/Cotizaciones.service'
 import Swal from 'sweetalert2';
 import { DetallesCotizacionPage } from './detalles-cotizacion/detalles-cotizacion.page'
-import { solicitarOrdenCompra, confirmarRegistroCliente } from '../../shared/utils/cotizacion-alerts.util';
+import { solicitarOrdenCompra, elegirAccionCliente } from '../../shared/utils/cotizacion-alerts.util';
 import { ModalClientePage } from '../clientes/modal-cliente/modal-cliente.page'
 import { AuthService } from '../../core/services/auth.service';
 import {NumCotPage} from "./num-cot/num-cot.page";
+import { ModalVincularClientePage } from './modal-vincular-cliente/modal-vincular-cliente.page';
+
 @Component({
   selector: 'app-cotizaciones',
   templateUrl: './cotizaciones.page.html',
@@ -339,23 +341,48 @@ ejecutarConversionSp(idCotizacion: number, oc: string = '') {
     }
   });
 }
-
 aceptarCotizacion(cot: any) {
   if (!cot.id_cliente) {
-    confirmarRegistroCliente(cot.nombre_prospecto || cot.Cliente).then((deseaRegistrar) => {
-      if (!deseaRegistrar) return; 
-    const nombreCliente = cot.nombre_cliente_final && cot.nombre_cliente_final !== 'Sin Nombre'
-          ? cot.nombre_cliente_final
-          : (cot.nombre_prospecto || cot.Cliente || '');
+    const nombreProspecto = cot.nombre_prospecto || cot.Cliente || '';
+
+    elegirAccionCliente(nombreProspecto).then((accion) => {
+      if (!accion) return; // cerró el diálogo
+
+      if (accion === 'existente') {
+        const dialogRef = this.dialog.open(ModalVincularClientePage, {
+          width: '650px',
+          maxWidth: '105vw',
+          panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+          backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+          data: { nombreProspecto }
+        });
+
+        dialogRef.afterClosed().subscribe((idClienteExistente: number | null) => {
+          if (idClienteExistente) {
+            solicitarOrdenCompra().then((ordenCompra) => {
+              if (ordenCompra !== null) {
+                this.vincularYConvertir(cot.id, idClienteExistente, ordenCompra);
+              }
+            });
+          }
+        });
+        return;
+      }
+
+      // accion === 'nuevo' -> tu flujo actual, sin cambios
+      const nombreCliente = cot.nombre_cliente_final && cot.nombre_cliente_final !== 'Sin Nombre'
+        ? cot.nombre_cliente_final
+        : (cot.nombre_prospecto || cot.Cliente || '');
+
       const dialogRef = this.dialog.open(ModalClientePage, {
         width: '630px',
         maxWidth: '105vw',
         panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
         backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-       data: {
-            nombrePrellenado: nombreCliente,
-            idAsesorPrellenado: cot.id_asesor
-          }
+        data: {
+          nombrePrellenado: nombreCliente,
+          idAsesorPrellenado: cot.id_asesor
+        }
       });
 
       dialogRef.afterClosed().subscribe((nuevoIdCliente) => {

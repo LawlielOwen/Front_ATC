@@ -6,27 +6,63 @@
   <div class="p-6 overflow-y-auto flex-1">
     <div class="flex flex-col gap-5 animate-fade-in">
       
-      <!-- TARJETA 1: SELECCIONAR ORIGEN (PEDIDO O VISITA) -->
-      <app-card-form [title]="isSoporteTecnico ? 'Selecciona la Visita Programada' : 'Selecciona el Pedido a Surtir'">
+      <!-- TARJETA 1: SELECCIONAR ORIGEN (PEDIDO, COTIZACIÓN O VISITA) -->
+      <app-card-form [title]="isSoporteTecnico ? 'Selecciona la Visita Programada' : (origenVale === 'pedido' ? 'Selecciona el Pedido a Surtir' : 'Selecciona la Cotización a Surtir')">
         <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
         </svg>
 
         <div class="flex flex-col gap-2 md:col-span-2">
+
+          <!-- TOGGLE DE ORIGEN: solo para asesor/admin (no soporte técnico) -->
+          <div *ngIf="!isSoporteTecnico" class="flex gap-1.5 p-1 bg-slate-100 rounded-lg mb-2 w-fit">
+  <button type="button"
+    [ngStyle]="{
+      'background-color': origenVale === 'pedido' ? '#003B8A' : 'transparent',
+      'color': origenVale === 'pedido' ? '#ffffff' : '#64748b'
+    }"
+    class="px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wide transition-all hover:text-gray-700"
+    (click)="cambiarOrigen('pedido')">
+    Desde Pedido
+  </button>
+  <button type="button"
+    [ngStyle]="{
+      'background-color': origenVale === 'cotizacion' ? '#003B8A' : 'transparent',
+      'color': origenVale === 'cotizacion' ? '#ffffff' : '#64748b'
+    }"
+    class="px-4 py-1.5 rounded-md text-[11px] font-bold uppercase tracking-wide transition-all hover:text-gray-700"
+    (click)="cambiarOrigen('cotizacion')">
+    Desde Cotización
+  </button>
+</div>
           
-          <!-- DROPDOWN PARA PEDIDOS (NO ES SOPORTE TECNICO) -->
-          <ng-container *ngIf="!isSoporteTecnico">
+          <ng-container *ngIf="!isSoporteTecnico && origenVale === 'pedido'">
             <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Pedido</label>
             <select
               class="w-full border border-gray-300 rounded-md px-3 py-[9px] text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
               (change)="seleccionarPedido($any($event.target).value)">
               <option value="">Selecciona un pedido...</option>
               <option *ngFor="let p of pedidosDisponibles" [value]="p.id">
-                Pedido de {{ p.nombre_cliente }} — OC: {{ p.orden_compra || 'Sin orden' }}
+                Pedido de {{ p.nombre_cliente }} — OC: {{ p.orden_compra || 'Sin orden' }} ({{p.nombre_asesor}})
               </option>
             </select>
             <p *ngIf="cargandoPedidos" class="text-xs text-slate-400">Cargando tus pedidos disponibles...</p>
             <p *ngIf="!cargandoPedidos && pedidosDisponibles.length === 0" class="text-xs text-slate-400">No tienes pedidos listos para generar un vale.</p>
+          </ng-container>
+
+          <!-- DROPDOWN PARA COTIZACIONES -->
+          <ng-container *ngIf="!isSoporteTecnico && origenVale === 'cotizacion'">
+            <label class="text-[11px] font-bold text-gray-500 uppercase tracking-wider">Cotización</label>
+            <select
+              class="w-full border border-gray-300 rounded-md px-3 py-[9px] text-sm text-gray-700 bg-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+              (change)="seleccionarCotizacion($any($event.target).value)">
+              <option value="">Selecciona una cotización...</option>
+              <option *ngFor="let c of cotizacionesDisponibles" [value]="c.id">
+                Cotización {{ c.num_cotizacion }} — {{ c.nombre_cliente || 'Prospecto' }} ({{ c.nombre_asesor }})
+              </option>
+            </select>
+            <p *ngIf="cargandoCotizaciones" class="text-xs text-slate-400">Cargando tus cotizaciones disponibles...</p>
+            <p *ngIf="!cargandoCotizaciones && cotizacionesDisponibles.length === 0" class="text-xs text-slate-400">No tienes cotizaciones listas para generar un vale.</p>
           </ng-container>
 
           <!-- DROPDOWN PARA VISITAS (SI ES SOPORTE TECNICO) -->
@@ -95,11 +131,11 @@
               <div class="w-6 h-6 border-2 border-[#003B8A] border-t-transparent rounded-full animate-spin"></div>
             </div>
 
-            <div *ngIf="!cargandoProductos && !pedidoSeleccionado && !visitaSeleccionada" class="py-6 text-center text-slate-400 text-xs font-medium">
-              Selecciona {{ isSoporteTecnico ? 'una visita' : 'un pedido' }} para visualizar los artículos a surtir.
+            <div *ngIf="!cargandoProductos && !pedidoSeleccionado && !cotizacionSeleccionada && !visitaSeleccionada" class="py-6 text-center text-slate-400 text-xs font-medium">
+              Selecciona {{ isSoporteTecnico ? 'una visita' : (origenVale === 'pedido' ? 'un pedido' : 'una cotización') }} para visualizar los artículos a surtir.
             </div>
 
-            <div *ngIf="!cargandoProductos && (pedidoSeleccionado || visitaSeleccionada) && productosSolicitados.length === 0" class="py-6 text-center text-slate-400 text-xs font-medium">
+            <div *ngIf="!cargandoProductos && (pedidoSeleccionado || cotizacionSeleccionada || visitaSeleccionada) && productosSolicitados.length === 0" class="py-6 text-center text-slate-400 text-xs font-medium">
               No hay artículos registrados para esta selección.
             </div>
 

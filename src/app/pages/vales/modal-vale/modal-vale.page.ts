@@ -37,10 +37,18 @@ export class ModalValePage implements OnInit {
     orden_compra: '',
   };
 
+  // Origen del vale (solo aplica cuando no es soporte técnico)
+  origenVale: 'pedido' | 'cotizacion' = 'pedido';
+
   // Variables para Pedidos
   pedidosDisponibles: any[] = [];
   pedidoSeleccionado: any = null;
   cargandoPedidos: boolean = false;
+
+  // Variables para Cotizaciones
+  cotizacionesDisponibles: any[] = [];
+  cotizacionSeleccionada: any = null;
+  cargandoCotizaciones: boolean = false;
 
   // Variables para Visitas (Demos)
   visitasDisponibles: any[] = [];
@@ -53,7 +61,6 @@ export class ModalValePage implements OnInit {
   clientes: any[] = [];
   cargandoProductos: boolean = false;
   
-  // Variables de Sesión
   idUsuarioActivo: number | null = null;
   rolUsuario: string = '';
   isSoporteTecnico: boolean = false;
@@ -102,6 +109,20 @@ export class ModalValePage implements OnInit {
     }
   }
 
+  // ================== ORIGEN (Pedido / Cotización) ==================
+
+  cambiarOrigen(origen: 'pedido' | 'cotizacion') {
+    if (this.origenVale === origen) return;
+    this.origenVale = origen;
+    this.limpiarFormulario();
+
+    if (origen === 'pedido' && this.pedidosDisponibles.length === 0) {
+      this.cargarPedidosDisponibles();
+    }
+    if (origen === 'cotizacion' && this.cotizacionesDisponibles.length === 0) {
+      this.cargarCotizacionesDisponibles();
+    }
+  }
 
   cargarPedidosDisponibles() {
     if (!this.idUsuarioActivo) return;
@@ -154,6 +175,65 @@ export class ModalValePage implements OnInit {
     }
   });
 }
+
+
+  cargarCotizacionesDisponibles() {
+    if (!this.idUsuarioActivo) return;
+    this.cargandoCotizaciones = true;
+
+    this.valeService.obtenerCotizacionesDisponiblesVale(this.idUsuarioActivo).subscribe({
+      next: (res: any) => {
+        this.cotizacionesDisponibles = res || [];
+        this.cargandoCotizaciones = false;
+      },
+      error: (err) => {
+        console.error('Error al cargar cotizaciones', err);
+        this.cargandoCotizaciones = false;
+      }
+    });
+  }
+
+  seleccionarCotizacion(idCotizacionStr: string) {
+    if (!idCotizacionStr) return this.limpiarFormulario();
+
+    const idCotizacion = parseInt(idCotizacionStr);
+    const cotizacion = this.cotizacionesDisponibles.find(c => c.id === idCotizacion);
+    if (!cotizacion) return;
+
+    this.cotizacionSeleccionada = cotizacion;
+
+    if (cotizacion.id_cliente) {
+      this.clienteControl.setValue({ id: cotizacion.id_cliente, Nombre: cotizacion.nombre_cliente });
+      this.solicitud.id_cliente = cotizacion.id_cliente;
+    } else {
+      this.clienteControl.setValue(cotizacion.nombre_cliente);
+      this.solicitud.id_cliente = null;
+    }
+    this.clienteControl.disable();
+
+    this.cargandoProductos = true;
+    this.valeService.obtenerProductosCotizacionVale(cotizacion.id, this.idUsuarioActivo!).subscribe({
+      next: (res: any) => {
+        const detalles = Array.isArray(res) ? res : (res.data || Object.values(res).find(Array.isArray) || []);
+
+        this.productosSolicitados = detalles.map((item: any) => ({
+          id_producto: item.id_producto,
+          Nombre: item.nombre_producto || item.descripcion_manual || '',
+          codigo_producto: item.codigo_producto || item.codigo_manual || '',
+          piezas: item.piezas,
+
+          codigo_manual: item.codigo_manual || '',
+          descripcion_manual: item.descripcion_manual || '',
+          extra_descripcion_manual: item.extra_descripcion_manual || ''
+        }));
+        this.cargandoProductos = false;
+      },
+      error: () => {
+        toast.error('No se pudieron cargar los productos de la cotización.');
+        this.cargandoProductos = false;
+      }
+    });
+  }
 
 cargarVisitasDisponibles() {
     if (!this.idUsuarioActivo) return;
@@ -214,6 +294,7 @@ cargarVisitasDisponibles() {
   limpiarFormulario() {
     this.pedidoSeleccionado = null;
     this.visitaSeleccionada = null;
+    this.cotizacionSeleccionada = null;
     this.clienteControl.enable();
     this.clienteControl.setValue('');
     this.solicitud.id_cliente = null;
@@ -226,33 +307,50 @@ cargarVisitasDisponibles() {
       return;
     }
 
-    if (!this.isSoporteTecnico && !this.pedidoSeleccionado) {
-      toast.error('Selecciona el pedido del cual deseas generar el vale.');
-      return;
-    }
-
     if (this.isSoporteTecnico && !this.visitaSeleccionada) {
       toast.error('Selecciona la visita para la cual deseas solicitar el vale demo.');
       return;
     }
 
-    if (!this.isSoporteTecnico && !this.solicitud.id_cliente) {
+    if (!this.isSoporteTecnico && this.origenVale === 'pedido' && !this.pedidoSeleccionado) {
+      toast.error('Selecciona el pedido del cual deseas generar el vale.');
+      return;
+    }
+
+    if (!this.isSoporteTecnico && this.origenVale === 'cotizacion' && !this.cotizacionSeleccionada) {
+      toast.error('Selecciona la cotización de la cual deseas generar el vale.');
+      return;
+    }
+
+    if (!this.isSoporteTecnico && this.origenVale === 'pedido' && !this.solicitud.id_cliente) {
       toast.error('Selecciona un cliente destino');
       return;
     }
+
+   
+       if (!this.isSoporteTecnico && this.origenVale === 'cotizacion') {
+      this.valeService.crearValeDesdeCotizacion(this.cotizacionSeleccionada.id, this.idUsuarioActivo!).subscribe({
+        next: (res: any) => {
+          toast.success(res?.mensaje || 'Solicitud de vale creada correctamente');
+          this.dialogRef.close(true);
+        },
+        error: (err: any) => toast.error(err?.error?.error || 'Ocurrió un error al crear la solicitud de vale')
+      });
+      return;
+    }
+
 const productosValidos = [];
 for (let i = 0; i < this.productosSolicitados.length; i++) {
   const p = this.productosSolicitados[i];
   const idReferencia = this.isSoporteTecnico ? p.id_demo : p.id_producto;
   
-  // CORRECCIÓN: Evaluar tanto descripcion_manual como Nombre
   const textoDescripcion = p.descripcion_manual?.trim() || p.Nombre?.trim();
   const textoCodigo = p.codigo_manual?.trim() || p.codigo_producto?.trim();
   
   const esManual = !idReferencia && !!textoDescripcion;
 
   if (!idReferencia && !esManual) {
-    continue; // Es una fila realmente vacía, se ignora
+    continue;
   }
 
   if (this.isSoporteTecnico && esManual) {
@@ -271,7 +369,6 @@ for (let i = 0; i < this.productosSolicitados.length; i++) {
   } else if (idReferencia) {
     productosValidos.push({ id_producto: idReferencia, piezas: cantidadNum });
   } else {
-    // CORRECCIÓN: Asignar los textos rescatados a los campos del JSON
     productosValidos.push({
       id_producto: null,
       piezas: cantidadNum,

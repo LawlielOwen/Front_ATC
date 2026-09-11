@@ -1,0 +1,16 @@
+
+.cdk-overlay-pane.alta-pedido-dialog {
+  overflow: hidden !important;
+  max-height: 100dvh !important;
+}
+
+.alta-pedido-dialog .mat-mdc-dialog-container,
+.alta-pedido-dialog .mat-mdc-dialog-inner-container,
+.alta-pedido-dialog .mat-mdc-dialog-surface,
+.alta-pedido-dialog .mdc-dialog__surface {
+  overflow: hidden !important;
+}
+
+.alta-pedido-modal {
+  overscroll-behavior: contain;
+}

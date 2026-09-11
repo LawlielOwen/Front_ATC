@@ -1,0 +1,231 @@
+<div class="alta-pedido-modal bg-slate-200 rounded-[24px] overflow-hidden shadow-2xl w-full max-w-4xl mx-auto h-[88dvh] max-h-[88dvh] min-h-0 flex flex-col border border-gray-100 text-[#0d1f38]"
+  [attr.aria-busy]="guardando">
+  <ngx-sonner-toaster position="top-right" [richColors]="true"></ngx-sonner-toaster>
+
+  <app-header-modal class="shrink-0" [label]="'Agregar Pedido'"></app-header-modal>
+
+  <!-- Este es el único contenedor que debe desplazarse verticalmente. -->
+  <div class="p-4 overflow-y-auto overscroll-contain min-h-0 flex-1 custom-scrollbar">
+    <fieldset [disabled]="guardando" class="m-0 p-0 border-0 min-w-0 flex flex-col gap-4">
+      <legend class="sr-only">Datos del nuevo pedido</legend>
+
+      <app-card-form title="Información del Pedido">
+        <svg icono aria-hidden="true" class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414A1 1 0 0121 9.414V19a2 2 0 01-2 2z" />
+        </svg>
+
+        <div class="w-full min-w-0 md:col-span-2 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="min-w-0 md:col-span-2">
+            <label for="pedido-cliente" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cliente *</label>
+            <input id="pedido-cliente" type="text" autocomplete="off" [formControl]="clienteControl"
+              [matAutocomplete]="autoCliente" [readonly]="guardando || cargandoClientes"
+              [placeholder]="cargandoClientes ? 'Cargando clientes...' : 'Buscar cliente registrado...'"
+              aria-required="true" aria-describedby="pedido-cliente-ayuda"
+              class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm text-[#0d1f38] placeholder:text-slate-400 outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:opacity-60 transition-colors">
+            <mat-autocomplete #autoCliente="matAutocomplete" [displayWith]="mostrarNombreCliente">
+              <mat-option *ngFor="let cliente of clientesFiltrados" [value]="cliente" [disabled]="guardando">
+                <span class="text-sm font-medium">{{ mostrarNombreCliente(cliente) }}</span>
+              </mat-option>
+            </mat-autocomplete>
+            <p id="pedido-cliente-ayuda" class="text-[10px] text-slate-400 mt-1 mb-0">Selecciona un cliente de la lista para asociar el pedido.</p>
+          </div>
+
+          <div>
+            <label for="pedido-asesor" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Asesor encargado *</label>
+            <select id="pedido-asesor" [(ngModel)]="pedido.id_asesor" [disabled]="guardando || cargandoAsesores" aria-required="true"
+              class="w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:opacity-60 transition-colors">
+              <option [ngValue]="0">{{ cargandoAsesores ? 'Cargando...' : 'Seleccionar asesor...' }}</option>
+              <option *ngFor="let asesor of asesores" [ngValue]="asesor.id">{{ asesor.Nombre_completo }}</option>
+            </select>
+          </div>
+          <div>
+            <label for="pedido-orden" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Orden de compra <span class="normal-case font-normal">(opcional)</span></label>
+            <input id="pedido-orden" type="text" [(ngModel)]="pedido.orden_compra" maxlength="100" placeholder="Ej. OC-2026-001"
+              class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm placeholder:text-slate-400 outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:opacity-60 transition-colors">
+          </div>
+        </div>
+      </app-card-form>
+
+      <app-card-form title="Moneda y Vigencia">
+        <svg icono aria-hidden="true" class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <div class="w-full md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div>
+            <label for="pedido-moneda" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Moneda *</label>
+            <select id="pedido-moneda" [ngModel]="pedido.moneda" (ngModelChange)="cambiarMoneda($event)"
+              class="w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:opacity-60 transition-colors">
+              <option value="MONEDA NACIONAL">Pesos mexicanos (MXN)</option>
+              <option value="USD">Dólares (USD)</option>
+            </select>
+          </div>
+          <div>
+            <label for="pedido-cambio" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Tipo de cambio *</label>
+            <input id="pedido-cambio" type="number" [ngModel]="pedido.tipo_cambio"
+              (ngModelChange)="pedido.tipo_cambio = $event; calcularTotales()"
+              [disabled]="guardando || pedido.moneda !== 'USD'" min="0.0001" max="999999.9999" step="0.0001" inputmode="decimal"
+              aria-describedby="pedido-cambio-ayuda"
+              class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:bg-slate-100 disabled:text-slate-400 transition-colors">
+            <p id="pedido-cambio-ayuda" class="text-[10px] text-slate-400 mt-1 mb-0">{{ pedido.moneda === 'USD' ? 'Pesos por dólar.' : 'En MXN se utiliza 1.' }}</p>
+          </div>
+          <div>
+            <label for="pedido-vigencia" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Vigencia (días) *</label>
+            <input id="pedido-vigencia" type="number" [(ngModel)]="pedido.vigencia_dias" min="1" max="3650" step="1" inputmode="numeric"
+              class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:opacity-60 transition-colors">
+            <p class="text-[10px] text-slate-400 mt-1 mb-0">Desde la fecha de registro.</p>
+          </div>
+          <p *ngIf="pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999)"
+            role="status" class="md:col-span-3 m-0 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] text-amber-800">
+            Captura un tipo de cambio válido para consultar y editar los importes en dólares.
+          </p>
+        </div>
+      </app-card-form>
+
+      <app-card-form title="Productos del Pedido">
+        <svg icono aria-hidden="true" class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        </svg>
+        <div class="w-full min-w-0 md:col-span-2">
+          <div class="flex flex-col md:flex-row md:items-end gap-3 mb-3">
+            <div class="flex-1 min-w-0">
+              <label for="pedido-producto" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Buscador de productos</label>
+              <input id="pedido-producto" type="text" autocomplete="off" [formControl]="productoControl"
+                [matAutocomplete]="autoProducto" [readonly]="guardando" placeholder="Buscar por nombre, Cód. Japón..."
+                class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm placeholder:text-slate-400 outline-none focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] disabled:opacity-60 transition-colors">
+              <mat-autocomplete #autoProducto="matAutocomplete" (optionSelected)="seleccionarProducto($event.option.value)">
+                <mat-option *ngFor="let p of productosFiltrados" [value]="p" [disabled]="guardando" class="h-auto py-2">
+                  <div class="flex flex-col gap-0.5 py-1">
+                    <div class="flex justify-between items-center gap-4">
+                      <span class="text-xs font-bold text-[#0d1f38]">{{ p.Nombre }}</span>
+                      <span class="text-xs font-bold text-[#003B8A] whitespace-nowrap">
+                        {{ (pedido.moneda === 'USD' && !(pedido.tipo_cambio > 0) ? p.Precio : obtenerPrecioEnMonedaActual(p.Precio)) | currency:(pedido.moneda === 'USD' && !(pedido.tipo_cambio > 0) ? 'MXN' : (pedido.moneda === 'USD' ? 'USD' : 'MXN')):'code':'1.2-2' }}
+                      </span>
+                    </div>
+                    <span class="text-[10px] text-slate-500">JP: {{ p.Codigo_japon || '--' }} · Num: {{ p.Codigo_numeral || '--' }}</span>
+                  </div>
+                </mat-option>
+              </mat-autocomplete>
+            </div>
+            <button type="button" (click)="agregarItemManual()" [disabled]="guardando"
+              class="flex items-center justify-center gap-1.5 bg-white border border-solid border-slate-300 hover:border-[#003B8A] hover:bg-blue-50 text-[#003B8A] text-xs font-bold px-4 py-2.5 rounded-lg transition-colors whitespace-nowrap disabled:opacity-50 disabled:cursor-not-allowed">
+              <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
+              Partida manual
+            </button>
+          </div>
+          <p class="text-[10px] text-slate-400 mb-3">Busca con al menos dos caracteres y selecciona un producto. Para productos no registrados, agrega una partida manual.</p>
+
+          <div class="rounded-lg border border-slate-200 overflow-hidden bg-white">
+            <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Tabla editable de productos">
+              <table class="w-full min-w-[700px] border-collapse text-xs">
+                <thead class="bg-[#003B8A] text-white">
+                  <tr class="text-[10px] uppercase tracking-wide">
+                    <th scope="col" class="px-2 py-2.5 text-center w-8">N.</th>
+                    <th scope="col" class="px-2 py-2.5 text-left w-24">Código</th>
+                    <th scope="col" class="px-2 py-2.5 text-left">Descripción</th>
+                    <th scope="col" class="px-2 py-2.5 text-center w-16">Cant.</th>
+                    <th scope="col" class="px-2 py-2.5 text-right w-24">P. unitario</th>
+                    <th scope="col" class="px-2 py-2.5 text-right w-24">Flete</th>
+                    <th scope="col" class="px-2 py-2.5 text-right w-24">Importe</th>
+                    <th scope="col" class="px-2 py-2.5 w-10"><span class="sr-only">Acciones</span></th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngIf="detalles.length === 0">
+                    <td colspan="8" class="px-4 py-8 text-center">
+                      <p class="font-semibold text-slate-500 mb-1">Aún no hay productos</p>
+                      <p class="text-[11px] text-slate-400 m-0">Usa el buscador o agrega una partida manual.</p>
+                    </td>
+                  </tr>
+                  <tr *ngFor="let item of detalles; let i = index" class="border-b border-slate-100 last:border-0 align-top hover:bg-slate-50/60 transition-colors">
+                    <td class="px-2 py-3 text-center font-bold text-slate-400">{{ i + 1 }}</td>
+                    <td class="px-2 py-2">
+                      <ng-container *ngIf="item.id_producto !== null; else codigoManual">
+                        <span class="block py-1 font-semibold break-all text-[11px]">{{ item.codigo_producto || 'S/C' }}</span>
+                      </ng-container>
+                      <ng-template #codigoManual>
+                        <input type="text" [(ngModel)]="item.codigo_manual" maxlength="100" placeholder="Código"
+                          class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-2 py-1.5 text-[11px] outline-none focus:border-[#003B8A] disabled:opacity-60 transition-colors">
+                      </ng-template>
+                    </td>
+                    <td class="px-2 py-2 min-w-[180px]">
+                      <ng-container *ngIf="item.id_producto !== null; else descripcionManual">
+                        <span class="block py-1 font-semibold whitespace-normal break-words text-[11px]">{{ item.nombre_producto }}</span>
+                      </ng-container>
+                      <ng-template #descripcionManual>
+                        <input type="text" [(ngModel)]="item.descripcion_manual" maxlength="250" placeholder="Descripción *"
+                          class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-2 py-1.5 text-[11px] outline-none focus:border-[#003B8A] disabled:opacity-60 transition-colors">
+                        <textarea [(ngModel)]="item.extra_descripcion_manual" rows="1" placeholder="Detalles extra (opcional)"
+                          class="mt-1.5 w-full border border-solid border-slate-200 rounded px-2 py-1.5 text-[11px] resize-y outline-none focus:border-[#003B8A] disabled:opacity-60 transition-colors"></textarea>
+                      </ng-template>
+                    </td>
+                    <td class="px-2 py-2">
+                      <input type="number" [ngModel]="item.cantidad" (ngModelChange)="item.cantidad = $event; calcularTotales()"
+                        min="1" step="1" inputmode="numeric"
+                        class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-center text-[11px] font-bold text-[#003B8A] outline-none focus:border-[#003B8A] disabled:opacity-60 transition-colors">
+                    </td>
+                    <td class="px-2 py-2">
+                      <input
+  type="number"
+  [ngModel]="obtenerPrecioEnMonedaActual(item.precio_unitario).toFixed(2)"
+  (ngModelChange)="actualizarPrecio(item, $event)"
+  min="0.01"
+  step="0.01"
+  inputmode="decimal"
+  [disabled]="guardando || (pedido.moneda === 'USD' &&
+    !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
+  class="w-full border border-solid border-slate-300 bg-slate-50
+         rounded px-1.5 py-1.5 text-right text-[11px]
+         outline-none focus:border-[#003B8A]
+         disabled:opacity-50 transition-colors">
+                    </td>
+                    <td class="px-2 py-2">
+                      <input type="number" [ngModel]="obtenerPrecioEnMonedaActual(item.costo_flete)"
+                        (ngModelChange)="actualizarFlete(item, $event)" min="0" step="0.01" inputmode="decimal"
+                        [disabled]="guardando || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
+                        class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-right text-[11px] outline-none focus:border-[#003B8A] disabled:opacity-50 transition-colors">
+                    </td>
+                    <td class="px-2 py-3 text-right font-bold whitespace-nowrap text-[11px]">
+                      <ng-container *ngIf="pedido.moneda !== 'USD' || pedido.tipo_cambio > 0; else importePendiente">
+                        {{ obtenerPrecioEnMonedaActual(item.subtotal_partida) | currency:(pedido.moneda === 'USD' ? 'USD' : 'MXN'):'$':'1.2-2' }}
+                      </ng-container>
+                      <ng-template #importePendiente>—</ng-template>
+                    </td>
+                    <td class="px-2 py-2 text-center">
+                      <button type="button" (click)="eliminarItem(i)" [disabled]="guardando" title="Eliminar"
+                        class="inline-flex items-center justify-center w-7 h-7 rounded text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50">
+                        <svg aria-hidden="true" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 7h12m-8 4v6m4-6v6M9 7V4h6v3M7 7l1 13h8l1-13" /></svg>
+                      </button>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            
+            <div class="bg-slate-50 border-t border-slate-200 p-3 md:px-4 flex flex-col sm:flex-row justify-between gap-4">
+              <div class="text-[11px] text-slate-500">
+                <p class="m-0 font-semibold text-[#0d1f38]">{{ detalles.length }} {{ detalles.length === 1 ? 'partida' : 'partidas' }}</p>
+                <p class="mt-0.5 mb-0">Importes en {{ pedido.moneda === 'USD' ? 'USD' : 'MXN' }}. Flete por partida.</p>
+              </div>
+              <div *ngIf="pedido.moneda !== 'USD' || pedido.tipo_cambio > 0; else totalesPendientes" class="w-full sm:w-56 space-y-1.5">
+                <div class="flex justify-between text-[11px] text-slate-500"><span>Subtotal:</span><span class="font-semibold text-[#0d1f38]">{{ subtotal_final | currency:(pedido.moneda === 'USD' ? 'USD' : 'MXN'):'$':'1.2-2' }}</span></div>
+                <div class="flex justify-between text-[11px] text-slate-500"><span>IVA (16%):</span><span class="font-semibold text-[#0d1f38]">{{ iva_final | currency:(pedido.moneda === 'USD' ? 'USD' : 'MXN'):'$':'1.2-2' }}</span></div>
+                <div class="flex justify-between items-center gap-2 pt-2 border-t border-slate-200">
+                  <span class="text-[11px] font-bold">TOTAL:</span>
+                  <span class="text-base font-black text-[#003B8A]">{{ total_final | currency:(pedido.moneda === 'USD' ? 'USD' : 'MXN'):'symbol':'1.2-2' }} <span class="text-[9px] font-bold text-slate-500">{{ pedido.moneda === 'USD' ? 'USD' : 'MXN' }}</span></span>
+                </div>
+              </div>
+              <ng-template #totalesPendientes><p class="m-0 text-[11px] text-amber-800 flex items-center">Captura el tipo de cambio para ver totales.</p></ng-template>
+            </div>
+          </div>
+        </div>
+      </app-card-form>
+    </fieldset>
+  </div>
+
+  <app-footer-modal class="shrink-0 border-t border-gray-100" [paddingClass]="'p-3 px-5'">
+    <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" [disabled]="guardando" (click)="cerrar()"></app-button-action>
+    <app-button-action [label]="guardando ? 'Guardando...' : 'Guardar Pedido'" [claseCss]="'btn-agregar'"
+      [disabled]="guardando || cargandoClientes || cargandoAsesores || detalles.length === 0 || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
+      (click)="guardarPedido()"></app-button-action>
+  </app-footer-modal>
+</div>

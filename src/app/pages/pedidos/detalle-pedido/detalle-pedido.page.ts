@@ -57,26 +57,76 @@ export class DetallePedidoPage implements OnInit {
     this.dialogRef.close(this.actualizoAlgo);
   }
 
-  cargarDetalles() {
-    this.cargando = true;
-    this.ps.obtenerDetallesPedido(this.ped.id).subscribe({
-      next: (res: any) => {
-        this.pedidoDetalle = res;
+  cargarDetalles(): void {
+  this.cargando = true;
 
-        if (this.pedidoDetalle.length > 0 && this.pedidoDetalle[0].moneda) {
-          this.monedaActual = this.pedidoDetalle[0].moneda;
+  this.ps.obtenerDetallesPedido(this.ped.id).subscribe({
+    next: (res: any) => {
+      const detalles: any[] = Array.isArray(res) ? res : [];
+      const primero = detalles[0];
+
+      const moneda = String(
+        primero?.moneda || this.ped?.moneda || 'MXN'
+      ).trim().toUpperCase();
+
+      this.monedaActual =
+        moneda === 'MONEDA NACIONAL' ? 'MXN' : moneda;
+
+      const idCotizacion =
+        primero?.id_cotizacion !== undefined
+          ? primero.id_cotizacion
+          : this.ped?.id_cotizacion;
+
+      const esPedidoDirecto = idCotizacion === null;
+
+      const convertirADolares =
+        esPedidoDirecto && this.monedaActual === 'USD';
+
+      const tipoCambio = Number(
+        primero?.tipo_cambio ?? this.ped?.tipo_cambio
+      );
+
+      if (
+        convertirADolares &&
+        (!Number.isFinite(tipoCambio) || tipoCambio <= 0)
+      ) {
+        this.pedidoDetalle = [];
+        this.subtotal = 0;
+        this.iva = 0;
+        this.total = 0;
+        this.cargando = false;
+
+        toast.error(
+          'El pedido está en USD, pero no tiene un tipo de cambio válido.'
+        );
+        return;
+      }
+
+    
+      this.pedidoDetalle = detalles.map(item => {
+        if (!convertirADolares) {
+          return { ...item };
         }
 
-        this.calcularTotales();
-        this.cargando = false;
-      },
-      error: (err) => {
-        console.error('Error al cargar detalles:', err);
-        toast.error('No se pudieron cargar los detalles del pedido.');
-        this.cargando = false;
-      }
-    });
-  }
+        return {
+          ...item,
+          precio_unitario: Number(item.precio_unitario) / tipoCambio,
+          costo_flete: Number(item.costo_flete ?? 0) / tipoCambio,
+          importe: Number(item.importe) / tipoCambio
+        };
+      });
+
+      this.calcularTotales();
+      this.cargando = false;
+    },
+
+    error: (err) => {
+      console.error('Error al cargar detalles:', err);
+      toast.error('No se pudieron cargar los detalles del pedido.');
+      this.cargando = false;
+    }
+  });
+}
 
   calcularTotales() {
     this.subtotal = 0;
@@ -287,5 +337,18 @@ pagarConCredito() {
         });
       }
     });
+}
+private actualizarMonedaPedido(): void {
+
+  const monedaPedido = String(this.ped?.moneda ?? '').trim();
+  const monedaDetalle = String(
+    this.pedidoDetalle[0]?.moneda ?? ''
+  ).trim();
+
+  const moneda = (monedaPedido || monedaDetalle || 'MXN')
+    .toUpperCase();
+
+  this.monedaActual =
+    moneda === 'MONEDA NACIONAL' ? 'MXN' : moneda;
 }
 }

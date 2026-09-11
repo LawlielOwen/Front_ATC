@@ -286,7 +286,22 @@ export class POSPage implements OnInit {
       error: (err) => console.error('Error al cargar asesores', err)
     });
   }
-
+private limpiarEmojis(texto: string): string {
+  if (!texto || typeof texto !== 'string') return texto;
+  return texto
+    .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2190}-\u{21FF}\u{2B00}-\u{2BFF}\u{FE0F}]/gu, '')
+    .trim();
+}
+limpiarEmojisPublic(texto: string): string {
+  return this.limpiarEmojis(texto);
+}
+private sanearDetalles() {
+  this.detalles.forEach(item => {
+    if (item.origen) {
+      item.origen = this.limpiarEmojis(item.origen);
+    }
+  });
+}
  onClienteSeleccionado(cliente: any) {
     if (!cliente || typeof cliente !== 'object') return;
 
@@ -415,6 +430,7 @@ export class POSPage implements OnInit {
       toast.warning('Debes seleccionar un asesor antes de continuar.');
       return;
     }
+    this.sanearDetalles();
     const payload = {
       ...this.cotizacion,
       subtotal: this.subtotal_final,

@@ -22,7 +22,8 @@ import { StatCardComponent } from '../../shared/components/UI/stat-card/stat-car
 import { toast } from 'ngx-sonner';
 import { FiltroFechaComponent } from '../../shared/components/UI/Filter/filtro-fecha/filtro-fecha.component';
 import { AuthService } from '../../core/services/auth.service';
-
+import { ButtonNewComponent } from '../../shared/components/UI/buttons/button/button-new.component';
+import {AltaPedidoPage} from './alta-pedido/alta-pedido.page';
 @Component({
   selector: 'app-pedidos',
   templateUrl: './pedidos.page.html',
@@ -31,6 +32,7 @@ import { AuthService } from '../../core/services/auth.service';
   imports: [IonicModule, SiderbarComponent, HeaderComponent, NgxSonnerToaster, ButtonLayoutComponent,
    CountComponent, ContainerTableComponent, TableComponent, StatCardComponent, SearchLayoutComponent,
     EstatusComponent, SearchBarComponent, TableSkeletonComponent, PaginationComponent, CommonModule, FiltroFechaComponent,
+    ButtonNewComponent
   ]
 })
 export class PedidosPage implements OnInit {
@@ -318,4 +320,30 @@ const dialogRef = this.dialog.open(DetallePedidoPage, {
       }
     });
   }
+nuevoPedido() {
+  const dialogRef = this.dialog.open(AltaPedidoPage, {
+    width: '850px',
+    maxWidth: '95vw',
+    maxHeight: '95dvh',
+
+    panelClass: [
+  'alta-pedido-dialog',
+  'p-0',
+  'bg-transparent',
+  'shadow-none'
+],
+
+    backdropClass: [
+      'bg-black/40',
+      'backdrop-blur-sm'
+    ]
+  });
+
+  dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
+    if (necesitaRecargar) {
+      this.cargarPedidos();
+      this.cargarEstadisticas();
+    }
+  });
+}
 }

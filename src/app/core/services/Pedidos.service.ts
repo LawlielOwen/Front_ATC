@@ -11,6 +11,31 @@ export interface RespuestaPaginada {
     paginaActual: number;
 }
 
+export interface NuevoPedidoInput {
+    id_cliente: number;
+    id_asesor: number;
+    orden_compra?: string | null;
+    moneda: string;
+    tipo_cambio: number;
+    vigencia_dias: number;
+    detalles: DetallePedidoInput[];
+}
+
+export interface DetallePedidoInput {
+    id_producto: number | null;
+    codigo_manual?: string | null;
+    descripcion_manual?: string | null;
+    extra_descripcion_manual?: string | null;
+    cantidad: number;
+    precio_unitario: number;
+    costo_flete: number;
+}
+
+export interface RespuestaPedidoCreado {
+    id_pedido: number;
+    mensaje: string;
+}
+
 @Injectable({
     providedIn: 'root',
 })
@@ -53,12 +78,10 @@ export class PedidoService {
         return this.http.get<RespuestaPaginada>(`${this.apiUrl}/pedido`, { params });
     }
 
-    // 2. Obtener los detalles (productos) de un pedido
     obtenerDetallesPedido(idPedido: number): Observable<DetallePedido[]> {
         return this.http.get<DetallePedido[]>(`${this.apiUrl}/pedido/${idPedido}`);
     }
 
-    // 3. Subir la factura física (PDF, JPG, PNG)
     subirFactura(idPedido: number, archivoFactura: File): Observable<any> {
         const formData = new FormData();
         
@@ -67,12 +90,10 @@ export class PedidoService {
         return this.http.post<any>(`${this.apiUrl}/pedido/${idPedido}/factura`, formData);
     }
 
-    // 4. Aceptar el pedido (Este verificará el Stock y la Factura en el backend)
     aceptarPedido(idPedido: number): Observable<any> {
         return this.http.post<any>(`${this.apiUrl}/pedido/${idPedido}/aceptar`, {});
     }
 
-    // 5. Cancelar el pedido
     cancelarPedido(idPedido: number): Observable<any> {
         return this.http.post<any>(`${this.apiUrl}/pedido/${idPedido}/cancelar`, {});
     }
@@ -82,6 +103,11 @@ export class PedidoService {
     obtenerEstadisticas(): Observable<{ pendientes: number, cancelados: number, pagados: number, total_mes: number }> {
         return this.http.get<{ pendientes: number, cancelados: number, pagados: number, total_mes: number }>(`${this.apiUrl}/pedido/estadisticas`);
     }
+
+    crearPedidoDirecto(pedido: NuevoPedidoInput): Observable<RespuestaPedidoCreado> {
+        return this.http.post<RespuestaPedidoCreado>(`${this.apiUrl}/pedido`, pedido);
+    }
+
 obtenerUrlFactura(rutaRelativa: string): string {
     if (!rutaRelativa) return '';
     if (rutaRelativa.startsWith('http')) return rutaRelativa;

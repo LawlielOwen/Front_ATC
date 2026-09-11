@@ -14,6 +14,10 @@ const routes: Routes = [
   {
     path: 'subir-recibo',
     loadChildren: () => import('./subir-recibo/subir-recibo.module').then( m => m.SubirReciboPageModule)
+  },
+  {
+    path: 'alta-pedido',
+    loadChildren: () => import('./alta-pedido/alta-pedido.module').then( m => m.AltaPedidoPageModule)
   }
 
 ];

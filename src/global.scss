@@ -323,3 +323,9 @@ input:-webkit-autofill:active {
          placeholder:text-slate-400 text-xs rounded-lg px-3 py-2.5 
          transition-colors focus:ring-1 focus:ring-[#003B8A] focus:border-[#003B8A];
 }
+.alta-pedido-dialog .mat-mdc-dialog-container,
+.alta-pedido-dialog .mat-mdc-dialog-inner-container,
+.alta-pedido-dialog .mat-mdc-dialog-surface,
+.alta-pedido-dialog .mdc-dialog__surface {
+  overflow: hidden !important;
+}

@@ -1,32 +1,55 @@
 <div class="notification-wrapper relative overflow-visible" [id]="Notification_id" (click)="marcarComoLeidas()">
-  <ion-icon name="notifications-outline" class="bell-icon text-2xl"></ion-icon>
+  <svg aria-hidden="true" class="bell-icon w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+      d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+  </svg>
 
   <span *ngIf="contadorNoLeidas > 0"
-    class="notification-dot absolute -top-1 -right-1 flex items-center justify-center w-4 h-4 bg-red-500 rounded-full text-white text-[10px] font-bold z-10">
-    {{ contadorNoLeidas }}
+    class="notification-dot absolute -top-1 -right-1 flex items-center justify-center min-w-4 h-4 px-1 bg-red-500 rounded-full text-white text-[10px] font-bold z-10">
+    {{ contadorNoLeidas > 9 ? '9+' : contadorNoLeidas }}
   </span>
 </div>
 
 <ion-popover [trigger]="Notification_id" triggerAction="click" class="notifications-popover" #popover>
   <ng-template>
-    <div class="block px-4 py-3 font-semibold text-center text-gray-700 bg-gray-50 border-b border-gray-200">
-      Notificaciones
+    <div class="flex items-center justify-between px-4 py-3 bg-gray-50 border-b border-gray-200">
+      <span class="font-semibold text-gray-700">Notificaciones</span>
+      <span *ngIf="notificaciones.length > 0" class="text-[11px] text-gray-400">{{ notificaciones.length }}</span>
     </div>
 
     <div class="divide-y divide-gray-200 bg-white max-h-80 overflow-y-auto">
 
-      <div *ngIf="notificaciones.length === 0" class="p-4 text-center text-gray-500 text-sm">
-        No tienes notificaciones pendientes.
+      <div *ngIf="notificaciones.length === 0" class="flex flex-col items-center gap-2 p-6 text-center text-gray-400">
+        <svg aria-hidden="true" class="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+            d="M15 17h5l-1.4-1.4A2 2 0 0118 14.2V11a6 6 0 10-12 0v3.2a2 2 0 01-.6 1.4L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+        </svg>
+        <span class="text-sm">No tienes notificaciones pendientes.</span>
       </div>
 
       <a *ngFor="let notif of notificaciones" (click)="irAModulo(notif)"
         class="no-underline flex px-4 py-3 hover:bg-gray-50 transition-colors cursor-pointer" [class.bg-blue-50]="notif.leida === 0">
-       <div class="shrink-0">
-          <div class="flex items-center justify-center w-11 h-11 rounded-full" 
+
+        <div class="shrink-0">
+          <div class="flex items-center justify-center w-11 h-11 rounded-full"
                [ngClass]="getEstiloNotificacion(notif).bg">
-            <ion-icon [name]="getEstiloNotificacion(notif).icono" 
-                      class="text-xl" 
-                      [ngClass]="getEstiloNotificacion(notif).color"></ion-icon>
+
+            <svg *ngIf="getEstiloNotificacion(notif).icono === 'check'" aria-hidden="true" class="w-5 h-5" [ngClass]="getEstiloNotificacion(notif).color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12.5l2 2 4-4.5M12 21a9 9 0 100-18 9 9 0 000 18z" />
+            </svg>
+
+            <svg *ngIf="getEstiloNotificacion(notif).icono === 'close'" aria-hidden="true" class="w-5 h-5" [ngClass]="getEstiloNotificacion(notif).color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 9l-6 6m0-6l6 6M12 21a9 9 0 100-18 9 9 0 000 18z" />
+            </svg>
+
+            <svg *ngIf="getEstiloNotificacion(notif).icono === 'document'" aria-hidden="true" class="w-5 h-5" [ngClass]="getEstiloNotificacion(notif).color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+
+            <svg *ngIf="getEstiloNotificacion(notif).icono === 'alert'" aria-hidden="true" class="w-5 h-5" [ngClass]="getEstiloNotificacion(notif).color" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v4m0 4h.01M12 21a9 9 0 100-18 9 9 0 000 18z" />
+            </svg>
+
           </div>
         </div>
 
@@ -36,7 +59,9 @@
             {{ notif.mensaje }}
           </div>
           <div class="text-xs text-gray-400 font-medium flex items-center gap-1">
-            <ion-icon name="time-outline"></ion-icon>
+            <svg aria-hidden="true" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
             {{ (notif.fecha | date:'short') || 'Justo ahora' }}
           </div>
         </div>

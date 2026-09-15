@@ -46,7 +46,7 @@
         </div>
       </app-card-form>
 
-      <app-card-form title="Moneda y Vigencia">
+            <app-card-form title="Moneda y Vigencia">
         <svg icono aria-hidden="true" class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
@@ -60,13 +60,27 @@
             </select>
           </div>
           <div>
-            <label for="pedido-cambio" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Tipo de cambio *</label>
-            <input id="pedido-cambio" type="number" [ngModel]="pedido.tipo_cambio"
-              (ngModelChange)="pedido.tipo_cambio = $event; calcularTotales()"
-              [disabled]="guardando || pedido.moneda !== 'USD'" min="0.0001" max="999999.9999" step="0.0001" inputmode="decimal"
-              aria-describedby="pedido-cambio-ayuda"
-              class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:bg-slate-100 disabled:text-slate-400 transition-colors">
-            <p id="pedido-cambio-ayuda" class="text-[10px] text-slate-400 mt-1 mb-0">{{ pedido.moneda === 'USD' ? 'Pesos por dólar.' : 'En MXN se utiliza 1.' }}</p>
+            <label for="pedido-cambio" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">
+              Tipo de cambio del día <span *ngIf="pedido.moneda === 'USD'">*</span>
+            </label>
+            <div class="relative">
+              <span *ngIf="pedido.moneda === 'USD'" class="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400 pointer-events-none">$</span>
+              <input id="pedido-cambio" type="number" [ngModel]="pedido.tipo_cambio"
+                (ngModelChange)="pedido.tipo_cambio = $event; calcularTotales()"
+                [disabled]="guardando || pedido.moneda !== 'USD'" min="0.0001" max="999999.9999" step="0.0001" inputmode="decimal"
+                aria-describedby="pedido-cambio-ayuda"
+                [class.pl-6]="pedido.moneda === 'USD'"
+                class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:bg-slate-100 disabled:text-slate-400 transition-colors">
+            </div>
+            <p id="pedido-cambio-ayuda" class="text-[10px] mt-1 mb-0">
+              <ng-container *ngIf="pedido.moneda === 'USD'; else infoMxn">
+                <span *ngIf="pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999; else sinCapturar" class="text-[#1D9E75] font-semibold">
+                  1 USD = {{ pedido.tipo_cambio | currency:'MXN':'$':'1.2-2' }} MXN — cuánto costó el dólar hoy.
+                </span>
+                <ng-template #sinCapturar><span class="text-slate-400">Captura cuántos pesos costó 1 dólar el día de hoy.</span></ng-template>
+              </ng-container>
+              <ng-template #infoMxn><span class="text-slate-400">En MXN se utiliza 1, no aplica conversión.</span></ng-template>
+            </p>
           </div>
           <div>
             <label for="pedido-vigencia" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Vigencia (días) *</label>

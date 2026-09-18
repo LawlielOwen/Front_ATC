@@ -14,6 +14,7 @@
           </svg>
         </app-count>
         <div class="flex flex-wrap items-center gap-3">
+          <app-button-new label="Ajustar folio" variante="btn-verde" (click)="ajustarFolio()" *ngIf="rolUsuario === 'Administrador' || rolUsuario === 'Almacen'"> </app-button-new>
           <app-button-new label="Solicitar vale" variante="btn-azul" (click)="abrirModalVale()"></app-button-new>
         </div>
       </app-button-layout>

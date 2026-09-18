@@ -58,9 +58,9 @@ export class ValeService {
         if (fechaFin) params = params.set('fechaFin', fechaFin);
         return this.http.get<RespuestaPaginada>(`${this.apiUrl}/vales/buscar`, { params });
     }
-    aceptarVal(id: number, comentarios: string, id_asesor: number): Observable<any> {
-        return this.http.put(`${this.apiUrl}/vales/aceptar`, { id, comentarios, id_asesor });
-    }
+    aceptarVal(id: number, comentarios: string, id_asesor: number, detalles: any[] = []) {
+  return this.http.post(`${this.apiUrl}/vales/aceptar`, { id, comentarios, id_asesor, detalles });
+}
     rechazarVal(id: number, comentarios: string, id_asesor: number): Observable<any> {
         return this.http.put(`${this.apiUrl}/vales/rechazar`, { id, comentarios, id_asesor });
     }
@@ -95,10 +95,27 @@ export class ValeService {
     crearValeDemo(payload: any): Observable<any> {
         return this.http.post<any>(`${this.apiUrl}/vales/demo`, payload);
     }
-    aceptarValeDemo(id: number, comentarios: string, id_asesor: number): Observable<any> {
-        return this.http.put(`${this.apiUrl}/vales/demo/aceptar`, { id, comentarios, id_asesor });
-    }
+ aceptarValeDemo(id: number, comentarios: string, id_asesor: number, detalles: any[] = []): Observable<any> {
+    return this.http.put(`${this.apiUrl}/vales/demo/aceptar`, { id, comentarios, id_asesor, detalles });
+}
     obtenerVisitasDisponiblesVale(id_tecnico: number) {
         return this.http.get(`${this.apiUrl}/vales/visitas/disponibles-vale/${id_tecnico}`);
     }
+     obtenerFolioAsesor(idAsesor: number): Observable<any> {
+  return this.http.get<any>(`${this.apiUrl}/vales/folios-asesores/${idAsesor}`);
+}
+
+actualizarFolioAsesor(idAsesor: number, iniciales: string, consecutivo: number) {
+  return this.http.put(`${this.apiUrl}/vales/folios-asesores/${idAsesor}`, { iniciales, consecutivo });
+}
+
+verificarFolioValeExistente(folio: string) {
+  const params = new HttpParams().set('folio', folio);
+  return this.http.get(`${this.apiUrl}/vales/verificar-folio`, { params });
+}
+verPdfVale(idvale: number) {
+    return this.http.get(`${this.apiUrl}/vales/${idvale}/pdf`, {
+      responseType: 'blob'
+    });
+  }
 }

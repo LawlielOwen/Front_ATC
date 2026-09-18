@@ -15,4 +15,6 @@ export interface Productos{
     ExtraDescripcion: string
     Apartado: number
     origen: string
+    ApartadoComprometido?: number;
+ApartadoLibre?: number;
 }

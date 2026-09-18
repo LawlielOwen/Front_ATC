@@ -225,21 +225,29 @@ timeoutBusqueda: any;
       }
     });
   }
-  detallesProducto(productoSeleccionado: any) {
-    const dialogRef = this.dialog.open(DetallesProductoPage, {
-      width: '750px',
-      maxWidth: '95vw',
-      panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
-      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-      data: { producto: productoSeleccionado }
+ detallesProducto(productoSeleccionado: any) {
+    this.ps.getProducto(productoSeleccionado.id).subscribe({
+        next: (productoActualizado: any) => {
+            const dialogRef = this.dialog.open(DetallesProductoPage, {
+                width: '750px',
+                maxWidth: '95vw',
+                panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+                backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+                data: { producto: productoActualizado }
+            });
+            dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
+                if (necesitaRecargar) {
+                    this.cargarProductos();
+                    this.obtenerTotalActivos();
+                }
+            });
+        },
+        error: (err) => {
+            console.error('Error al cargar detalle del producto', err);
+            toast.error('No se pudo cargar el detalle del producto');
+        }
     });
-    dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
-      if (necesitaRecargar) {
-        this.cargarProductos();
-        this.obtenerTotalActivos();
-      }
-    });
-  }
+}
   registrarExistencia() {
     const dialogRef = this.dialog.open(ExistenciasPage, {
       data: { tipo: 'Entrada' },

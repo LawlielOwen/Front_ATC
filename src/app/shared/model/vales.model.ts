@@ -21,4 +21,5 @@ export interface DetalleVale {
   id_producto: number;
   id_vale: number;
   piezas: number;
+  detalles?:string
 }

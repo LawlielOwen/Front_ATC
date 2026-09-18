@@ -164,7 +164,6 @@ async aceptarCotizacion(cot: any) {
       return;
     }
 
-    // accion === 'nuevo' -> tu flujo actual, sin cambios
     const nombreCliente = cot.nombre_cliente_final && cot.nombre_cliente_final !== 'Sin Nombre'
       ? cot.nombre_cliente_final
       : (cot.nombre_prospecto || cot.Cliente || '');
@@ -236,8 +235,8 @@ abrirPdf(cotizacion: any) {
     text: 'Por favor espera un momento',
     allowOutsideClick: false,
     allowEscapeKey: false,
-    heightAuto: false,        // Evita que cambie la altura del body y empuje el modal
-    scrollbarPadding: false,  // Evita el padding automático que genera la franja blanca
+    heightAuto: false,       
+    scrollbarPadding: false,  
     didOpen: () => Swal.showLoading()
   });
 

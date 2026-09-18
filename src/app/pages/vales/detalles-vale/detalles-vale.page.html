@@ -1,152 +1,461 @@
-<div class="bg-slate-200 rounded-[10px] overflow-hidden shadow-2xl w-full max-w-5xl mx-auto max-h-[90vh] flex flex-col border border-gray-100">
-  
+<div
+  class="bg-[#e2e8f0] rounded-[10px] overflow-hidden shadow-2xl w-full max-w-6xl mx-auto max-h-[90vh] flex flex-col border border-[#f1f5f9]">
+
   <app-header-modal [label]="'Detalles de Vale ' + (vale?.folio_vale || '')"></app-header-modal>
 
-  <div class="p-6 overflow-y-auto flex-1 bg-white m-4 rounded-xl shadow-sm border border-slate-100">
-    <div class="flex flex-col gap-8 animate-fade-in" *ngIf="vale">
+  <div class="p-6 overflow-y-auto flex-1 bg-white m-4 rounded-xl shadow-sm border border-[#f1f5f9] custom-scrollbar"
+    *ngIf="vale">
+
+    <!-- BARRA DE ESTATUS -->
+    <div class="flex flex-wrap items-center justify-between gap-3 rounded-2xl p-4 mb-7 border-2" [ngStyle]="{
+           'background-color': vale.estatus === 1 ? '#ecfdf5' : vale.estatus === 2 ? '#fef2f2' : '#f8fafc',
+           'border-color': vale.estatus === 1 ? '#6ee7b7' : vale.estatus === 2 ? '#fca5a5' : '#cbd5e1'
+         }">
+      <div class="flex items-center gap-3">
+        <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0"
+          [ngStyle]="{'background-color': vale.estatus === 1 ? '#059669' : vale.estatus === 2 ? '#dc2626' : '#64748b'}">
+          <svg *ngIf="vale.estatus === 0" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            class="w-5 h-5 shrink-0 text-white">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <svg *ngIf="vale.estatus === 1" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            class="w-5 h-5 shrink-0 text-white">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+          </svg>
+          <svg *ngIf="vale.estatus === 2" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            class="w-5 h-5 shrink-0 text-white">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </div>
+        <div>
+          <span class="block text-[9px] font-bold uppercase tracking-widest"
+            [ngStyle]="{'color': vale.estatus === 1 ? '#047857' : vale.estatus === 2 ? '#b91c1c' : '#475569'}">
+            {{ getTextoEstatus(vale.estatus) }}
+          </span>
+          <span class="block text-base font-black text-[#0d1f38]">{{ vale.folio_vale }}</span>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap gap-2">
+        <span
+          class="flex items-center gap-1.5 bg-white border border-[#e2e8f0] rounded-full px-3 py-1.5 text-[11px] font-semibold text-[#0d1f38]">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            class="w-3.5 h-3.5 shrink-0 text-[#003B8A]">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M3 21h18M5 21V7l8-4v18M13 21V9l6 3v9M9 9h.01M9 13h.01M9 17h.01" />
+          </svg>
+          {{ vale.nombre_cliente }}
+        </span>
+        <span
+          class="flex items-center gap-1.5 bg-white border border-[#e2e8f0] rounded-full px-3 py-1.5 text-[11px] font-semibold text-[#0d1f38]">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            class="w-3.5 h-3.5 shrink-0 text-[#003B8A]">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          {{ vale.nombre_asesor }}
+        </span>
+        <span
+          class="flex items-center gap-1.5 bg-white border border-[#e2e8f0] rounded-full px-3 py-1.5 text-[11px] font-semibold text-[#0d1f38]">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            class="w-3.5 h-3.5 shrink-0 text-[#003B8A]">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+          </svg>
+          {{ vale.fecha | date:'dd MMM yyyy, hh:mm a':'':'es-MX' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="flex flex-col gap-8 animate-fade-in">
 
       <!-- SECCIÓN 1: Información -->
       <div>
-        <h3 class="text-sm font-bold text-[#0d1f38] border-b border-slate-200 pb-2 mb-4 flex items-center gap-2">
-          <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-          </svg>
-          Información del asesor y almacén
-        </h3>
-        
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="flex flex-col">
-            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Empresa / Cliente Destino</span>
-            <p class="text-sm font-bold text-[#003B8A]">{{ vale.nombre_cliente }}</p>
-            <p class="text-[11px] text-slate-500 mt-0.5">OC: {{ vale.orden_compra || 'N/A' }}</p>
-          </div>
-
-          <div class="flex flex-col">
-            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Asesor Solicitante</span>
-            <p class="text-sm font-bold text-[#0d1f38]">{{ vale.nombre_asesor }}</p>
-            <p class="text-[11px] text-slate-500 mt-0.5">Asesor de ventas</p>
-          </div>
-
-          <div class="flex flex-col">
-            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fecha de Solicitud</span>
-            <p class="text-sm font-bold text-[#0d1f38]">{{ vale.fecha | date:'hh:mm a' }}</p>
-            <p class="text-[11px] text-slate-500 mt-0.5">{{ vale.fecha | date:'dd MMMM yyyy':'':'es-MX' }}</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- SECCIÓN 2: Material -->
-      <div>
-        <div class="flex justify-between items-end border-b border-slate-200 pb-2 mb-4">
-          <h3 class="text-sm font-bold text-[#0d1f38] flex items-center gap-2">
-            <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+        <div class="flex items-center gap-2.5 mb-5">
+          <div class="w-8 h-8 rounded-lg bg-[#dbeafe] flex items-center justify-center shrink-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              class="w-4 h-4 shrink-0 text-[#1d4ed8]">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
             </svg>
-            Material solicitado
-          </h3>
-          <span class="text-[11px] text-slate-400 font-medium">{{ vale.productos?.length || 0 }} productos · {{ getTotalPiezas() }} piezas</span>
+          </div>
+          <h3 class="text-sm font-bold text-[#0d1f38]">Información del asesor y almacén</h3>
+          <div class="flex-1 h-px bg-[#e2e8f0]"></div>
         </div>
 
-        <div class="rounded-lg border border-slate-200 overflow-hidden">
-          <div class="bg-[#003B8A] grid grid-cols-12 gap-3 py-2.5 px-4">
-            <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">N.</span>
-            <span class="col-span-2 text-[9px] font-bold text-white uppercase tracking-widest">Cód. Interno</span>
-            <span class="col-span-3 text-[9px] font-bold text-white uppercase tracking-widest">Código Japón</span>
-            <span class="col-span-5 text-[9px] font-bold text-white uppercase tracking-widest">Nombre</span>
-            <span class="col-span-1 text-[9px] font-bold text-white uppercase tracking-widest text-center">Pzas</span>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="flex flex-col rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4 shadow-sm">
+            <span class="text-[9px] font-bold text-[#64748b] uppercase tracking-widest mb-1.5">Empresa / Cliente
+              Destino</span>
+            <p class="text-sm font-bold text-[#003B8A]">{{ vale.nombre_cliente }}</p>
+            <p class="text-[11px] text-[#64748b] mt-0.5">OC: {{ vale.orden_compra || 'N/A' }}</p>
           </div>
 
-          <div *ngFor="let prod of vale.productos; let i = index" class="grid grid-cols-12 gap-3 py-2 px-4 border-b border-slate-100 last:border-0 hover:bg-slate-50 transition-colors items-center">
-            <div class="col-span-1 text-[11px] font-bold text-slate-400 text-center">{{ i + 1 }}</div>
-            <div class="col-span-2 text-xs font-medium text-slate-500">{{ prod.Codigo_numeral || 'Sin codigo' }}</div>
-            <div class="col-span-3 text-xs font-medium text-slate-500">{{ prod.Codigo_japon || 'No aplica' }}</div>
-            <div class="col-span-5 text-xs font-bold text-[#0d1f38] truncate" [title]="prod.nombre_producto">{{ prod.nombre_producto }}</div>
-            <div class="col-span-1 text-sm font-black text-[#003B8A] text-center">{{ prod.piezas }}</div>
+          <div class="flex flex-col rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4 shadow-sm">
+            <span class="text-[9px] font-bold text-[#64748b] uppercase tracking-widest mb-1.5">Asesor Solicitante</span>
+            <p class="text-sm font-bold text-[#0d1f38]">{{ vale.nombre_asesor }}</p>
+            <p class="text-[11px] text-[#64748b] mt-0.5">Asesor de ventas</p>
           </div>
 
-          <div class="bg-slate-50 py-2.5 px-6 flex justify-end items-center gap-4 border-t border-slate-200">
-            <span class="text-xs font-bold text-[#0d1f38]">Total de piezas:</span>
-            <span class="text-lg font-black text-[#003B8A] w-12 text-center">{{ getTotalPiezas() }}</span>
+          <div class="flex flex-col rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4 shadow-sm">
+            <span class="text-[9px] font-bold text-[#64748b] uppercase tracking-widest mb-1.5">Fecha de Solicitud</span>
+            <p class="text-sm font-bold text-[#0d1f38]">{{ vale.fecha | date:'hh:mm a' }}</p>
+            <p class="text-[11px] text-[#64748b] mt-0.5">{{ vale.fecha | date:'dd MMMM yyyy':'':'es-MX' }}</p>
           </div>
         </div>
       </div>
 
-      <!-- SECCIÓN 3: Firmas y Resolución -->
+      <!-- SECCIÓN 2: Material solicitado -->
       <div>
-        <h3 class="text-sm font-bold text-[#0d1f38] border-b border-slate-200 pb-2 mb-4 flex items-center gap-2">
-          <svg class="w-4 h-4 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-          </svg>
-          Autorización.
-        </h3>
-
-        <!-- CAJA DE COMENTARIOS PARA ESTATUS 0 -->
-        <div  *ngIf="vale.estatus === 0 && (rolUsuario === 'Administrador' || rolUsuario === 'Almacen')"  class="mb-6" >
-          <label class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 block">
-            Observaciones o Motivo de rechazo (Opcional)
-          </label>
-          <textarea 
-            [(ngModel)]="comentarioResolucion"
-            placeholder="Escribe aquí las observaciones" 
-            class="w-full bg-slate-50 border border-slate-200 focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-lg text-sm text-[#414a53] p-3 outline-none transition-all resize-none min-h-[80px]">
-          </textarea>
-        </div>
-
-        <!-- Alertas de Estatus 1 y 2 -->
-        <div *ngIf="vale.estatus === 2" class="bg-red-50 border border-red-200 rounded-lg p-3.5 mb-6">
-          <h4 class="text-xs font-bold text-red-800 mb-0.5">Motivo de rechazo</h4>
-          <p class="text-xs text-red-600">{{ vale.comentario || 'Sin observaciones registradas.' }}</p>
-        </div>
-
-        <div *ngIf="vale.estatus === 1 && vale.comentario" class="bg-emerald-50 border border-emerald-200 rounded-lg p-3.5 mb-6">
-          <h4 class="text-xs font-bold text-emerald-800 mb-0.5">Observaciones de entrega</h4>
-          <p class="text-xs text-emerald-600">{{ vale.comentario }}</p>
-        </div>
-
-        <!-- Tarjetas de Firmas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-          
-          <div class="border border-slate-200 rounded-xl p-4 shadow-sm">
-            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Recibe Material · Asesor</span>
-            <p class="text-sm font-bold text-[#0d1f38] mt-1">{{ vale.nombre_asesor }}</p>
-            <p class="text-[11px] text-slate-500 mb-3">Solicitante Autorizado</p>
-
-            <div class="border-2 border-dashed border-emerald-300 bg-emerald-50/30 rounded-lg p-3 flex flex-col items-center justify-center h-24">
-              <svg class="w-8 h-8 text-emerald-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+        <div class="flex justify-between items-end mb-5">
+          <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-[#fef3c7] flex items-center justify-center shrink-0">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                class="w-4 h-4 shrink-0 text-[#b45309]">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
               </svg>
-              <span class="text-xs font-bold text-emerald-700">Solicitud registrada</span>
-              <span class="text-[9px] text-emerald-600/70 mt-1">Fecha de creacion: {{ vale.fecha | date:'dd MMM yyyy' }}</span>
+            </div>
+            <h3 class="text-sm font-bold text-[#0d1f38]">Material solicitado</h3>
+          </div>
+          <span
+            class="flex items-center gap-1.5 bg-[#fef3c7] rounded-full px-3 py-1 text-[11px] font-bold text-[#92400e]">
+            {{ vale.productos?.length || 0 }} productos · {{ getTotalPiezas() }} piezas
+          </span>
+        </div>
+
+        <!-- ═════════ SELECTOR DE MODO DE OBSERVACIÓN (solo al revisar un vale pendiente) ═════════ -->
+        <div *ngIf="puedeEditar" class="mb-5 rounded-2xl border border-[#e2e8f0] bg-[#f8fafc] p-4">
+
+          <p id="lblModoObs" class="text-[10px] font-bold text-[#64748b] uppercase tracking-widest mb-3">
+            ¿Cómo quieres agregar observaciones al PDF?
+          </p>
+
+          <div role="radiogroup" aria-labelledby="lblModoObs" class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+            <!-- Opción: Por producto -->
+            <button type="button" role="radio" [attr.aria-checked]="modoObservacion === 'producto'"
+              (click)="cambiarModo('producto')" [disabled]="enviando"
+              class="flex items-center gap-3 text-left rounded-xl border-2 p-3.5 cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#003B8A] focus-visible:ring-offset-2"
+              [ngClass]="modoObservacion === 'producto'
+                ? 'border-[#003B8A] bg-[#eff6ff]'
+                : 'border-[#e2e8f0] bg-white hover:border-[#94a3b8]'">
+
+              <!-- Miniatura: una marca por cada fila -->
+              <svg width="44" height="30" viewBox="0 0 44 30" class="shrink-0" aria-hidden="true">
+                <rect x="0.5" y="0.5" width="43" height="29" rx="4" fill="#fff" stroke="#cbd5e1" />
+                <line x1="26" y1="0.5" x2="26" y2="29.5" stroke="#cbd5e1" />
+                <line x1="0.5" y1="10" x2="43.5" y2="10" stroke="#e2e8f0" />
+                <line x1="0.5" y1="20" x2="43.5" y2="20" stroke="#e2e8f0" />
+                <rect x="30" y="3.5" width="10" height="3" rx="1.5" fill="#1D9E75" />
+                <rect x="30" y="13.5" width="10" height="3" rx="1.5" fill="#1D9E75" />
+                <rect x="30" y="23.5" width="10" height="3" rx="1.5" fill="#1D9E75" />
+              </svg>
+
+              <span class="flex-1 min-w-0">
+                <span class="block text-xs font-bold text-[#0d1f38]">Por producto</span>
+                <span class="block text-[11px] text-[#64748b] mt-0.5 leading-snug">
+                  Una nota para cada producto. Aparece en la fila de ese producto.
+                </span>
+              </span>
+
+              <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                [ngClass]="modoObservacion === 'producto' ? 'border-[#003B8A] bg-[#003B8A]' : 'border-[#cbd5e1] bg-white'">
+                <svg *ngIf="modoObservacion === 'producto'" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" class="w-3 h-3 text-white" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+            </button>
+
+            <!-- Opción: General -->
+            <button type="button" role="radio" [attr.aria-checked]="modoObservacion === 'general'"
+              (click)="cambiarModo('general')" [disabled]="enviando"
+              class="flex items-center gap-3 text-left rounded-xl border-2 p-3.5 cursor-pointer transition-colors duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[#003B8A] focus-visible:ring-offset-2"
+              [ngClass]="modoObservacion === 'general'
+                ? 'border-[#003B8A] bg-[#eff6ff]'
+                : 'border-[#e2e8f0] bg-white hover:border-[#94a3b8]'">
+
+              <!-- Miniatura: solo la primera fila -->
+              <svg width="44" height="30" viewBox="0 0 44 30" class="shrink-0" aria-hidden="true">
+                <rect x="0.5" y="0.5" width="43" height="29" rx="4" fill="#fff" stroke="#cbd5e1" />
+                <line x1="26" y1="0.5" x2="26" y2="29.5" stroke="#cbd5e1" />
+                <line x1="0.5" y1="10" x2="43.5" y2="10" stroke="#e2e8f0" />
+                <line x1="0.5" y1="20" x2="43.5" y2="20" stroke="#e2e8f0" />
+                <rect x="30" y="3.5" width="10" height="3" rx="1.5" fill="#1D9E75" />
+              </svg>
+
+              <span class="flex-1 min-w-0">
+                <span class="block text-xs font-bold text-[#0d1f38]">Un comentario general</span>
+                <span class="block text-[11px] text-[#64748b] mt-0.5 leading-snug">
+                  Una sola nota para todo el vale. Aparece en la primera fila del PDF.
+                </span>
+              </span>
+
+              <span class="w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0"
+                [ngClass]="modoObservacion === 'general' ? 'border-[#003B8A] bg-[#003B8A]' : 'border-[#cbd5e1] bg-white'">
+                <svg *ngIf="modoObservacion === 'general'" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" class="w-3 h-3 text-white" aria-hidden="true">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="4" d="M5 13l4 4L19 7" />
+                </svg>
+              </span>
+            </button>
+          </div>
+
+          <!-- Aviso permanente -->
+          <div class="mt-3 flex items-start gap-2 rounded-lg bg-[#fffbeb] border border-[#fde68a] px-3 py-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              class="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#b45309]" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p class="text-[11px] text-[#92400e] leading-snug">
+              Solo puedes usar una opción por vale; al cambiar, se borra lo escrito en la otra.
+              Las observaciones se guardan al aceptar el vale, por eso <strong>Ver PDF</strong> no las
+              mostrará hasta entonces.
+            </p>
+          </div>
+
+          <!-- Comentario general (solo en modo general) -->
+          <div *ngIf="modoObservacion === 'general'" class="mt-4">
+            <div class="flex items-end justify-between mb-1.5">
+              <label for="comentarioGeneral" class="text-[11px] font-bold text-[#0d1f38]">
+                Comentario general <span class="font-medium text-[#64748b]">(opcional)</span>
+              </label>
+              <span class="text-[10px] font-semibold"
+                [ngClass]="(comentarioResolucion?.length || 0) >= MAX_COMENTARIO_GENERAL * 0.9 ? 'text-[#b45309]' : 'text-[#64748b]'">
+                {{ comentarioResolucion?.length || 0 }}/{{ MAX_COMENTARIO_GENERAL }}
+              </span>
+            </div>
+            <textarea id="comentarioGeneral" [(ngModel)]="comentarioResolucion" [maxlength]="MAX_COMENTARIO_GENERAL"
+              rows="3" placeholder="Ej. Entregar en caja cerrada, cortar a medida" style="forced-color-adjust:none;"
+              class="w-full bg-white border border-[#cbd5e1] focus:border-[#003B8A] focus:ring-1 focus:ring-[#003B8A] rounded-lg text-sm text-[#414a53] placeholder:text-[#94a3b8] p-3 outline-none transition-all resize-none"></textarea>
+            <p class="text-[10px] text-[#64748b] mt-1">
+              Vista previa: mira la primera fila de la columna Observaciones, así saldrá en el PDF.
+            </p>
+          </div>
+        </div>
+
+        <!-- ═════════ TABLA ═════════ -->
+        <div class="rounded-xl border border-[#e2e8f0] overflow-hidden shadow-sm">
+          <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+              <thead class="bg-[#003B8A]">
+                <tr>
+                  <th class="py-3 px-4 text-[9px] font-bold text-white uppercase tracking-widest text-center w-10">N.
+                  </th>
+                  <th class="py-3 px-4 text-[9px] font-bold text-white uppercase tracking-widest w-28">Cód. Interno</th>
+                  <th class="py-3 px-4 text-[9px] font-bold text-white uppercase tracking-widest w-32">Código Japón</th>
+                  <th class="py-3 px-4 text-[9px] font-bold text-white uppercase tracking-widest min-w-[200px]">Nombre
+                  </th>
+                  <th class="py-3 px-4 text-[9px] font-bold text-white uppercase tracking-widest text-center w-20">Pzas
+                  </th>
+                  <th class="py-3 px-4 text-[9px] font-bold text-white uppercase tracking-widest min-w-[220px]">
+                    Observaciones</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let prod of vale.productos; let i = index"
+                  class="border-b border-[#f1f5f9] last:border-0 transition-colors"
+                  [ngStyle]="{'background-color': i % 2 === 1 ? '#f8fafc' : '#ffffff'}">
+                  <td class="py-3 px-4 align-middle text-center">
+                    <span
+                      class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-[#dbeafe] text-[10px] font-bold text-[#1d4ed8]">{{
+                      i + 1 }}</span>
+                  </td>
+                  <td class="py-3 px-4 text-xs font-medium text-[#64748b] align-middle">{{ prod.Codigo_numeral || 'Sin
+                    código' }}</td>
+                  <td class="py-3 px-4 text-xs font-medium text-[#64748b] align-middle">{{ prod.Codigo_japon || 'No
+                    aplica' }}</td>
+                  <td class="py-3 px-4 text-xs font-bold text-[#0d1f38] align-middle break-words">
+                    {{ prod.nombre_producto || prod.descripcion_manual }}
+                  </td>
+                  <td class="py-3 px-4 align-middle text-center">
+                    <span
+                      class="inline-flex items-center justify-center min-w-[28px] px-2 py-1 rounded-full bg-[#003B8A] text-xs font-black text-white">{{
+                      prod.piezas }}</span>
+                  </td>
+
+                  <!-- Celda de observaciones -->
+                  <td class="py-3 px-4 align-middle">
+
+                    <ng-container *ngIf="puedeEditar; else observacionLectura">
+
+                      <!-- MODO PRODUCTO: input editable -->
+                      <input *ngIf="modoObservacion === 'producto'; else celdaGeneral" type="text"
+                        [(ngModel)]="prod.observaciones" [maxlength]="MAX_OBS_PRODUCTO"
+                        [attr.aria-label]="'Observación del producto ' + (i + 1)"
+                        placeholder="Opcional (Ej. Cortar a medida)"
+                        style="-webkit-appearance:none; appearance:none; forced-color-adjust:none;"
+                        class="w-full bg-white border border-[#cbd5e1] rounded-md px-2.5 py-2 text-[11px] text-[#0d1f38] outline-none shadow-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] placeholder:text-[#94a3b8] transition-all">
+
+                      <!-- MODO GENERAL: primera fila = vista previa, demás = bloqueadas -->
+                      <ng-template #celdaGeneral>
+                        <div *ngIf="i === 0; else celdaBloqueada"
+                          class="rounded-md border-2 border-dashed border-[#1D9E75] bg-[#ecfdf5] px-2.5 py-2 text-[11px] leading-snug break-words whitespace-pre-line">
+                          <span *ngIf="comentarioResolucion?.trim(); else placeholderGeneral"
+                            class="font-medium text-[#065f46]">{{ comentarioResolucion }}</span>
+                          <ng-template #placeholderGeneral>
+                            <span class="italic text-[#047857]">Aquí aparecerá tu comentario general</span>
+                          </ng-template>
+                        </div>
+                        <ng-template #celdaBloqueada>
+                          <span class="block text-[11px] text-[#94a3b8] select-none" aria-hidden="true">—</span>
+                        </ng-template>
+                      </ng-template>
+                    </ng-container>
+
+                    <!-- SOLO LECTURA (vale aceptado / rechazado / sin permiso) -->
+                    <ng-template #observacionLectura>
+                      <span class="text-[11px] font-medium text-[#003B8A] whitespace-pre-line">{{
+                        getObservacionLectura(prod, i) || '—' }}</span>
+                    </ng-template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <div class="bg-[#f8fafc] py-3 px-6 flex flex-wrap justify-between items-center gap-3 border-t border-[#e2e8f0]">
+            <span *ngIf="puedeEditar && modoObservacion === 'producto'; else espaciador"
+              class="text-[11px] font-medium text-[#64748b]">
+              {{ totalObsProductos }} de {{ vale.productos?.length || 0 }} productos con observación
+            </span>
+            <ng-template #espaciador><span></span></ng-template>
+
+            <div class="flex items-center gap-4">
+              <span class="text-xs font-bold text-[#0d1f38]">Total de piezas:</span>
+              <span
+                class="inline-flex items-center justify-center min-w-[36px] px-3 py-1 rounded-full bg-[#003B8A] text-base font-black text-white">{{
+                getTotalPiezas() }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN 3: Autorización -->
+      <div>
+        <div class="flex items-center gap-2.5 mb-5">
+          <div class="w-8 h-8 rounded-lg bg-[#ede9fe] flex items-center justify-center shrink-0">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              class="w-4 h-4 shrink-0 text-[#6d28d9]">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+            </svg>
+          </div>
+          <h3 class="text-sm font-bold text-[#0d1f38]">Autorización</h3>
+          <div class="flex-1 h-px bg-[#e2e8f0]"></div>
+        </div>
+
+        <!-- Qué pasará al pulsar los botones (reemplaza al textarea, que ahora vive junto al selector) -->
+        <div *ngIf="puedeEditar"
+          class="flex items-start gap-3 bg-[#f8fafc] border border-[#e2e8f0] rounded-xl p-3.5 mb-6">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            class="w-4 h-4 shrink-0 mt-0.5 text-[#64748b]" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <p class="text-[11px] text-[#475569] leading-snug">
+            Al <strong>aceptar</strong> verás un resumen para confirmar.
+            Al <strong>rechazar</strong> deberás escribir el motivo.
+          </p>
+        </div>
+
+        <div *ngIf="vale.estatus === 2"
+          class="flex items-start gap-3 bg-[#fef2f2] border-2 border-[#fca5a5] rounded-xl p-4 mb-6">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            class="w-4 h-4 shrink-0 mt-0.5 text-[#b91c1c]">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M12 9v3.75m0 3.75h.008v.008H12v-.008zM21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <div>
+            <h4 class="text-xs font-bold text-[#991b1b] mb-0.5">Motivo de rechazo</h4>
+            <p class="text-xs text-[#b91c1c]">{{ vale.comentario || 'Sin observaciones generales registradas.' }}</p>
+          </div>
+        </div>
+
+        <div *ngIf="vale.estatus === 1 && vale.comentario"
+          class="flex items-start gap-3 bg-[#ecfdf5] border-2 border-[#6ee7b7] rounded-xl p-4 mb-6">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+            class="w-5 h-5 shrink-0 text-[#059669]">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+          </svg>
+          <div>
+            <h4 class="text-xs font-bold text-[#065f46] mb-0.5">Comentario general de entrega</h4>
+            <p class="text-xs text-[#047857]">{{ vale.comentario }}</p>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+          <div class="rounded-2xl p-5 shadow-sm border-2 border-[#6ee7b7] bg-gradient-to-br from-[#ecfdf5] to-white">
+            <span class="text-[9px] font-bold text-[#64748b] uppercase tracking-widest">Recibe Material · Asesor</span>
+            <p class="text-base font-black text-[#0d1f38] mt-1">{{ vale.nombre_asesor }}</p>
+            <p class="text-[11px] text-[#64748b] mb-4">Solicitante Autorizado</p>
+
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-full bg-[#059669] flex items-center justify-center shrink-0 shadow-md">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                  class="w-5 h-5 shrink-0 text-white">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <span class="block text-sm font-bold text-[#065f46]">Solicitud registrada</span>
+                <span class="block text-[10px] text-[#047857]">Fecha de creación: {{ vale.fecha | date:'dd MMM yyyy'
+                  }}</span>
+              </div>
             </div>
           </div>
 
-          <div class="border border-slate-200 rounded-xl p-4 shadow-sm">
-            <span class="text-[9px] font-bold text-slate-400 uppercase tracking-widest">Entrega Material · Almacén</span>
-            <p class="text-sm font-bold text-[#0d1f38] mt-1">Autorización Central</p>
-            <p class="text-[11px] text-slate-500 mb-3">Supervisor de sucursal o almacén</p>
+          <div class="rounded-2xl p-5 shadow-sm border-2"
+            [ngStyle]="{'border-color': vale.estatus === 1 ? '#6ee7b7' : vale.estatus === 2 ? '#fca5a5' : '#cbd5e1'}"
+            [class.bg-gradient-to-br]="true" [ngClass]="{
+                 'from-[#ecfdf5] to-white': vale.estatus === 1,
+                 'from-[#fef2f2] to-white': vale.estatus === 2,
+                 'from-[#f8fafc] to-white': vale.estatus === 0
+               }">
+            <span class="text-[9px] font-bold text-[#64748b] uppercase tracking-widest">Entrega Material ·
+              Almacén</span>
+            <p class="text-base font-black text-[#0d1f38] mt-1">Autorización Central</p>
+            <p class="text-[11px] text-[#64748b] mb-4">Supervisor de sucursal o almacén</p>
 
-            <div *ngIf="vale.estatus === 0" class="border-2 border-dashed border-slate-300 bg-slate-50 rounded-lg p-3 flex flex-col items-center justify-center h-24">
-              <svg class="w-8 h-8 text-slate-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-xs font-bold text-slate-500">Pendiente de revisión</span>
-              <span class="text-[9px] text-slate-400 mt-1">Esperando revision</span>
-            </div>
+            <div class="flex items-center gap-3">
+              <div class="w-11 h-11 rounded-full flex items-center justify-center shrink-0 shadow-md"
+                [ngStyle]="{'background-color': vale.estatus === 1 ? '#059669' : vale.estatus === 2 ? '#dc2626' : '#94a3b8'}">
 
-            <div *ngIf="vale.estatus === 1" class="border-2 border-dashed border-emerald-300 bg-emerald-50/30 rounded-lg p-3 flex flex-col items-center justify-center h-24">
-              <svg class="w-8 h-8 text-emerald-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-xs font-bold text-emerald-700">Entrega Autorizada</span>
-              <span class="text-[9px] text-emerald-600/70 mt-1">Validado por almacen</span>
-            </div>
+                <!-- Icono Pendiente -->
+                <svg *ngIf="vale.estatus === 0" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" class="w-5 h-5 shrink-0 text-white">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
 
-            <div *ngIf="vale.estatus === 2" class="border-2 border-dashed border-red-300 bg-red-50/30 rounded-lg p-3 flex flex-col items-center justify-center h-24">
-              <svg class="w-8 h-8 text-red-500 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-              <span class="text-xs font-bold text-red-700">Solicitud rechazada</span>
-              <span class="text-[9px] text-red-600/70 mt-1">Acción denegada</span>
+                <!-- Icono Aceptado -->
+                <svg *ngIf="vale.estatus === 1" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" class="w-5 h-5 shrink-0 text-white">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+
+                <!-- Icono Rechazado -->
+                <svg *ngIf="vale.estatus === 2" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" class="w-5 h-5 shrink-0 text-white">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </div>
+
+              <div>
+                <span class="block text-sm font-bold"
+                  [ngStyle]="{'color': vale.estatus === 1 ? '#065f46' : vale.estatus === 2 ? '#991b1b' : '#475569'}">
+                  {{ getTextoEstatus(vale.estatus) }}
+                </span>
+                <span class="block text-[10px]"
+                  [ngStyle]="{'color': vale.estatus === 1 ? '#047857' : vale.estatus === 2 ? '#b91c1c' : '#64748b'}">
+                  {{ vale.estatus === 1 ? 'Validado por almacén' : vale.estatus === 2 ? 'Acción denegada' : 'Esperando
+                  revisión' }}
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -155,11 +464,25 @@
     </div>
   </div>
 
-  <app-footer-modal [paddingClass]="'p-4 px-6 bg-white border-t border-slate-200'">
+  <app-footer-modal [paddingClass]="'p-4 px-6 bg-white border-t border-[#e2e8f0]'">
+
     <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
-    <div class="flex gap-2.5" *ngIf="vale?.estatus === 0">
-      <app-button-action [label]="'Rechazar'" [claseCss]="'btn-eliminar'" (click)="rechazarVale()" *ngIf="rolUsuario === 'Administrador' || rolUsuario === 'Almacen'"></app-button-action>
-      <app-button-action [label]="'Aceptar'" [claseCss]="'btn-activar'" (click)="aceptarVale()" *ngIf="rolUsuario === 'Administrador' || rolUsuario === 'Almacen'"></app-button-action>
+
+    <!-- Contenedor derecho (Ver PDF + botones de autorización) -->
+    <div class="flex items-center gap-2.5">
+
+      <app-button-action [label]="'Ver PDF'" [claseCss]="'btn-pdf'" (click)="abrirPdfVale(vale)"></app-button-action>
+
+      <ng-container *ngIf="puedeEditar">
+        <!-- Mientras se envía, se bloquean para evitar doble clic -->
+        <app-button-action [label]="'Rechazar'" [claseCss]="'btn-eliminar'" (click)="rechazarVale()"
+          [class.pointer-events-none]="enviando" [class.opacity-60]="enviando"></app-button-action>
+        <app-button-action [label]="enviando ? 'Procesando...' : 'Aceptar'" [claseCss]="'btn-activar'"
+          (click)="aceptarVale()" [class.pointer-events-none]="enviando"
+          [class.opacity-60]="enviando"></app-button-action>
+      </ng-container>
+
     </div>
+
   </app-footer-modal>
 </div>

@@ -10,6 +10,7 @@ import { FooterModalComponent } from "../../../shared/components/UI/modal/footer
 import { HeaderModalComponent } from "../../../shared/components/UI/modal/header-modal/header-modal.component";
 import { ButtonActionComponent } from "../../../shared/components/UI/buttons/button-action/button-action.component";
 import { CardFormComponent } from "../../../shared/components/UI/form/card-form/card-form.component";
+
 import { AsesoresService } from "../../../core/services/Asesores.service";
 
 @Component({
@@ -33,6 +34,10 @@ export class NumCotPage implements OnInit {
   guardando: boolean = false;
   cargando: boolean = true;
 
+  tituloModal: string = 'Ajustar Folio de Cotización';
+  entidadTexto: string = 'cotización';
+  accionTexto: string = 'la siguiente cotización que se guarde';
+
   constructor(
     public dialogRef: MatDialogRef<NumCotPage>,
     private asesoresService: AsesoresService
@@ -40,8 +45,9 @@ export class NumCotPage implements OnInit {
 
   ngOnInit() {
     this.cargando = true;
+
     this.asesoresService.obtenerConsecutivoGlobal().subscribe({
-      next: (res) => {
+      next: (res: any) => {
         const consecutivo = res.consecutivo;
         this.consecutivoActualOriginal = consecutivo;
         this.folioActualPreview = this.formatearFolio(consecutivo);
@@ -70,7 +76,7 @@ export class NumCotPage implements OnInit {
   }
 
   private formatearFolio(numero: number): string {
-    const numeroFormateado = numero.toString().padStart(3, '0');
+    const numeroFormateado = numero < 1000 ? numero.toString().padStart(3, '0') : numero.toString();
     return `C-${numeroFormateado}`;
   }
 
@@ -84,7 +90,9 @@ export class NumCotPage implements OnInit {
     this.consecutivoChange$.next(this.nuevoConsecutivo);
   }
 
-  cerrar() { this.dialogRef.close(false); }
+  cerrar() {
+    this.dialogRef.close(false);
+  }
 
   guardarConsecutivo() {
     if (!this.nuevoConsecutivo || this.nuevoConsecutivo < 1) {
@@ -92,6 +100,7 @@ export class NumCotPage implements OnInit {
       return;
     }
     this.guardando = true;
+
     this.asesoresService.actualizarConsecutivoGlobal(this.nuevoConsecutivo).subscribe({
       next: () => {
         toast.success('Folio global actualizado correctamente.');

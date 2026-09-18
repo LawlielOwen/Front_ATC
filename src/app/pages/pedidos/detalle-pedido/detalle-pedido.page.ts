@@ -253,19 +253,37 @@ export class DetallePedidoPage implements OnInit {
     link.click();
     document.body.removeChild(link);
   }
-  validarYCompletar() {
-    this.ps.aceptarPedido(this.ped.id).subscribe({
-      next: (res: any) => {
-        toast.success(res.mensaje || '¡Pedido completado!');
-        this.dialogRef.close(true);
-      },
-      error: (err) => {
-        console.error('Error al validar/completar pedido:', err);
-        const mensajeError = err.error?.error || 'No se pudo completar el pedido. Verifica el stock y la factura.';
-        toast.error(mensajeError);
-      }
-    });
-  }
+validarYCompletar() {
+  this.ps.aceptarPedido(this.ped.id).subscribe({
+    next: (res: any) => {
+      const completo = !res.mensaje?.toLowerCase().includes('incompleto');
+
+      Swal.fire({
+        icon: completo ? 'success' : 'warning',
+        title: completo ? '¡Pedido completado!' : 'Pedido aún incompleto',
+        html: res.mensaje,
+        confirmButtonText: 'Entendido',
+        confirmButtonColor: completo ? '#1D9E75' : '#f59e0b',
+        heightAuto: false 
+      }).then(() => {
+
+      });
+    },
+    error: (err) => {
+      console.error('Error al validar/completar pedido:', err);
+      const mensajeError = err.error?.error || 'No se pudo completar el pedido. Verifica el stock y la factura.';
+
+      Swal.fire({
+        icon: 'error',
+        title: 'No se pudo completar',
+        text: mensajeError,
+        confirmButtonText: 'Cerrar',
+        heightAuto: false 
+      });
+
+    }
+  });
+}
 pagarConCredito() {
 
     if (this.monedaActual === 'USD') {

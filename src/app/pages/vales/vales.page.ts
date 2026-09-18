@@ -16,8 +16,8 @@ import { StatCardComponent } from '../../shared/components/UI/stat-card/stat-car
 import { ContainerTableComponent } from '../../shared/components/layout/container-table/container-table.component';
 import { PaginationComponent } from '../../shared/components/UI/pagination/pagination.component';
 import { FiltroFechaComponent } from '../../shared/components/UI/Filter/filtro-fecha/filtro-fecha.component';
-
-
+import {FolioValePage} from './folio-vale/folio-vale.page';
+import { AuthService } from '../../core/services/auth.service';
 import { MatDialog } from '@angular/material/dialog';
 import { toast } from 'ngx-sonner';
 import { ValeService } from '../../core/services/Vales.service';
@@ -25,6 +25,7 @@ import { ValeSalida } from '../../shared/model/vales.model';
 import { ModalValePage } from './modal-vale/modal-vale.page';
 import { DetallesValePage } from "./detalles-vale/detalles-vale.page";
 import { notificacionService } from '../../core/services/Notificaciones.service';
+import { NumCotPage } from '../cotizaciones/num-cot/num-cot.page';
 @Component({
   selector: 'app-vales',
   templateUrl: './vales.page.html',
@@ -62,7 +63,7 @@ export class ValesPage implements OnInit, OnDestroy{
       this.sidebar.toggleMenu();
     }
   }
-  constructor(private vs: ValeService, private dialog: MatDialog,private notiService: notificacionService) { }
+  constructor(private vs: ValeService, private dialog: MatDialog,private notiService: notificacionService, private authService: AuthService) { }
   estatusVales = [
     { label: 'Todos', value: null },
     { label: 'Pendientes', value: 0 },
@@ -240,7 +241,7 @@ busquedaTexto(texto: string) {
   }
   abrirDetalles(vale: any) {
     const dialogRef = this.dialog.open(DetallesValePage, {
-      width: '750px',
+      width: '850px',
       maxWidth: '95vw',
       panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
@@ -338,4 +339,21 @@ ionViewWillEnter() {
     this.fechaIni = formatear(primerDia);
     this.fechaFin = formatear(ultimoDia);
   }
+  ajustarFolio() {
+  const usuarioActual = this.authService.obtenerUsuarioActual();
+
+  const dialogRef = this.dialog.open(FolioValePage, {
+    width: '650px',
+    maxWidth: '95vw',
+    panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+    backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+    data: { usuario: usuarioActual }
+  });
+
+  dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {
+    if (necesitaRecargar) {
+      this.cargarVal();
+    }
+  });
+}
 }

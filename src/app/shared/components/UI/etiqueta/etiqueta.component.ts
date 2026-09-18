@@ -16,64 +16,60 @@ export class EtiquetaComponent {
   @Input() tipoBorde: 'rojo' | 'azul' | 'naranja' | 'verde' = 'azul';
   @Input() mostrarCuadro: boolean = false; 
   @Input() mostrarBotones: boolean = false;
-   @Input() cargando: boolean = false;
+  @Input() cargando: boolean = false;
   @Output() aprobar = new EventEmitter<void>();
   @Output() rechazar = new EventEmitter<void>();
 
-  // Borde lateral
   get borderClass() {
     switch (this.tipoBorde) {
-      case 'rojo': return 'border-l-[#dc2626]';
+      case 'rojo': return 'border-l-red-600';
       case 'azul': return 'border-l-[#003B8A]';
-      case 'naranja': return 'border-l-[#f59e0b]'; // Ámbar puro
-      case 'verde': return 'border-l-[#16a34a]';
-      default: return 'border-l-slate-300';
+      case 'naranja': return 'border-l-orange-500'; 
+      case 'verde': return 'border-l-green-600';
+      default: return 'border-l-slate-400';
     }
   }
 
-  // Cuadro del ícono
   get bgIconClass() {
     switch (this.tipoBorde) {
-      case 'rojo': return 'bg-red-100';
-      case 'azul': return 'bg-blue-100';
-      case 'naranja': return 'bg-amber-100'; // Ámbar claro
-      case 'verde': return 'bg-green-100';
+      case 'rojo': return 'bg-red-200';
+      case 'azul': return 'bg-blue-200';
+      case 'naranja': return 'bg-orange-200'; 
+      case 'verde': return 'bg-green-200';
       default: return 'bg-slate-200';
     }
   }
 
-  // Color del ícono
   get textIconClass() {
     switch (this.tipoBorde) {
-      case 'rojo': return 'text-red-600';
+      case 'rojo': return 'text-red-700';
       case 'azul': return 'text-[#003B8A]';
-      case 'naranja': return 'text-amber-600'; // Ámbar fuerte
-      case 'verde': return 'text-green-600';
-      default: return 'text-slate-500';
+      case 'naranja': return 'text-orange-700'; 
+      case 'verde': return 'text-green-700';
+      default: return 'text-slate-600';
     }
   }
 
-  // Fondo de la tarjeta
   get cardBgClass() {
     switch (this.tipoBorde) {
-      case 'rojo': return 'bg-red-50/50 hover:bg-red-50';
-      case 'azul': return 'bg-blue-50/50 hover:bg-blue-50';
-      case 'naranja': return 'bg-amber-50/40 hover:bg-amber-50/80'; // Tinte ámbar sutil
-      case 'verde': return 'bg-green-50/50 hover:bg-green-50';
-      default: return 'bg-slate-50/50 hover:bg-slate-50';
+      case 'rojo': return 'bg-red-50 hover:bg-red-100 transition-colors';
+      case 'azul': return 'bg-blue-50 hover:bg-blue-100 transition-colors';
+      case 'naranja': return 'bg-orange-50 hover:bg-orange-100 transition-colors'; 
+      case 'verde': return 'bg-green-50 hover:bg-green-100 transition-colors';
+      default: return 'bg-slate-50 hover:bg-slate-100 transition-colors';
     }
   }
 
-  // NUEVO: Color dinámico para la pastilla (badge)
   get badgeClass() {
     switch (this.tipoBorde) {
-      case 'rojo': return 'text-red-700 bg-red-100 border-red-200';
-      case 'verde': return 'text-green-700 bg-green-100 border-green-200';
-      case 'naranja': return 'text-amber-700 bg-amber-100 border-amber-300';
-      case 'azul': return 'text-blue-700 bg-blue-100 border-blue-200';
-      default: return 'text-slate-700 bg-slate-200 border-slate-200';
+      case 'rojo': return 'text-red-800 bg-red-100 border-red-300 font-semibold';
+      case 'verde': return 'text-green-800 bg-green-100 border-green-300 font-semibold';
+      case 'naranja': return 'text-orange-800 bg-orange-100 border-orange-300 font-semibold';
+      case 'azul': return 'text-blue-800 bg-blue-100 border-blue-300 font-semibold';
+      default: return 'text-slate-800 bg-slate-200 border-slate-300 font-semibold';
     }
   }
+
   getBadgeText(estatus: number): string {
     switch (estatus) {
       case 0: return 'Pendiente';
@@ -83,7 +79,6 @@ export class EtiquetaComponent {
     }
   }
 
-  // Función para traducir el número al color del borde
   getTipoBorde(estatus: number): 'naranja' | 'verde' | 'rojo' | 'azul' {
     switch (estatus) {
       case 0: return 'naranja';

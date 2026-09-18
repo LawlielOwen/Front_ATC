@@ -14,6 +14,10 @@ const routes: Routes = [
   {
     path: 'detalles-vale',
     loadChildren: () => import('./detalles-vale/detalles-vale.module').then( m => m.DetallesValePageModule)
+  },
+  {
+    path: 'folio-vale',
+    loadChildren: () => import('./folio-vale/folio-vale.module').then( m => m.FolioValePageModule)
   }
 
 ];

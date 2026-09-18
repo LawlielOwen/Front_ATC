@@ -83,34 +83,7 @@ estatusPedidos = [
       { header: 'Estatus', key: 'estatusTexto', type: 'status', align: 'center' }
     ];
 
-    const opcionesMenuAutorizadas = [];
-
-    if (this.authService.tieneAcceso(['Administrador', 'Asesor'])) {
-      opcionesMenuAutorizadas.push({
-        accion: 'subir_recibo', 
-        etiqueta: 'Subir recibo de pago',
-        mostrarSi: (row: any) => row.Estatus === 1
-      });
-    }
-
-    if (this.authService.tieneAcceso(['Administrador', 'Cotizador'])) {
-      opcionesMenuAutorizadas.push({
-        accion: 'cancelar', 
-        etiqueta: 'Cancelar',
-        mostrarSi: (row: any) => row.Estatus === 1 
-      });
-    }
-
-    if (opcionesMenuAutorizadas.length > 0) {
-      columnasBase.push({
-        header: '',
-        key: 'acciones',
-        type: 'actions',
-        align: 'center',
-        omitirBase: true,
-        menuOptions: opcionesMenuAutorizadas
-      });
-    }
+    
 
     this.columnasPedidos = columnasBase;
   }

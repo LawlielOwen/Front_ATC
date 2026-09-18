@@ -276,7 +276,7 @@ export class CotizacionesPage implements OnInit {
     maxWidth: '95vw',
     panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
     backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
-    data: usuarioActual
+    data: { usuario: usuarioActual, tipo: 'cotizacion' }
   });
 
   dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {

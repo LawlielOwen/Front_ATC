@@ -1,40 +1,68 @@
 <div class="bg-slate-200 rounded-[10px] overflow-hidden shadow-2xl w-full mx-auto max-h-[90vh] flex flex-col border border-gray-100">
   <ngx-sonner-toaster position="top-right" richColors="true"></ngx-sonner-toaster>
 
-  <app-header-modal [label]="tituloModal"></app-header-modal>
+  <app-header-modal [label]="'Ajustar Folio de Vale de Salida'"></app-header-modal>
 
   <div class="p-6 overflow-y-auto flex-1">
     <div class="flex flex-col gap-5 animate-fade-in">
 
-      <app-card-form title="Control de Consecutivo">
+      <app-card-form title="Folio por Asesor">
         <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
         </svg>
 
         <div class="flex flex-col gap-4 md:col-span-2 w-full">
 
-          <div *ngIf="!cargando" class="flex items-center gap-2.5 bg-slate-50 border border-slate-300 rounded-md px-3.5 py-3 text-sm">
-            <svg class="w-4 h-4 text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <app-select
+            label="Asesor *"
+            [disabled]="cargandoAsesores"
+            [value]="idAsesorSeleccionado"
+            (valueChange)="onAsesorChange($event)">
+            <option value="" disabled selected>{{ cargandoAsesores ? 'Cargando asesores...' : 'Selecciona un asesor' }}</option>
+            <option *ngFor="let asesor of asesores" [value]="asesor.id">{{ asesor.Nombre_completo }}</option>
+          </app-select>
+
+          <div *ngIf="!idAsesorSeleccionado" class="flex items-center gap-2.5 bg-slate-50 border border-dashed border-slate-300 rounded-md px-3.5 py-3 text-sm text-slate-500">
+            <svg class="w-4 h-4 text-slate-400 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
             </svg>
-            <span class="text-slate-600">
-              El sistema va actualmente en el folio
-              <strong class="text-slate-800 font-bold">{{ folioActualPreview }}</strong>
-              — la próxima <strong>{{ entidadTexto }}</strong> de cualquier asesor usará ese número.
-            </span>
+            Selecciona un asesor para ver y ajustar su folio de vale.
           </div>
 
-          <div *ngIf="cargando" class="flex items-center gap-2 text-sm text-slate-500 px-1">
+          <div *ngIf="idAsesorSeleccionado && cargandoFolioAsesor" class="flex items-center gap-2 text-sm text-slate-500 px-1">
             <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
             </svg>
-            Cargando folio actual...
+            Cargando folio actual del asesor...
           </div>
 
-          <div class="flex gap-6 items-center mt-1">
+          <div *ngIf="idAsesorSeleccionado && !cargandoFolioAsesor" class="flex items-center gap-2.5 bg-slate-50 border border-slate-300 rounded-md px-3.5 py-3 text-sm">
+            <svg class="w-4 h-4 text-slate-500 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="text-slate-600">
+              Este asesor va actualmente en el folio
+              <strong class="text-slate-800 font-bold">{{ folioActualPreview }}</strong>
+              — su próxima solicitud de vale usará ese número.
+            </span>
+          </div>
+
+          <div *ngIf="idAsesorSeleccionado && !cargandoFolioAsesor" class="flex gap-6 items-center mt-1">
             <div class="w-1/2 flex flex-col gap-1.5">
-              <label class="text-sm font-semibold text-gray-700">Nuevo número de folio *</label>
+              <label class="text-sm font-semibold text-gray-700">Iniciales *</label>
+              <input
+                type="text"
+                maxlength="5"
+                class="w-full bg-white border border-solid text-slate-700 text-sm rounded-md focus:outline-none focus:ring-1 px-3.5 py-2.5 transition-all uppercase disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
+                [ngClass]="folioDuplicado
+                  ? 'border-red-400 focus:ring-red-400 focus:border-red-500'
+                  : 'border-slate-300 focus:ring-blue-500 focus:border-blue-500'"
+                [(ngModel)]="iniciales"
+                (ngModelChange)="onCampoChange()"
+                placeholder="Ej. JGM">
+
+              <label class="text-sm font-semibold text-gray-700 mt-2">Consecutivo *</label>
               <input
                 type="number"
                 min="1"
@@ -42,24 +70,23 @@
                 [ngClass]="folioDuplicado
                   ? 'border-red-400 focus:ring-red-400 focus:border-red-500'
                   : 'border-slate-300 focus:ring-blue-500 focus:border-blue-500'"
-                [(ngModel)]="nuevoConsecutivo"
-                (ngModelChange)="generarPreview()"
-                placeholder="Ej. 55"
-                [disabled]="cargando">
+                [(ngModel)]="consecutivo"
+                (ngModelChange)="onCampoChange()"
+                placeholder="Ej. 12">
             </div>
 
-            <div class="w-1/2 flex flex-col gap-1.5 p-3 bg-white rounded-lg border border-dashed border-gray-400">
+            <div class="w-1/2 flex flex-col gap-1.5 p-3 bg-white rounded-lg border border-dashed border-gray-400 self-stretch justify-center">
               <span class="text-xs text-gray-500 font-medium">Se verá así:</span>
               <div class="flex items-center gap-2">
                 <svg class="w-5 h-5 flex-shrink-0" [ngClass]="folioDuplicado ? 'text-red-500' : 'text-slate-300'" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
                 </svg>
-                <span class="text-xl font-bold text-gray-800 tracking-wider">{{ previewFolio }}</span>
+                <span class="text-xl font-bold text-gray-800 tracking-wider">{{ folioPreview }}</span>
               </div>
             </div>
           </div>
 
-          <div *ngIf="verificandoFolio" class="text-xs text-slate-400 italic px-1 flex items-center gap-1.5">
+          <div *ngIf="idAsesorSeleccionado && verificandoFolio" class="text-xs text-slate-400 italic px-1 flex items-center gap-1.5">
             <svg class="w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
@@ -67,25 +94,14 @@
             Verificando folio...
           </div>
 
-          <div *ngIf="folioDuplicado && !verificandoFolio"
+          <div *ngIf="idAsesorSeleccionado && folioDuplicado && !verificandoFolio"
                class="flex items-start gap-2 bg-red-50 border border-red-300 text-red-700 rounded-md px-3.5 py-2.5 text-xs">
             <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
             </svg>
             <span>
-              <strong>Atención:</strong> el folio <strong>{{ previewFolio }}</strong> ya existe en el historial de este año.
+              <strong>Atención:</strong> el folio <strong>{{ folioPreview }}</strong> ya existe en el historial de este año.
               Puedes guardarlo de todas formas, pero se generará un folio duplicado.
-            </span>
-          </div>
-
-          <div *ngIf="!folioDuplicado && !cargando && nuevoConsecutivo !== consecutivoActualOriginal && nuevoConsecutivo >= 1"
-               class="flex items-start gap-2 bg-amber-100 border border-amber-500 text-amber-800 rounded-md px-3.5 py-2.5 text-xs">
-            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-            </svg>
-            <span>
-              <strong>Atención:</strong> vas a mover el consecutivo general de <strong>{{ folioActualPreview }}</strong> a <strong>{{ previewFolio }}</strong>.
-              Esto afecta a <strong>{{ accionTexto }}</strong>.
             </span>
           </div>
 
@@ -99,9 +115,9 @@
     <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
     <app-button-action
       [label]="'Guardar Cambios'"
-      [disabled]="guardando || cargando"
+      [disabled]="!puedeGuardar()"
       [claseCss]="'btn-agregar'"
-      (click)="guardarConsecutivo()">
+      (click)="guardarFolio()">
     </app-button-action>
   </app-footer-modal>
 </div>

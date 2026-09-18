@@ -27,8 +27,8 @@ export interface DetallePedidoInput {
     descripcion_manual?: string | null;
     extra_descripcion_manual?: string | null;
     cantidad: number;
-    precio_unitario: number;
-    costo_flete: number;
+    precio_unitario: number | null; 
+    costo_flete: number | null;     
 }
 
 export interface RespuestaPedidoCreado {
@@ -119,4 +119,7 @@ obtenerUrlFactura(rutaRelativa: string): string {
     
     return `${baseUrl}/uploads/recibos/${nombreArchivo}`;
   }
+  reembolsarPedido(idPedido: number): Observable<any> {
+        return this.http.post<any>(`${this.apiUrl}/pedido/${idPedido}/reembolsar`, {});
+    }
 }

@@ -190,15 +190,22 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
     }
   }
 
-  agregarItemManual(): void {
-    if (this.guardando) return;
-    this.detalles.push({
-      id_producto: null, nombre_producto: '', codigo_producto: '',
-      codigo_manual: '', descripcion_manual: '', extra_descripcion_manual: '',
-      cantidad: 1, precio_unitario: 0, costo_flete: 0, subtotal_partida: 0
-    });
-    this.calcularTotales();
-  }
+ agregarItemManual(): void {
+  if (this.guardando) return;
+  this.detalles.push({
+    id_producto: null, 
+    nombre_producto: '', 
+    codigo_producto: '',
+    codigo_manual: '', 
+    descripcion_manual: '', 
+    extra_descripcion_manual: '',
+    cantidad: 1, 
+    precio_unitario: null, 
+    costo_flete: null,    
+    subtotal_partida: 0
+  });
+  this.calcularTotales();
+}
 
   eliminarItem(index: number): void {
     if (this.guardando || index < 0 || index >= this.detalles.length) return;

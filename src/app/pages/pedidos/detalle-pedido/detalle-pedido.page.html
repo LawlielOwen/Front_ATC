@@ -245,7 +245,6 @@
         </ng-container>
 
         <ng-container *ngIf="(ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente') && authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])">
-
             <app-button-action 
                  *ngIf="monedaActual !== 'USD'"
                 [label]="'Cobrar con Crédito'" 
@@ -255,11 +254,23 @@
         </ng-container>
 
         <ng-container *ngIf="ped?.Estatus === 3">
+            
+            <app-button-action 
+                [label]="'Reembolsar'" 
+                [claseCss]="'btn-cancelar'" 
+                *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador'])"
+                (click)="reembolsarPedido()">
+            </app-button-action>
+
+            <!-- Botón Reintentar apartado -->
             <app-button-action [label]="'Reintentar apartado'" [claseCss]="'btn-pdf'"
                 *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])"
-                (click)="validarYCompletar()"></app-button-action>
+                (click)="validarYCompletar()">
+            </app-button-action>
+            
         </ng-container>
 
+        <!-- BOTÓN SUBIR / CAMBIAR RECIBO (No aplica para Cancelados ni para Pagos del Sistema) -->
         <ng-container *ngIf="ped?.Estatus !== 0 && ped?.estatusTexto !== 'Cancelado' && ped?.factura_ruta !== 'SISTEMA_INTERNO'">
             <app-button-action 
                 [label]="ped?.factura_ruta ? 'Cambiar Recibo' : 'Subir Recibo'" 

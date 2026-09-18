@@ -177,27 +177,33 @@
                         min="1" step="1" inputmode="numeric"
                         class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-center text-[11px] font-bold text-[#003B8A] outline-none focus:border-[#003B8A] disabled:opacity-60 transition-colors">
                     </td>
-                    <td class="px-2 py-2">
-                      <input
-  type="number"
-  [ngModel]="obtenerPrecioEnMonedaActual(item.precio_unitario).toFixed(2)"
-  (ngModelChange)="actualizarPrecio(item, $event)"
-  min="0.01"
-  step="0.01"
-  inputmode="decimal"
-  [disabled]="guardando || (pedido.moneda === 'USD' &&
-    !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
-  class="w-full border border-solid border-slate-300 bg-slate-50
-         rounded px-1.5 py-1.5 text-right text-[11px]
-         outline-none focus:border-[#003B8A]
-         disabled:opacity-50 transition-colors">
-                    </td>
-                    <td class="px-2 py-2">
-                      <input type="number" [ngModel]="obtenerPrecioEnMonedaActual(item.costo_flete)"
-                        (ngModelChange)="actualizarFlete(item, $event)" min="0" step="0.01" inputmode="decimal"
-                        [disabled]="guardando || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
-                        class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-right text-[11px] outline-none focus:border-[#003B8A] disabled:opacity-50 transition-colors">
-                    </td>
+                  <!-- Celda de P. Unitario -->
+<td class="px-2 py-2">
+  <input
+    type="number"
+    [ngModel]="item.precio_unitario === null ? null : obtenerPrecioEnMonedaActual(item.precio_unitario)"
+    (ngModelChange)="actualizarPrecio(item, $event)"
+    min="0"
+    step="any"
+    inputmode="decimal"
+    placeholder="0.00"
+    [disabled]="guardando || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
+    class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-right text-[11px] outline-none focus:border-[#003B8A] disabled:opacity-50 transition-colors">
+</td>
+
+<!-- Celda de Flete -->
+<td class="px-2 py-2">
+  <input 
+    type="number" 
+    [ngModel]="item.costo_flete === null ? null : obtenerPrecioEnMonedaActual(item.costo_flete)"
+    (ngModelChange)="actualizarFlete(item, $event)" 
+    min="0" 
+    step="any" 
+    inputmode="decimal"
+    placeholder="0"
+    [disabled]="guardando || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
+    class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-right text-[11px] outline-none focus:border-[#003B8A] disabled:opacity-50 transition-colors">
+</td>
                     <td class="px-2 py-3 text-right font-bold whitespace-nowrap text-[11px]">
                       <ng-container *ngIf="pedido.moneda !== 'USD' || pedido.tipo_cambio > 0; else importePendiente">
                         {{ obtenerPrecioEnMonedaActual(item.subtotal_partida) | currency:(pedido.moneda === 'USD' ? 'USD' : 'MXN'):'$':'1.2-2' }}

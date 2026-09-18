@@ -36,8 +36,8 @@ export interface DetallePedido {
 
     cantidad: number;
     cantidad_surtida: number; 
-    precio_unitario: number;
-    costo_flete: number;      
+    precio_unitario?: any;
+    costo_flete?: any;      
     importe: number;        
     estatus_surtido: number;
 

@@ -295,7 +295,7 @@ const dialogRef = this.dialog.open(DetallePedidoPage, {
   }
 nuevoPedido() {
   const dialogRef = this.dialog.open(AltaPedidoPage, {
-    width: '850px',
+    width: '900px',
     maxWidth: '95vw',
     maxHeight: '95dvh',
 

@@ -369,4 +369,33 @@ private actualizarMonedaPedido(): void {
   this.monedaActual =
     moneda === 'MONEDA NACIONAL' ? 'MXN' : moneda;
 }
+reembolsarPedido() {
+    const dialogRef = this.dialog.open(DeleteComponent, {
+      width: '400px',
+      panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
+      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      data: {
+        titulo: 'Reembolsar Pedido',
+        mensaje: `¿Estás seguro de que deseas reembolsar este pedido? Se liberará el stock apartado y, si aplica, se reembolsará el saldo a la línea de crédito del cliente.`,
+        textoAceptar: 'Sí, Reembolsar',
+        textoCancelar: 'Cancelar'
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((confirmado: boolean) => {
+      if (confirmado) {
+        this.ps.reembolsarPedido(this.ped.id).subscribe({
+          next: (res: any) => {
+            toast.success('Pedido reembolsado correctamente');
+            
+            this.dialogRef.close(true); 
+          },
+          error: (err) => {
+            console.error('Error al reembolsar', err);
+            toast.error(err.error?.error || 'No se pudo procesar el reembolso');
+          }
+        });
+      }
+    });
+  }
 }

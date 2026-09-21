@@ -357,7 +357,6 @@ export class DetallesValePage implements OnInit {
     });
   }
   async asignarFolioCotizacionManual(): Promise<void> {
-    // Validar si ya tiene cotización (asumiendo que viene como "Sin cotización" si está vacío)
     if (this.vale.num_cotizacion && this.vale.num_cotizacion !== 'Sin cotización') {
       toast.warning('Este vale ya cuenta con un folio de cotización.');
       return;

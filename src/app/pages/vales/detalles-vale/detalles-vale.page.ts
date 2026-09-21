@@ -7,7 +7,7 @@ import { HeaderModalComponent } from "../../../shared/components/UI/modal/header
 import { ButtonActionComponent } from "../../../shared/components/UI/buttons/button-action/button-action.component";
 import { ValeService } from "../../../core/services/Vales.service";
 import { FormsModule } from '@angular/forms';
-import { toast } from 'ngx-sonner';
+import { toast, NgxSonnerToaster } from 'ngx-sonner';
 import Swal from 'sweetalert2';
 
 export type ModoObservacion = 'producto' | 'general';
@@ -24,6 +24,7 @@ export type ModoObservacion = 'producto' | 'general';
     HeaderModalComponent,
     ButtonActionComponent,
     FormsModule,
+    NgxSonnerToaster
   ]
 })
 export class DetallesValePage implements OnInit {
@@ -354,5 +355,122 @@ export class DetallesValePage implements OnInit {
         });
       }
     });
+  }
+  async asignarFolioCotizacionManual(): Promise<void> {
+    // Validar si ya tiene cotización (asumiendo que viene como "Sin cotización" si está vacío)
+    if (this.vale.num_cotizacion && this.vale.num_cotizacion !== 'Sin cotización') {
+      toast.warning('Este vale ya cuenta con un folio de cotización.');
+      return;
+    }
+
+    const resultado = await Swal.fire({
+      ...this.swalBase,
+      icon: 'info',
+      title: 'Asignar folio de cotización',
+      text: 'Ingresa el número de cotización manual para este vale:',
+      input: 'text',
+      inputPlaceholder: 'Ej. COT-12345',
+      inputAttributes: {
+        maxlength: '40',
+        autocapitalize: 'off',
+        autocorrect: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Guardar cotización',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#003B8A',
+      reverseButtons: true,
+      inputValidator: (valor: string) => {
+        if (!valor || !valor.trim()) {
+          return 'Debes ingresar un folio válido.';
+        }
+        return null;
+      }
+    });
+
+    if (resultado.isConfirmed) {
+      const folio = String(resultado.value).trim();
+      this.enviando = true;
+
+      this.valeService.asignarFolioCotizacion(this.vale.id_vale, folio).subscribe({
+        next: (res: any) => {
+          this.enviando = false;
+          toast.success(res.message || 'Folio de cotización asignado');
+          
+          // Actualizamos la vista local
+          this.vale.num_cotizacion = folio;
+        },
+        error: (err) => {
+          this.enviando = false;
+          const mensajeError = err.error?.error || 'Error al asignar el folio de cotización.';
+          
+          Swal.fire({
+            ...this.swalBase,
+            icon: 'error',
+            title: 'No se pudo asignar',
+            text: mensajeError,
+            confirmButtonColor: '#003B8A'
+          });
+        }
+      });
+    }
+  }
+  async asignarFolioManual(): Promise<void> {
+    // Si el vale ya tiene folio, podemos evitar que lo intente sobreescribir desde el frontend
+   
+    const resultado = await Swal.fire({
+      ...this.swalBase,
+      icon: 'info',
+      title: 'Asignar folio de cotización',
+      text: 'Ingresa el número de folio para asignarlo manualmente a este vale:',
+      input: 'text',
+      inputPlaceholder: 'Ej. COT-12345',
+      inputAttributes: {
+        maxlength: '40',
+        autocapitalize: 'off',
+        autocorrect: 'off'
+      },
+      showCancelButton: true,
+      confirmButtonText: 'Guardar folio',
+      cancelButtonText: 'Cancelar',
+      confirmButtonColor: '#003B8A',
+      reverseButtons: true,
+      inputValidator: (valor: string) => {
+        if (!valor || !valor.trim()) {
+          return 'Debes ingresar un folio válido.';
+        }
+        return null;
+      }
+    });
+
+    if (resultado.isConfirmed) {
+      const folio = String(resultado.value).trim();
+      this.enviando = true;
+
+      this.valeService.asignarFolioManual(this.vale.id_vale, folio).subscribe({
+        next: (res: any) => {
+          this.enviando = false;
+          toast.success(res.message || 'Folio asignado correctamente');
+          
+          this.vale.folio_vale = folio;
+          
+          if (!this.vale.num_cotizacion) {
+            this.vale.num_cotizacion = folio;
+          }
+        },
+        error: (err) => {
+          this.enviando = false;
+          const mensajeError = err.error?.error || 'Ocurrió un error al asignar el folio.';
+          
+          Swal.fire({
+            ...this.swalBase,
+            icon: 'error',
+            title: 'No se pudo asignar',
+            text: mensajeError,
+            confirmButtonColor: '#003B8A'
+          });
+        }
+      });
+    }
   }
 }

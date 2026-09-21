@@ -118,4 +118,10 @@ verPdfVale(idvale: number) {
       responseType: 'blob'
     });
   }
+  asignarFolioManual(id_vale: number, folio: string) {
+    return this.http.put(`${this.apiUrl}/vales/asignar-folio`, { id_vale, folio });
+  }
+  asignarFolioCotizacion(id_vale: number, folio: string) {
+    return this.http.put(`${this.apiUrl}/vales/asignar-folio-cotizacion`, { id_vale, folio });
+  }
 }

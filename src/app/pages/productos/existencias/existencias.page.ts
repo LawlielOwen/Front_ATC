@@ -205,13 +205,13 @@ onEnterProducto(event: any) {
 get opcionesDestino(): CardOption[] {
     if (this.esEntrada) {
       return [
-        { value: 'almacen', titulo: 'Para almacén', descripcion: 'Se suma al stock general' },
-        { value: 'pedido', titulo: 'Para pedido', descripcion: 'Se suma al stock en apartado' }
+        { value: 'almacen', titulo: 'Para almacén', descripcion: 'Se suma al Stock Libre' },
+        { value: 'pedido', titulo: 'Para pedidos', descripcion: 'Se suma a la Bolsa General de apartados' }
       ];
     } else {
       return [
-        { value: 'pedido', titulo: 'Para pedido', descripcion: 'Descuenta de apartados' },
-        { value: 'Entrega Mostrador', titulo: 'Entregar en mostrador', descripcion: 'Descuenta de stock libre' }
+        { value: 'pedido', titulo: 'Surtir pedido', descripcion: 'Descuenta de las reservas del cliente' },
+        { value: 'Entrega Mostrador', titulo: 'Entregar en mostrador', descripcion: 'Descuenta del Stock Libre' }
       ];
     }
   }
@@ -246,15 +246,18 @@ get stockActualVisible() {
     if (!this.productoEncontrado) return 0;
     
     if (this.destino === 'almacen' || this.destino === 'Entrega Mostrador') {
-      return this.productoEncontrado.Stock || 0;
+      return Number(this.productoEncontrado.Stock) || 0; 
     } 
-    return this.productoEncontrado.Apartado || 0;
+    return Number(this.productoEncontrado.Apartado) || 0; 
   }
 
   get nuevoStock() {
     if (!this.productoEncontrado) return 0;
+    
+    const cant = Number(this.cantidad) || 0; 
+
     return this.esEntrada
-      ? this.stockActualVisible + this.cantidad
-      : this.stockActualVisible - this.cantidad;
+      ? this.stockActualVisible + cant
+      : this.stockActualVisible - cant;
   }
 }

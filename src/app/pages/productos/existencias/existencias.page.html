@@ -63,9 +63,14 @@
           <span class="text-[11px] text-slate-600 font-medium mb-1">
             {{ productoEncontrado.Codigo_japon }} • {{ productoEncontrado.Marca }} • Estantería: <strong>{{ productoEncontrado.Estanteria }}</strong>
           </span>
-          <span class="text-[12px] text-slate-600 font-medium">
-            Stock actual: <strong class="text-[#003B8A] text-[13px]">{{ productoEncontrado.Stock }} pz</strong>
-          </span>
+          <div class="flex gap-4 mt-1">
+            <span class="text-[12px] text-slate-600 font-medium">
+              Stock Libre: <strong class="text-emerald-600 text-[13px]">{{ productoEncontrado.Stock }} pz</strong>
+            </span>
+            <span class="text-[12px] text-slate-600 font-medium">
+              Total Apartado: <strong class="text-amber-600 text-[13px]">{{ productoEncontrado.Apartado }} pz</strong>
+            </span>
+          </div>
         </div>
       </div>
     </div>
@@ -147,8 +152,8 @@
             </mat-option>
         </mat-autocomplete>
       </div>
-     <div class="bg-amber-100 border border-amber-400 text-amber-900 shadow-md text-[13px] px-4 py-3 rounded-lg mt-4">
-  Al confirmar, el <strong>{{ destino === 'pedido' ? 'stock en apartado' : 'stock general' }}</strong> 
+    <div class="bg-amber-100 border border-amber-400 text-amber-900 shadow-md text-[13px] px-4 py-3 rounded-lg mt-4">
+  Al confirmar, el <strong>{{ destino === 'pedido' ? 'Total en Apartado' : 'Stock Libre' }}</strong> 
   pasará de <strong>{{ stockActualVisible }}</strong> a 
   <strong>{{ nuevoStock }}</strong> unidades.
 </div>
@@ -172,7 +177,7 @@
 <div class="bg-slate-200 border border-slate-400 shadow-md rounded-xl w-full py-3 px-4 mt-2 flex justify-between items-center">
   <div class="flex flex-col">
     <span class="text-[10px] font-bold text-slate-600 uppercase tracking-widest mb-0.5">
-      Nuevo {{ destino === 'almacen' ? 'Stock General' : 'Stock en Apartado' }}
+      Nuevo {{ destino === 'almacen' || destino === 'Entrega Mostrador' ? 'Stock Libre' : 'Total en Apartado' }}
     </span>
     <span class="font-bold text-[#0d1f38] text-[13px]">{{ productoEncontrado.Nombre }}</span>
     <span class="text-[11px] text-slate-600 font-mono">{{ productoEncontrado.Codigo_japon || productoEncontrado.Codigo_numeral }}</span>

@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy, Optional } from '@angular/core';
+import { Component, OnInit, OnDestroy, Optional, Inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormControl, FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { IonicModule } from '@ionic/angular';
 import { Router } from '@angular/router';
-import { MatDialogRef } from '@angular/material/dialog';
+import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -44,7 +44,7 @@ interface PartidaPedido extends DetallePedidoInput {
 })
 export class AltaPedidoPage implements OnInit, OnDestroy {
   private readonly destruir$ = new Subject<void>();
-  // Los DTO de clientes/productos conservan los nombres de tu API actual.
+  
   clienteControl = new FormControl<any>('');
   productoControl = new FormControl<any>('');
   clientes: any[] = [];
@@ -52,12 +52,18 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
   productosFiltrados: any[] = [];
   asesores: any[] = [];
   detalles: PartidaPedido[] = [];
+  
   guardando = false;
   cargandoClientes = false;
   cargandoAsesores = false;
+  
   subtotal_final = 0;
   iva_final = 0;
   total_final = 0;
+
+  // Variables para MODO EDICIÓN
+  esEdicion = false;
+  idPedidoEdit: number = 0;
 
   pedido: Omit<NuevoPedidoInput, 'detalles' | 'id_cliente' | 'moneda'> & {
     id_cliente: number | null;
@@ -73,23 +79,58 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
     private clientesService: ClientesService,
     private asesoresService: AsesoresService,
     private router: Router,
-    @Optional() private dialogRef: MatDialogRef<AltaPedidoPage> | null
+    @Optional() private dialogRef: MatDialogRef<AltaPedidoPage> | null,
+    @Optional() @Inject(MAT_DIALOG_DATA) public data: any
   ) {}
 
   ngOnInit(): void {
     this.cargarClientes();
     this.cargarAsesores();
+    
+    // VALIDACIÓN: ¿Viene información para editar?
+    if (this.data && this.data.pedido) {
+      this.esEdicion = true;
+      this.idPedidoEdit = this.data.pedido.id;
+      
+      // Mapear cabecera
+      this.pedido.orden_compra = this.data.pedido.orden_compra || '';
+      this.pedido.moneda = this.data.pedido.moneda || 'MONEDA NACIONAL';
+      this.pedido.tipo_cambio = Number(this.data.pedido.tipo_cambio) || 1;
+      this.pedido.id_cliente = this.data.pedido.id_cliente;
+      this.pedido.id_asesor = this.data.pedido.id_asesor;
+      
+      // Forzar texto del cliente
+      const nombreCliente = this.data.pedido.nombre_cliente || this.data.pedido.empresa || 'Cliente seleccionado';
+      this.clienteControl.setValue(nombreCliente, { emitEvent: false });
+
+      // Mapear detalles
+      if (Array.isArray(this.data.detalles)) {
+        this.detalles = this.data.detalles.map((d: any) => ({
+          id_producto: d.id_producto || null,
+          nombre_producto: d.descripcion || d.nombre_producto || d.descripcion_manual || '',
+          codigo_producto: d.codigo_numeral || d.codigo_japon || d.codigo_manual || '',
+          codigo_manual: d.codigo_manual || null,
+          descripcion_manual: d.descripcion_manual || null,
+          extra_descripcion_manual: d.extra_descripcion_manual || null,
+          cantidad: Number(d.cantidad) || 1,
+          precio_unitario: Number(d.precio_unitario) || 0,
+          costo_flete: Number(d.costo_flete) || 0,
+          subtotal_partida: 0
+        }));
+        this.calcularTotales();
+      }
+    }
+
     this.clienteControl.valueChanges.pipe(takeUntil(this.destruir$)).subscribe(valor => {
       this.clientesFiltrados = this.filtrarClientes(valor);
       if (valor && typeof valor === 'object') {
         this.onClienteSeleccionado(valor);
-      } else {
-        // Escribir un nombre no equivale a seleccionar un cliente existente.
+      } else if (!this.esEdicion) {
         this.pedido.id_cliente = null;
       }
     });
+
     this.productoControl.valueChanges.pipe(
-      // Cada cambio cancela también una búsqueda que ya esté en vuelo.
       switchMap(valor => {
         this.productosFiltrados = [];
         const termino = typeof valor === 'string' ? valor.trim() : '';
@@ -97,7 +138,7 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
         return timer(300).pipe(
           switchMap(() => this.cotizacionService.buscarProductoParaPOS(termino)),
           catchError(() => {
-            toast.error('No se pudieron buscar los productos. Intenta nuevamente.');
+            toast.error('No se pudieron buscar los productos.');
             return of({ productos: [] });
           })
         );
@@ -110,15 +151,12 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
 
   cargarClientes(): void {
     this.cargandoClientes = true;
-    // Mismo límite del POS: si tienes más de 1000 clientes, utiliza búsqueda
-    // paginada en el servidor o carga las páginas adicionales.
     this.clientesService.getClientes(1, 1000).pipe(
       takeUntil(this.destruir$), finalize(() => this.cargandoClientes = false)
     ).subscribe({
       next: (res: any) => {
         const lista = res?.clientes ?? res?.data ?? res;
-        this.clientes = Array.isArray(lista)
-          ? lista.filter(c => Number(c.estatus ?? c.Estatus) === 1) : [];
+        this.clientes = Array.isArray(lista) ? lista.filter(c => Number(c.estatus ?? c.Estatus) === 1) : [];
         this.clientesFiltrados = this.filtrarClientes(this.clienteControl.value);
       },
       error: () => toast.error('No se pudo cargar la lista de clientes.')
@@ -177,9 +215,6 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
   }
 
   onEnterProducto(event: Event): void {
-    // Si usas este atajo en HTML, usa (keydown.enter), no (keyup.enter).
-    // Material emite optionSelected cuando una opción activa recibe Enter;
-    // el atajo sólo interviene si no existe una opción activa.
     event.preventDefault();
     const input = event.target as HTMLInputElement;
     if (input.getAttribute('aria-activedescendant')) return;
@@ -190,22 +225,22 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
     }
   }
 
- agregarItemManual(): void {
-  if (this.guardando) return;
-  this.detalles.push({
-    id_producto: null, 
-    nombre_producto: '', 
-    codigo_producto: '',
-    codigo_manual: '', 
-    descripcion_manual: '', 
-    extra_descripcion_manual: '',
-    cantidad: 1, 
-    precio_unitario: null, 
-    costo_flete: null,    
-    subtotal_partida: 0
-  });
-  this.calcularTotales();
-}
+  agregarItemManual(): void {
+    if (this.guardando) return;
+    this.detalles.push({
+      id_producto: null, 
+      nombre_producto: '', 
+      codigo_producto: '',
+      codigo_manual: '', 
+      descripcion_manual: '', 
+      extra_descripcion_manual: '',
+      cantidad: 1, 
+      precio_unitario: null as any, 
+      costo_flete: null as any,  
+      subtotal_partida: 0
+    });
+    this.calcularTotales();
+  }
 
   eliminarItem(index: number): void {
     if (this.guardando || index < 0 || index >= this.detalles.length) return;
@@ -222,7 +257,6 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
     const tc = Number(this.pedido.tipo_cambio);
     return Number.isFinite(tc) && tc > 0 ? Number(montoMXN) / tc : 0;
   }
-
 
   actualizarPrecio(item: PartidaPedido, valor: number | string | null): void {
     this.actualizarMonto(item, 'precio_unitario', valor);
@@ -265,17 +299,15 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
     if (this.guardando) return;
     const idCliente = Number(this.pedido.id_cliente);
     const idAsesor = Number(this.pedido.id_asesor);
-    const dias = Number(this.pedido.vigencia_dias);
     const tc = this.pedido.moneda === 'USD' ? Number(this.pedido.tipo_cambio) : 1;
     const fallar = (mensaje: string) => toast.warning(mensaje);
-    if (!Number.isInteger(idCliente) || idCliente <= 0) {
+    
+    // Validaciones base
+    if (!this.esEdicion && (!Number.isInteger(idCliente) || idCliente <= 0)) {
       fallar('Selecciona un cliente registrado de la lista.'); return;
     }
-    if (!Number.isInteger(idAsesor) || idAsesor <= 0) {
+    if (!this.esEdicion && (!Number.isInteger(idAsesor) || idAsesor <= 0)) {
       fallar('Selecciona un asesor válido.'); return;
-    }
-    if (!Number.isInteger(dias) || dias < 1 || dias > 3650) {
-      fallar('Captura una vigencia entre 1 y 3650 días.'); return;
     }
     if (!Number.isFinite(tc) || tc <= 0 || tc > 999999.9999) {
       fallar('Captura un tipo de cambio válido, mayor que cero.'); return;
@@ -284,6 +316,8 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
       fallar('La orden de compra admite hasta 100 caracteres.'); return;
     }
     if (!this.detalles.length) { fallar('Agrega al menos un producto.'); return; }
+
+    // Validar partidas
     for (const [index, item] of this.detalles.entries()) {
       const cantidad = Number(item.cantidad);
       const precio = Number(item.precio_unitario);
@@ -301,39 +335,64 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
       if (item.id_producto === null && !item.descripcion_manual?.trim()) {
         fallar(prefijo + 'escribe la descripción del producto manual.'); return;
       }
-      if ((item.codigo_manual || '').trim().length > 100 ||
-          (item.descripcion_manual || '').trim().length > 250) {
-        fallar(prefijo + 'máximo 100 caracteres de código y 250 de descripción.'); return;
-      }
     }
-    const payload: NuevoPedidoInput = {
-      id_cliente: idCliente, id_asesor: idAsesor,
-      orden_compra: this.pedido.orden_compra?.trim() || null,
-      moneda: this.pedido.moneda, tipo_cambio: Number(tc.toFixed(4)), vigencia_dias: dias,
-      detalles: this.detalles.map(item => ({
-        id_producto: item.id_producto,
-        codigo_manual: item.id_producto === null ? item.codigo_manual?.trim() || null : null,
-        descripcion_manual: item.id_producto === null ? item.descripcion_manual!.trim() : null,
-        extra_descripcion_manual: item.id_producto === null ? item.extra_descripcion_manual?.trim() || null : null,
-        cantidad: Number(item.cantidad), precio_unitario: this.redondear(Number(item.precio_unitario)),
-        costo_flete: this.redondear(Number(item.costo_flete))
-      }))
-    };
+
+    // Armado del arreglo de detalles que comparten ambas peticiones
+    const payloadDetalles = this.detalles.map(item => ({
+      id_producto: item.id_producto,
+      codigo_manual: item.id_producto === null ? item.codigo_manual?.trim() || null : null,
+      descripcion_manual: item.id_producto === null ? item.descripcion_manual!.trim() : null,
+      extra_descripcion_manual: item.id_producto === null ? item.extra_descripcion_manual?.trim() || null : null,
+      cantidad: Number(item.cantidad),
+      precio_unitario: this.redondear(Number(item.precio_unitario)),
+      costo_flete: this.redondear(Number(item.costo_flete))
+    }));
+
     this.guardando = true;
-    this.pedidosService.crearPedidoDirecto(payload).pipe(
-      takeUntil(this.destruir$), finalize(() => this.guardando = false)
-    ).subscribe({
-      next: respuesta => {
-        if (!Number.isInteger(Number(respuesta?.id_pedido)) || Number(respuesta.id_pedido) <= 0) {
-          toast.error(respuesta?.mensaje || 'No se pudo crear el pedido.'); return;
-        }
-        toast.success(respuesta.mensaje || 'Pedido creado correctamente.');
-        if (this.dialogRef) this.dialogRef.close(respuesta);
-        else void this.router.navigate(['/pedidos']);
-      },
-      error: error => toast.error(error?.error?.mensaje || error?.error?.message ||
-        'No se pudo confirmar el guardado. Revisa la lista de pedidos antes de reintentar.')
-    });
+
+    // BIFURCACIÓN: ¿Editar o Crear?
+    if (this.esEdicion) {
+      const payloadEdit = {
+        orden_compra: this.pedido.orden_compra?.trim() || null,
+        detalles: payloadDetalles
+      };
+      
+      // Llamada al endpoint de modificación
+      this.pedidosService.modificarPedido(this.idPedidoEdit, payloadEdit).pipe(
+        takeUntil(this.destruir$), finalize(() => this.guardando = false)
+      ).subscribe({
+        next: (respuesta: any) => {
+          toast.success(respuesta?.message || respuesta?.mensaje || 'Pedido actualizado correctamente.');
+          if (this.dialogRef) this.dialogRef.close(true);
+        },
+        error: error => toast.error(error?.error?.error || error?.error?.mensaje || 'No se pudo modificar el pedido.')
+      });
+
+    } else {
+      const payloadNuevo: NuevoPedidoInput = {
+        id_cliente: idCliente, id_asesor: idAsesor,
+        orden_compra: this.pedido.orden_compra?.trim() || null,
+        moneda: this.pedido.moneda, 
+        tipo_cambio: Number(tc.toFixed(4)), 
+        vigencia_dias: Number(this.pedido.vigencia_dias),
+        detalles: payloadDetalles
+      };
+      
+      // Llamada al endpoint original
+      this.pedidosService.crearPedidoDirecto(payloadNuevo).pipe(
+        takeUntil(this.destruir$), finalize(() => this.guardando = false)
+      ).subscribe({
+        next: respuesta => {
+          if (!Number.isInteger(Number(respuesta?.id_pedido)) || Number(respuesta.id_pedido) <= 0) {
+            toast.error(respuesta?.mensaje || 'No se pudo crear el pedido.'); return;
+          }
+          toast.success(respuesta.mensaje || 'Pedido creado correctamente.');
+          if (this.dialogRef) this.dialogRef.close(respuesta);
+          else void this.router.navigate(['/pedidos']);
+        },
+        error: error => toast.error(error?.error?.mensaje || error?.error?.message || 'No se pudo crear el pedido.')
+      });
+    }
   }
 
   cerrar(): void {

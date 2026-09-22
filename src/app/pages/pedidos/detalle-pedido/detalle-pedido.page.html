@@ -238,7 +238,14 @@
     <app-button-action [label]="'Cerrar'" [claseCss]="'btn-cerrar'" (click)="cerrar()"></app-button-action>
 
     <div class="flex gap-2.5 items-center">
-
+    
+        <ng-container *ngIf="(ped?.Estatus === 1 || ped?.Estatus === 3 || ped?.estatusTexto === 'Pendiente' || ped?.estatusTexto === 'Incompleto') && authService.tieneAcceso(['Administrador', 'Cotizador', 'Asesor'])">
+            <app-button-action 
+                [label]="'Modificar'" 
+                [claseCss]="'btn-editar'" 
+                (click)="abrirModalModificar()">
+            </app-button-action>
+        </ng-container>
         <ng-container *ngIf="ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente'">
             <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cancelar'" *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador'])"
                 (click)="cancelarPedido()"></app-button-action>

@@ -15,6 +15,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { mostrarAvisoStockIncompleto, mostrarExitoPedido, mostrarCreditoInsuficiente, mostrarCreditoVencido } from '../../../shared/utils/pedido-alerts.util';
 import Swal from 'sweetalert2';
 import { ChangeDetectorRef } from '@angular/core';
+import { AltaPedidoPage } from '../alta-pedido/alta-pedido.page';
 @Component({
   selector: 'app-detalle-pedido',
   templateUrl: './detalle-pedido.page.html',
@@ -426,6 +427,33 @@ reembolsarPedido() {
             toast.error(err.error?.error || 'No se pudo procesar el reembolso');
           }
         });
+      }
+    });
+  }
+  abrirModalModificar() {
+    const dialogRef = this.dialog.open(AltaPedidoPage, {
+      width: '900px',
+      maxWidth: '95vw',
+      maxHeight: '95dvh',
+         panelClass: [
+  'alta-pedido-dialog',
+  'p-0',
+  'bg-transparent',
+  'shadow-none'
+],
+      backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      disableClose: true,
+      data: {
+        pedido: this.ped,            
+        detalles: this.pedidoDetalle  
+      }
+    });
+
+    dialogRef.afterClosed().subscribe((resultado: any) => {
+
+      if (resultado) {
+        this.actualizoAlgo = true;
+        this.recargarPedidoCompleto();
       }
     });
   }

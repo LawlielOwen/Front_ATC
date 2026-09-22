@@ -2,12 +2,12 @@
   [attr.aria-busy]="guardando">
   <ngx-sonner-toaster position="top-right" [richColors]="true"></ngx-sonner-toaster>
 
-  <app-header-modal class="shrink-0" [label]="'Agregar Pedido'"></app-header-modal>
+  <!-- Cambia el título dependiendo del modo -->
+  <app-header-modal class="shrink-0" [label]="esEdicion ? 'Modificar Pedido' : 'Agregar Pedido'"></app-header-modal>
 
-  <!-- Este es el único contenedor que debe desplazarse verticalmente. -->
   <div class="p-4 overflow-y-auto overscroll-contain min-h-0 flex-1 custom-scrollbar">
     <fieldset [disabled]="guardando" class="m-0 p-0 border-0 min-w-0 flex flex-col gap-4">
-      <legend class="sr-only">Datos del nuevo pedido</legend>
+      <legend class="sr-only">Datos del pedido</legend>
 
       <app-card-form title="Información del Pedido">
         <svg icono aria-hidden="true" class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -18,7 +18,7 @@
           <div class="min-w-0 md:col-span-2">
             <label for="pedido-cliente" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Cliente *</label>
             <input id="pedido-cliente" type="text" autocomplete="off" [formControl]="clienteControl"
-              [matAutocomplete]="autoCliente" [readonly]="guardando || cargandoClientes"
+              [matAutocomplete]="autoCliente" [readonly]="guardando || cargandoClientes || esEdicion"
               [placeholder]="cargandoClientes ? 'Cargando clientes...' : 'Buscar cliente registrado...'"
               aria-required="true" aria-describedby="pedido-cliente-ayuda"
               class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm text-[#0d1f38] placeholder:text-slate-400 outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:opacity-60 transition-colors">
@@ -27,12 +27,13 @@
                 <span class="text-sm font-medium">{{ mostrarNombreCliente(cliente) }}</span>
               </mat-option>
             </mat-autocomplete>
-            <p id="pedido-cliente-ayuda" class="text-[10px] text-slate-400 mt-1 mb-0">Selecciona un cliente de la lista para asociar el pedido.</p>
+            <p id="pedido-cliente-ayuda" class="text-[10px] text-slate-400 mt-1 mb-0" *ngIf="!esEdicion">Selecciona un cliente de la lista para asociar el pedido.</p>
+            <p id="pedido-cliente-ayuda" class="text-[10px] text-amber-600 mt-1 mb-0" *ngIf="esEdicion">El cliente no puede ser modificado en un pedido existente.</p>
           </div>
 
           <div>
             <label for="pedido-asesor" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Asesor encargado *</label>
-            <select id="pedido-asesor" [(ngModel)]="pedido.id_asesor" [disabled]="guardando || cargandoAsesores" aria-required="true"
+            <select id="pedido-asesor" [(ngModel)]="pedido.id_asesor" [disabled]="guardando || cargandoAsesores || esEdicion" aria-required="true"
               class="w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:opacity-60 transition-colors">
               <option [ngValue]="0">{{ cargandoAsesores ? 'Cargando...' : 'Seleccionar asesor...' }}</option>
               <option *ngFor="let asesor of asesores" [ngValue]="asesor.id">{{ asesor.Nombre_completo }}</option>
@@ -40,20 +41,22 @@
           </div>
           <div>
             <label for="pedido-orden" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Orden de compra <span class="normal-case font-normal">(opcional)</span></label>
+            <!-- Este campo SÍ se puede editar -->
             <input id="pedido-orden" type="text" [(ngModel)]="pedido.orden_compra" maxlength="100" placeholder="Ej. OC-2026-001"
+              [disabled]="guardando"
               class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm placeholder:text-slate-400 outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:opacity-60 transition-colors">
           </div>
         </div>
       </app-card-form>
 
-            <app-card-form title="Moneda y Vigencia">
+      <app-card-form title="Moneda y Vigencia">
         <svg icono aria-hidden="true" class="w-4 h-4 text-[#1D9E75]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
         </svg>
         <div class="w-full md:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label for="pedido-moneda" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Moneda *</label>
-            <select id="pedido-moneda" [ngModel]="pedido.moneda" (ngModelChange)="cambiarMoneda($event)"
+            <select id="pedido-moneda" [ngModel]="pedido.moneda" (ngModelChange)="cambiarMoneda($event)" [disabled]="guardando || esEdicion"
               class="w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:opacity-60 transition-colors">
               <option value="MONEDA NACIONAL">Pesos mexicanos (MXN)</option>
               <option value="USD">Dólares (USD)</option>
@@ -67,31 +70,17 @@
               <span *ngIf="pedido.moneda === 'USD'" class="absolute left-3 top-1/2 -translate-y-1/2 text-[11px] font-bold text-slate-400 pointer-events-none">$</span>
               <input id="pedido-cambio" type="number" [ngModel]="pedido.tipo_cambio"
                 (ngModelChange)="pedido.tipo_cambio = $event; calcularTotales()"
-                [disabled]="guardando || pedido.moneda !== 'USD'" min="0.0001" max="999999.9999" step="0.0001" inputmode="decimal"
+                [disabled]="guardando || pedido.moneda !== 'USD' || esEdicion" min="0.0001" max="999999.9999" step="0.0001" inputmode="decimal"
                 aria-describedby="pedido-cambio-ayuda"
                 [class.pl-6]="pedido.moneda === 'USD'"
                 class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:bg-slate-100 disabled:text-slate-400 transition-colors">
             </div>
-            <p id="pedido-cambio-ayuda" class="text-[10px] mt-1 mb-0">
-              <ng-container *ngIf="pedido.moneda === 'USD'; else infoMxn">
-                <span *ngIf="pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999; else sinCapturar" class="text-[#1D9E75] font-semibold">
-                  1 USD = {{ pedido.tipo_cambio | currency:'MXN':'$':'1.2-2' }} MXN — cuánto costó el dólar hoy.
-                </span>
-                <ng-template #sinCapturar><span class="text-slate-400">Captura cuántos pesos costó 1 dólar el día de hoy.</span></ng-template>
-              </ng-container>
-              <ng-template #infoMxn><span class="text-slate-400">En MXN se utiliza 1, no aplica conversión.</span></ng-template>
-            </p>
           </div>
           <div>
             <label for="pedido-vigencia" class="block text-[11px] font-bold text-slate-500 uppercase mb-1">Vigencia (días) *</label>
-            <input id="pedido-vigencia" type="number" [(ngModel)]="pedido.vigencia_dias" min="1" max="3650" step="1" inputmode="numeric"
+            <input id="pedido-vigencia" type="number" [(ngModel)]="pedido.vigencia_dias" [disabled]="guardando || esEdicion" min="1" max="3650" step="1" inputmode="numeric"
               class="appearance-none w-full bg-slate-50 border border-solid border-[#cbd5e1] rounded-lg px-3 py-2 text-sm outline-none focus:border-[#1D9E75] focus:ring-1 focus:ring-[#1D9E75] disabled:opacity-60 transition-colors">
-            <p class="text-[10px] text-slate-400 mt-1 mb-0">Desde la fecha de registro.</p>
           </div>
-          <p *ngIf="pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999)"
-            role="status" class="md:col-span-3 m-0 rounded-lg bg-amber-50 border border-amber-200 px-3 py-2 text-[11px] text-amber-800">
-            Captura un tipo de cambio válido para consultar y editar los importes en dólares.
-          </p>
         </div>
       </app-card-form>
 
@@ -126,7 +115,6 @@
               Partida manual
             </button>
           </div>
-          <p class="text-[10px] text-slate-400 mb-3">Busca con al menos dos caracteres y selecciona un producto. Para productos no registrados, agrega una partida manual.</p>
 
           <div class="rounded-lg border border-slate-200 overflow-hidden bg-white">
             <div class="overflow-x-auto" tabindex="0" role="region" aria-label="Tabla editable de productos">
@@ -177,33 +165,18 @@
                         min="1" step="1" inputmode="numeric"
                         class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-center text-[11px] font-bold text-[#003B8A] outline-none focus:border-[#003B8A] disabled:opacity-60 transition-colors">
                     </td>
-                  <!-- Celda de P. Unitario -->
-<td class="px-2 py-2">
-  <input
-    type="number"
-    [ngModel]="item.precio_unitario === null ? null : obtenerPrecioEnMonedaActual(item.precio_unitario)"
-    (ngModelChange)="actualizarPrecio(item, $event)"
-    min="0"
-    step="any"
-    inputmode="decimal"
-    placeholder="0.00"
-    [disabled]="guardando || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
-    class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-right text-[11px] outline-none focus:border-[#003B8A] disabled:opacity-50 transition-colors">
-</td>
-
-<!-- Celda de Flete -->
-<td class="px-2 py-2">
-  <input 
-    type="number" 
-    [ngModel]="item.costo_flete === null ? null : obtenerPrecioEnMonedaActual(item.costo_flete)"
-    (ngModelChange)="actualizarFlete(item, $event)" 
-    min="0" 
-    step="any" 
-    inputmode="decimal"
-    placeholder="0"
-    [disabled]="guardando || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
-    class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-right text-[11px] outline-none focus:border-[#003B8A] disabled:opacity-50 transition-colors">
-</td>
+                    <td class="px-2 py-2">
+                      <input type="number" [ngModel]="item.precio_unitario === null ? null : obtenerPrecioEnMonedaActual(item.precio_unitario)"
+                        (ngModelChange)="actualizarPrecio(item, $event)" min="0" step="any" inputmode="decimal" placeholder="0.00"
+                        [disabled]="guardando || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
+                        class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-right text-[11px] outline-none focus:border-[#003B8A] disabled:opacity-50 transition-colors">
+                    </td>
+                    <td class="px-2 py-2">
+                      <input type="number" [ngModel]="item.costo_flete === null ? null : obtenerPrecioEnMonedaActual(item.costo_flete)"
+                        (ngModelChange)="actualizarFlete(item, $event)" min="0" step="any" inputmode="decimal" placeholder="0"
+                        [disabled]="guardando || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
+                        class="w-full border border-solid border-slate-300 bg-slate-50 rounded px-1.5 py-1.5 text-right text-[11px] outline-none focus:border-[#003B8A] disabled:opacity-50 transition-colors">
+                    </td>
                     <td class="px-2 py-3 text-right font-bold whitespace-nowrap text-[11px]">
                       <ng-container *ngIf="pedido.moneda !== 'USD' || pedido.tipo_cambio > 0; else importePendiente">
                         {{ obtenerPrecioEnMonedaActual(item.subtotal_partida) | currency:(pedido.moneda === 'USD' ? 'USD' : 'MXN'):'$':'1.2-2' }}
@@ -244,8 +217,10 @@
 
   <app-footer-modal class="shrink-0 border-t border-gray-100" [paddingClass]="'p-3 px-5'">
     <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" [disabled]="guardando" (click)="cerrar()"></app-button-action>
-    <app-button-action [label]="guardando ? 'Guardando...' : 'Guardar Pedido'" [claseCss]="'btn-agregar'"
-      [disabled]="guardando || cargandoClientes || cargandoAsesores || detalles.length === 0 || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
+    
+    <!-- Botón condicional según el modo -->
+    <app-button-action [label]="guardando ? 'Guardando...' : (esEdicion ? 'Guardar Cambios' : 'Guardar Pedido')" [claseCss]="'btn-agregar'"
+      [disabled]="guardando || (!esEdicion && cargandoClientes) || (!esEdicion && cargandoAsesores) || detalles.length === 0 || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
       (click)="guardarPedido()"></app-button-action>
   </app-footer-modal>
 </div>

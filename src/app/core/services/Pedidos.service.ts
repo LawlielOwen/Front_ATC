@@ -122,4 +122,7 @@ obtenerUrlFactura(rutaRelativa: string): string {
   reembolsarPedido(idPedido: number): Observable<any> {
         return this.http.post<any>(`${this.apiUrl}/pedido/${idPedido}/reembolsar`, {});
     }
+    modificarPedido(idPedido: number, payload: any): Observable<any> {
+      return this.http.put<any>(`${this.apiUrl}/pedido/${idPedido}/modificar`, payload);
+  }
 }

@@ -160,25 +160,9 @@ export class DetallePedidoPage implements OnInit {
   }
 recargarPedidoCompleto() {
 
-  this.ps.obtenerDetallesPedido(this.ped.id).subscribe({
-    next: (pedidoActualizado: any) => {
-      if (pedidoActualizado) {
-        this.ped = {
-          ...this.ped,
-          ...pedidoActualizado,
-          estatusTexto: this.obtenerTextoEstatus(pedidoActualizado.Estatus ?? pedidoActualizado.estatus)
-        };
-      }
-
-      this.cargarDetalles();
-      this.cdr.detectChanges();
-    },
-    error: (err) => {
-      console.error('Error al refrescar el pedido:', err);
-      this.cargarDetalles();
-    }
-  });
-}
+    this.cargarDetalles();
+    this.cdr.detectChanges();
+  }
    obtenerTextoEstatus(estatus: number): string {
     const mapaEstatus: Record<number, string> = {
       0: 'Cancelado',
@@ -188,7 +172,7 @@ recargarPedidoCompleto() {
     };
     return mapaEstatus[estatus] || 'Desconocido';
   }
-  subirPDF() {
+subirPDF() {
     const dialogRef = this.dialog.open(SubirReciboPage, {
       width: '650px',
       maxWidth: '95vw',
@@ -200,15 +184,20 @@ recargarPedidoCompleto() {
 
     dialogRef.afterClosed().subscribe((resultado: any) => {
       if (resultado && resultado.subido) {
-
         const mensajeBackend = resultado.mensaje || '';
         this.actualizoAlgo = true; 
 
-        // 1. Validación ampliada de palabras clave
         const msj = mensajeBackend.toLowerCase();
         const estaIncompleto = msj.includes('incompleto') || msj.includes('faltan') || msj.includes('pendiente');
 
-        // 2. RECARGAMOS INMEDIATAMENTE el fondo
+        this.ped.Estatus = estaIncompleto ? 3 : 2;
+        this.ped.estatusTexto = estaIncompleto ? 'Incompleto' : 'Completado';
+        
+        if (!this.ped.factura_ruta) {
+           this.ped.factura_ruta = 'archivo_adjunto.pdf'; 
+        }
+        this.cdr.detectChanges();
+  
         this.recargarPedidoCompleto();
 
         if (estaIncompleto) {
@@ -220,7 +209,7 @@ recargarPedidoCompleto() {
         }
       }
     });
-}
+  }
 
   cancelarPedido() {
     const dialogRef = this.dialog.open(DeleteComponent, {

@@ -14,6 +14,7 @@ import { NgxSonnerToaster } from 'ngx-sonner';
 import { AuthService } from '../../../core/services/auth.service';
 import { mostrarAvisoStockIncompleto, mostrarExitoPedido, mostrarCreditoInsuficiente, mostrarCreditoVencido } from '../../../shared/utils/pedido-alerts.util';
 import Swal from 'sweetalert2';
+import { ChangeDetectorRef } from '@angular/core';
 @Component({
   selector: 'app-detalle-pedido',
   templateUrl: './detalle-pedido.page.html',
@@ -43,7 +44,7 @@ export class DetallePedidoPage implements OnInit {
   constructor(
     private ps: PedidoService,
     public dialogRef: MatDialogRef<DetallePedidoPage>,
-    @Inject(MAT_DIALOG_DATA) public data: any, public authService: AuthService,
+    @Inject(MAT_DIALOG_DATA) public data: any, public authService: AuthService,private cdr: ChangeDetectorRef,
     public dialog: MatDialog
   ) {
     this.ped = data.detalles;
@@ -156,22 +157,27 @@ export class DetallePedidoPage implements OnInit {
 
     return new Intl.NumberFormat('es-MX', opciones).format(cantidad);
   }
- recargarPedidoCompleto() {
-    this.ps.obtenerDetallesPedido(this.ped.id).subscribe({
-      next: (pedidoActualizado: any) => {
+recargarPedidoCompleto() {
+
+  this.ps.obtenerDetallesPedido(this.ped.id).subscribe({
+    next: (pedidoActualizado: any) => {
+      if (pedidoActualizado) {
         this.ped = {
-          ...this.ped,          
-          ...pedidoActualizado,  
-          estatusTexto: this.obtenerTextoEstatus(pedidoActualizado.Estatus)
+          ...this.ped,
+          ...pedidoActualizado,
+          estatusTexto: this.obtenerTextoEstatus(pedidoActualizado.Estatus ?? pedidoActualizado.estatus)
         };
-        this.cargarDetalles();
-      },
-      error: (err) => {
-        console.error('Error al refrescar el pedido:', err);
-        this.cargarDetalles();
       }
-    });
-  }
+
+      this.cargarDetalles();
+      this.cdr.detectChanges();
+    },
+    error: (err) => {
+      console.error('Error al refrescar el pedido:', err);
+      this.cargarDetalles();
+    }
+  });
+}
    obtenerTextoEstatus(estatus: number): string {
     const mapaEstatus: Record<number, string> = {
       0: 'Cancelado',
@@ -181,12 +187,13 @@ export class DetallePedidoPage implements OnInit {
     };
     return mapaEstatus[estatus] || 'Desconocido';
   }
-   subirPDF() {
+  subirPDF() {
     const dialogRef = this.dialog.open(SubirReciboPage, {
       width: '650px',
       maxWidth: '95vw',
       panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      disableClose: true,
       data: { idPedido: this.ped.id }
     });
 
@@ -196,10 +203,15 @@ export class DetallePedidoPage implements OnInit {
         const mensajeBackend = resultado.mensaje || '';
         this.actualizoAlgo = true; 
 
-        if (mensajeBackend.toLowerCase().includes('incompleto')) {
-            mostrarAvisoStockIncompleto(mensajeBackend).then(() => {
-              this.recargarPedidoCompleto();
-            });
+        // 1. Validación ampliada de palabras clave
+        const msj = mensajeBackend.toLowerCase();
+        const estaIncompleto = msj.includes('incompleto') || msj.includes('faltan') || msj.includes('pendiente');
+
+        // 2. RECARGAMOS INMEDIATAMENTE el fondo
+        this.recargarPedidoCompleto();
+
+        if (estaIncompleto) {
+            mostrarAvisoStockIncompleto(mensajeBackend);
         } else {
             mostrarExitoPedido(mensajeBackend || 'Archivo subido y pedido completado correctamente.').then(() => {
               this.dialogRef.close(true);
@@ -207,13 +219,14 @@ export class DetallePedidoPage implements OnInit {
         }
       }
     });
-  }
+}
 
   cancelarPedido() {
     const dialogRef = this.dialog.open(DeleteComponent, {
       width: '400px',
       panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      disableClose: true,
       data: {
         titulo: 'Cancelar Pedido',
         mensaje: `¿Estás seguro de que deseas cancelar este pedido?`,
@@ -256,7 +269,13 @@ export class DetallePedidoPage implements OnInit {
 validarYCompletar() {
   this.ps.aceptarPedido(this.ped.id).subscribe({
     next: (res: any) => {
-      const completo = !res.mensaje?.toLowerCase().includes('incompleto');
+      const mensajeStr = (res.mensaje || '').toLowerCase();
+      
+      const estaIncompleto = mensajeStr.includes('incompleto') || 
+                             mensajeStr.includes('faltan') || 
+                             mensajeStr.includes('pendiente');
+
+      const completo = !estaIncompleto;
 
       Swal.fire({
         icon: completo ? 'success' : 'warning',
@@ -266,7 +285,7 @@ validarYCompletar() {
         confirmButtonColor: completo ? '#1D9E75' : '#f59e0b',
         heightAuto: false 
       }).then(() => {
-
+        this.recargarPedidoCompleto();
       });
     },
     error: (err) => {
@@ -280,12 +299,10 @@ validarYCompletar() {
         confirmButtonText: 'Cerrar',
         heightAuto: false 
       });
-
     }
   });
 }
 pagarConCredito() {
-
     if (this.monedaActual === 'USD') {
       Swal.fire({
         icon: 'warning',
@@ -319,10 +336,23 @@ pagarConCredito() {
             const mensajeBackend = res.mensaje || '';
             this.actualizoAlgo = true;
 
-            if (mensajeBackend.toLowerCase().includes('incompleto')) {
-              mostrarAvisoStockIncompleto(mensajeBackend).then(() => {
-                this.recargarPedidoCompleto();
-              });
+            const msj = mensajeBackend.toLowerCase();
+            const estaIncompleto = msj.includes('incompleto') || msj.includes('faltan') || msj.includes('pendiente');
+
+
+            this.ped.Estatus = estaIncompleto ? 3 : 2; 
+            this.ped.estatusTexto = estaIncompleto ? 'Incompleto' : 'Completado';
+            
+            if (!this.ped.recibo_pago_ruta) {
+               this.ped.recibo_pago_ruta = 'pago_con_credito'; 
+            }
+            
+            this.cdr.detectChanges(); 
+
+            this.recargarPedidoCompleto();
+
+            if (estaIncompleto) {
+              mostrarAvisoStockIncompleto(mensajeBackend);
             } else {
               mostrarExitoPedido(mensajeBackend || 'El cobro se aplicó exitosamente al crédito del cliente.').then(() => {
                 this.dialogRef.close(true);
@@ -374,6 +404,7 @@ reembolsarPedido() {
       width: '400px',
       panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      disableClose: true,
       data: {
         titulo: 'Reembolsar Pedido',
         mensaje: `¿Estás seguro de que deseas reembolsar este pedido? Se liberará el stock apartado y, si aplica, se reembolsará el saldo a la línea de crédito del cliente.`,

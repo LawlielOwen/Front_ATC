@@ -203,6 +203,7 @@ const dialogRef = this.dialog.open(DetallePedidoPage, {
       maxWidth: '95vw',
       panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
       backdropClass: ['bg-black/40', 'backdrop-blur-sm'],
+      disableClose: true,
       data: { detalles: pedido }
     });
     dialogRef.afterClosed().subscribe((necesitaRecargar: boolean) => {

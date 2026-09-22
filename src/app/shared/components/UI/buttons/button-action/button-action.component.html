@@ -1,6 +1,7 @@
 <ion-button 
-  [disabled]="disabled"
+  [disabled]="disabled || autoDisabled"
   [expand]="expandir" 
+  [class.button-disabled]="disabled || autoDisabled"
   [ngClass]="esEliminar && estatus === 0 ? 'btn-activar' : claseCss">
   {{ esEliminar && estatus === 0 ? 'Activar' : label }}
 </ion-button>

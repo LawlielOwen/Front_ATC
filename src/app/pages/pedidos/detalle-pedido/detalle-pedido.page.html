@@ -239,19 +239,13 @@
 
     <div class="flex gap-2.5 items-center">
     
-        <ng-container *ngIf="(ped?.Estatus === 1 || ped?.Estatus === 3 || ped?.estatusTexto === 'Pendiente' || ped?.estatusTexto === 'Incompleto') && authService.tieneAcceso(['Administrador', 'Cotizador', 'Asesor'])">
-            <app-button-action 
-                [label]="'Modificar'" 
-                [claseCss]="'btn-editar'" 
-                (click)="abrirModalModificar()">
-            </app-button-action>
-        </ng-container>
+        
         <ng-container *ngIf="ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente'">
-            <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cancelar'" *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador'])"
+            <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cancelar'" *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor','Almacen'])"
                 (click)="cancelarPedido()"></app-button-action>
         </ng-container>
 
-        <ng-container *ngIf="(ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente') && authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])">
+        <ng-container *ngIf="(ped?.Estatus === 1 || ped?.estatusTexto === 'Pendiente') && authService.tieneAcceso(['Administrador', 'Cotizador','Asesor', 'Almacen'])">
             <app-button-action 
                  *ngIf="monedaActual !== 'USD'"
                 [label]="'Cobrar con Crédito'" 
@@ -265,7 +259,7 @@
             <app-button-action 
                 [label]="'Reembolsar'" 
                 [claseCss]="'btn-cancelar'" 
-                *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador'])"
+                *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])"
                 (click)="reembolsarPedido()">
             </app-button-action>
 

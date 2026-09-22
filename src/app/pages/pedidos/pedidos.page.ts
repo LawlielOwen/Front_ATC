@@ -106,7 +106,7 @@ cargarPedidos() {
         
         if (payload && payload.Rol) {
           const rol = payload.Rol.toLowerCase().trim();
-          if (rol === 'asesor' || rol === 'cotizador') {
+          if (rol === 'asesor') {
             idAsesorFiltro = payload.id;
           }
         }

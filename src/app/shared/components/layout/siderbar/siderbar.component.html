@@ -57,7 +57,7 @@
     </ion-tab-button>
 
     <ion-tab-button layout="icon-start" routerLink="/pedidos" routerLinkActive="tab-selected"
-      *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor'])">
+      *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor','Almacen'])">
       <ion-icon name="cart-outline"></ion-icon>
       <ion-label>Pedidos</ion-label>
     </ion-tab-button>

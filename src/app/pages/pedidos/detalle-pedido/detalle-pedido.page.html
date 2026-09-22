@@ -244,7 +244,7 @@
             <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cancelar'" *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador','Asesor','Almacen'])"
                 (click)="cancelarPedido()"></app-button-action>
         </ng-container>
-        <ng-container *ngIf="(ped?.Estatus === 1 || ped?.Estatus === 3 || ped?.estatusTexto === 'Pendiente' || ped?.estatusTexto === 'Incompleto') && authService.tieneAcceso(['Administrador', 'Cotizador', 'Asesor'])">
+        <ng-container *ngIf="(ped?.Estatus === 1 || ped?.Estatus === 3 || ped?.estatusTexto === 'Pendiente' || ped?.estatusTexto === 'Incompleto') && authService.tieneAcceso(['Administrador', 'Cotizador', 'Asesor','Almacen'])">
             <app-button-action 
                 [label]="'Modificar'" 
                 [claseCss]="'btn-editar'" 

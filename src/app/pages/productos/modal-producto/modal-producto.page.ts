@@ -91,7 +91,7 @@ estanterias: string[] = Array.from({ length: 30 }, (_, i) => (i + 1).toString().
       this.guardarNuevoProducto();
     }
   }
-  private guardarNuevoProducto() {
+private guardarNuevoProducto() {
     this.ps.addProducto(this.productoNuevo as Productos).subscribe({
       next: (res) => {
         toast.success('Producto registrado correctamente');
@@ -99,10 +99,12 @@ estanterias: string[] = Array.from({ length: 30 }, (_, i) => (i + 1).toString().
       },
       error: (err) => {
         console.error('Error al guardar el producto', err);
-        toast.error('Ocurrió un error al intentar registrar el producto.');
+        
+        const mensajeError = err.error?.error || 'Ocurrió un error al intentar registrar el producto.';
+        toast.error(mensajeError);
       }
     });
-  }
+}
   actualizarProducto() {
     const idProducto = this.productoNuevo.id;
     this.ps.updateProducto(idProducto, this.productoNuevo as any).subscribe({

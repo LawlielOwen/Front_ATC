@@ -405,10 +405,17 @@
                             </div>
 
                             <div class="space-y-2 mt-4">
-                                <button class="appearance-none shadow-sm ring-0 w-full bg-[#003B8A] hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition text-sm"
-                                    (click)="guardarCotizacion()">
-                                    {{ isEditMode ? 'Actualizar cotización' : 'Guardar cotización' }}
-                                </button>
+                                <button
+  class="appearance-none shadow-sm ring-0 w-full bg-[#003B8A] hover:bg-blue-800 text-white font-semibold py-3 rounded-lg transition text-sm disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-[#003B8A]"
+  (click)="guardarCotizacion()"
+  [disabled]="guardandoCotizacion">
+
+  {{
+    guardandoCotizacion
+      ? (isEditMode ? 'Actualizando...' : 'Guardando...')
+      : (isEditMode ? 'Actualizar cotización' : 'Guardar cotización')
+  }}
+</button>
 
                                 <button (click)="guardarYDescargar()"
                                     class="appearance-none shadow-sm ring-0 w-full bg-[#008f5d] hover:bg-green-700 text-white font-semibold py-3 rounded-lg transition text-sm">

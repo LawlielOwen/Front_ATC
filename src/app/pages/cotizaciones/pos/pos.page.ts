@@ -49,7 +49,7 @@ export class POSPage implements OnInit {
   clientes: any[] = [];
   clientesFiltrados: any[] = [];
   asesores: Asesor[] = [];
-
+guardandoCotizacion: boolean = false;
   productoControl = new FormControl('');
   productosFiltrados: any[] = [];
   readonly ORIGENES_SMC: string[] = [
@@ -413,50 +413,66 @@ private sanearDetalles() {
     return this.cotizacion.moneda === 'USD' ? montoMXN / tipoCambio : montoMXN;
   }
 
-  guardarCotizacion() {
-    if (this.detalles.length === 0) {
-      toast.error('La cotización debe tener al menos un producto');
-      return;
-    }
-    if (this.hayPreciosFaltantes()) {
-      toast.warning('Hay una o más partidas manuales sin precio unitario capturado.');
-      return;
-    }
-    if (!this.cotizacion.id_cliente && !this.cotizacion.nombre_prospecto) {
-      toast.warning('Debes seleccionar un cliente o escribir el nombre de un cliente.');
-      return;
-    }
-    if (!this.cotizacion.id_asesor) {
-      toast.warning('Debes seleccionar un asesor antes de continuar.');
-      return;
-    }
-    this.sanearDetalles();
-    const payload = {
-      ...this.cotizacion,
-      subtotal: this.subtotal_final,
-      iva: this.iva_final,
-      total: this.total_final,
-      detalles: this.detalles
-    };
+guardarCotizacion() {
+  if (this.guardandoCotizacion) return;
 
-    if (this.isEditMode && this.cotizacionIdEdit) {
-      this.cs.modificarCotizacion(this.cotizacionIdEdit, payload).subscribe({
-        next: (res) => {
-          toast.success('Cotización actualizada con éxito.');
-          this.router.navigate(['/cotizaciones']);
-        },
-        error: (err) => toast.error('Error al actualizar la cotización')
-      });
-    } else {
-      this.cs.crearCotizacion(payload).subscribe({
-        next: (res) => {
-          toast.success('Cotización creada con éxito. Folio generado.');
-          this.limpiarFormulario();
-        },
-        error: (err) => toast.error('Error al guardar la cotización')
-      });
-    }
+  if (this.detalles.length === 0) {
+    toast.error('La cotización debe tener al menos un producto');
+    return;
   }
+
+  if (this.hayPreciosFaltantes()) {
+    toast.warning('Hay una o más partidas manuales sin precio unitario capturado.');
+    return;
+  }
+
+  if (!this.cotizacion.id_cliente && !this.cotizacion.nombre_prospecto) {
+    toast.warning('Debes seleccionar un cliente o escribir el nombre de un cliente.');
+    return;
+  }
+
+  if (!this.cotizacion.id_asesor) {
+    toast.warning('Debes seleccionar un asesor antes de continuar.');
+    return;
+  }
+
+  this.sanearDetalles();
+
+  const payload = {
+    ...this.cotizacion,
+    subtotal: this.subtotal_final,
+    iva: this.iva_final,
+    total: this.total_final,
+    detalles: this.detalles
+  };
+
+  this.guardandoCotizacion = true;
+
+  if (this.isEditMode && this.cotizacionIdEdit) {
+    this.cs.modificarCotizacion(this.cotizacionIdEdit, payload).subscribe({
+      next: () => {
+        toast.success('Cotización actualizada con éxito.');
+        this.router.navigate(['/cotizaciones']);
+      },
+      error: () => {
+        toast.error('Error al actualizar la cotización');
+        this.guardandoCotizacion = false;
+      }
+    });
+  } else {
+    this.cs.crearCotizacion(payload).subscribe({
+      next: () => {
+        toast.success('Cotización creada con éxito. Folio generado.');
+        this.limpiarFormulario();
+        this.guardandoCotizacion = false;
+      },
+      error: () => {
+        toast.error('Error al guardar la cotización');
+        this.guardandoCotizacion = false;
+      }
+    });
+  }
+}
 
   cambiarMoneda(nuevaMoneda: string) {
     this.cotizacion.moneda = nuevaMoneda;

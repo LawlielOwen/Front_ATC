@@ -70,87 +70,346 @@ flex flex-col border border-gray-100">
       
     <!-- DATOS OPERATIVOS -->
 <app-card-form title="Datos operativos">
-  <svg icono class="w-4 h-4 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+  <svg icono
+    class="w-4 h-4 text-[#003B8A]"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor">
+
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
       d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
   </svg>
 
-  <!-- 👇 AQUÍ el cambio: md:col-span-2 -->
-  <div class="flex flex-col gap-4 w-full md:col-span-2">
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-      <app-input tipo="text" placeholder="Ej. Juan Pérez" label="Nombre del Contacto"
-        [(value)]="clienteNuevo.nombre_contacto"></app-input>
-      <app-input tipo="text" placeholder="ej. 4771234567" label="Teléfono de Contacto" maxlength="14"
-        [(value)]="clienteNuevo.contacto_principal"></app-input>
-    </div>
+  <div class="flex flex-col gap-5 w-full md:col-span-2">
 
     <div class="w-full">
-      <app-input tipo="text" placeholder="ej. correo@empresa.com" label="Correo Electrónico"
-        [(value)]="clienteNuevo.correo_contacto"></app-input>
+      <app-input
+        tipo="text"
+        placeholder="Ej. CLI-00125"
+        label="Código del Cliente *"
+        maxlength="50"
+        [(value)]="clienteNuevo.codigo_cliente">
+      </app-input>
     </div>
+
+    <div class="border border-gray-200 rounded-xl p-4 bg-gray-50">
+      <div class="mb-4">
+        <h3 class="text-[#0d1f38] font-bold text-sm">
+          Contacto principal
+        </h3>
+
+        <p class="text-[11px] text-gray-500 mt-1">
+          Persona principal de referencia para este cliente.
+        </p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+
+        <app-input
+          tipo="text"
+          placeholder="Ej. Juan Pérez"
+          label="Nombre del Contacto"
+          [(value)]="clienteNuevo.nombre_contacto">
+        </app-input>
+
+        <app-input
+          tipo="text"
+          placeholder="Ej. 4771234567"
+          label="Teléfono de Contacto"
+          maxlength="16"
+          [(value)]="clienteNuevo.contacto_principal">
+        </app-input>
+
+      </div>
+
+      <div class="w-full mt-4">
+
+        <app-input
+          tipo="text"
+          placeholder="ej. correo@empresa.com"
+          label="Correo Electrónico"
+          [(value)]="clienteNuevo.correo_contacto">
+        </app-input>
+
+      </div>
+    </div>
+
+    <div class="border-t border-gray-200 pt-5">
+
+      <div class="flex items-center justify-between mb-4">
+
+        <div>
+          <h3 class="text-[#0d1f38] font-bold text-sm">
+            Contactos adicionales
+          </h3>
+
+          <p class="text-[11px] text-gray-500 mt-1">
+            Puedes registrar otras personas de referencia de la empresa.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          (click)="agregarContacto()"
+          class="text-xs bg-[#e8f5f0] text-[#0f6e56] font-bold px-3 py-2 rounded-md hover:bg-[#d1eadd] transition-colors flex items-center gap-1">
+
+          <svg
+            class="w-3.5 h-3.5"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor">
+
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 4v16m8-8H4" />
+
+          </svg>
+
+          Agregar contacto
+
+        </button>
+
+      </div>
+
+      <div
+        *ngIf="clienteNuevo.contactos.length === 0"
+        class="text-xs text-gray-500 border border-dashed border-gray-300 rounded-lg p-4 text-center bg-gray-50">
+
+        No hay contactos adicionales registrados.
+
+      </div>
+
+      <div
+        *ngFor="let contacto of clienteNuevo.contactos; let i = index"
+        class="relative bg-white border border-gray-200 rounded-xl p-4 mb-3">
+
+        <button
+          type="button"
+          (click)="removerContacto(i)"
+          class="absolute top-3 right-3 text-red-500 hover:bg-red-50 p-1.5 rounded-md transition-colors">
+
+          <svg
+            class="w-4 h-4"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor">
+
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M6 18L18 6M6 6l12 12" />
+
+          </svg>
+
+        </button>
+
+        <div class="pr-8">
+
+          <p class="text-xs font-bold text-[#003B8A] mb-4">
+            Contacto {{ i + 2 }}
+          </p>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <app-input
+              tipo="text"
+              placeholder="Ej. María López"
+              label="Nombre"
+              [(value)]="contacto.nombre">
+            </app-input>
+
+            <app-input
+              tipo="text"
+              placeholder="Ej. Compras"
+              label="Puesto"
+              [(value)]="contacto.puesto">
+            </app-input>
+
+            <app-input
+              tipo="text"
+              placeholder="Ej. 4771234567"
+              label="Teléfono"
+              maxlength="16"
+              [(value)]="contacto.telefono">
+            </app-input>
+
+            <app-input
+              tipo="text"
+              placeholder="Ej. maria@empresa.com"
+              label="Correo"
+              [(value)]="contacto.correo">
+            </app-input>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
   </div>
 
-  <!-- Asesores Responsables: ya tenía md:col-span-2, se queda igual -->
   <div class="col-span-1 md:col-span-2 mt-4 pt-4 border-t border-gray-200">
+
     <div class="flex justify-between items-center mb-4">
-      <h3 class="text-[#0d1f38] font-bold text-sm">Asesores Responsables</h3>
-      <button (click)="agregarAsesor()" type="button"
+
+      <h3 class="text-[#0d1f38] font-bold text-sm">
+        Asesores Responsables
+      </h3>
+
+      <button
+        (click)="agregarAsesor()"
+        type="button"
         class="text-xs bg-[#e8f5f0] text-[#0f6e56] font-bold px-3 py-1.5 rounded-md hover:bg-[#d1eadd] transition-colors flex items-center gap-1">
-        <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+
+        <svg
+          class="w-3.5 h-3.5"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor">
+
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M12 4v16m8-8H4" />
+
         </svg>
+
         Agregar otro asesor
+
       </button>
+
     </div>
 
-    <div *ngFor="let rel of clienteNuevo.asesoresAsignados; let i = index"
+    <div
+      *ngFor="let rel of clienteNuevo.asesoresAsignados; let i = index"
       class="bg-white border border-gray-200 rounded-lg p-4 mb-4 relative shadow-sm">
 
-      <button *ngIf="clienteNuevo.asesoresAsignados.length > 1" (click)="removerAsesor(i)"
+      <button
+        *ngIf="clienteNuevo.asesoresAsignados.length > 1"
+        (click)="removerAsesor(i)"
         class="absolute top-3 right-3 text-red-500 hover:bg-red-50 p-1 rounded-md">
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+
+        <svg
+          class="w-4 h-4"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor">
+
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M6 18L18 6M6 6l12 12" />
+
         </svg>
+
       </button>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <app-select label="Asesor Asignado *" [(value)]="rel.id_asesor">
-          <option value="">Seleccione un asesor...</option>
-          <option *ngFor="let asesor of asesores" [value]="asesor.id">{{ asesor.Nombre_completo }}</option>
+
+        <app-select
+          label="Asesor Asignado *"
+          [(value)]="rel.id_asesor">
+
+          <option value="">
+            Seleccione un asesor...
+          </option>
+
+          <option
+            *ngFor="let asesor of asesores"
+            [value]="asesor.id">
+
+            {{ asesor.Nombre_completo }}
+
+          </option>
+
         </app-select>
 
-        <app-select label="Origen del asesor *" [(value)]="rel.asesor_tipo">
-          <option value="">Seleccione origen</option>
-          <option value="Asesor propio">Asesor propio</option>
-          <option value="Asignado por la sucursal">Asignado por Sucursal</option>
+        <app-select
+          label="Origen del asesor *"
+          [(value)]="rel.asesor_tipo">
+
+          <option value="">
+            Seleccione origen
+          </option>
+
+          <option value="Asesor propio">
+            Asesor propio
+          </option>
+
+          <option value="Asignado por la sucursal">
+            Asignado por Sucursal
+          </option>
+
         </app-select>
+
       </div>
 
-      <!-- MARCAS: tal cual, sin tocar -->
       <div class="mt-4 pt-4 border-t border-gray-100">
-        <label class="block text-sm font-medium text-[#414a53] mb-3">Marcas Asignadas *</label>
+
+        <label class="block text-sm font-medium text-[#414a53] mb-3">
+          Marcas Asignadas *
+        </label>
+
         <div class="grid grid-cols-[repeat(auto-fill,minmax(120px,1fr))] gap-2.5">
-          <label *ngFor="let marca of opcionesMarcas"
+
+          <label
+            *ngFor="let marca of opcionesMarcas"
             class="flex items-center gap-2 text-sm cursor-pointer select-none hover:bg-blue-50 p-2 rounded-md border transition-all"
             [class.border-[#003B8A]]="rel.marcasArray.includes(marca.label)"
             [class.bg-blue-50]="rel.marcasArray.includes(marca.label)"
             [class.border-gray-200]="!rel.marcasArray.includes(marca.label)">
-            <input type="checkbox" class="sr-only peer" [value]="marca.label"
-              (change)="toggleMarca($event, marca.label, i)" [checked]="rel.marcasArray.includes(marca.label)">
+
+            <input
+              type="checkbox"
+              class="sr-only peer"
+              [value]="marca.label"
+              (change)="toggleMarca($event, marca.label, i)"
+              [checked]="rel.marcasArray.includes(marca.label)">
+
             <span
               class="w-4 h-4 shrink-0 rounded border border-gray-300 flex items-center justify-center peer-checked:bg-[#003B8A] peer-checked:border-[#003B8A]">
-              <svg *ngIf="rel.marcasArray.includes(marca.label)" class="w-3 h-3 text-white" fill="none"
-                viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+
+              <svg
+                *ngIf="rel.marcasArray.includes(marca.label)"
+                class="w-3 h-3 text-white"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+                stroke-width="3">
+
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  d="M5 13l4 4L19 7" />
+
               </svg>
+
             </span>
-            <span class="text-gray-700 font-medium">{{ marca.label }}</span>
+
+            <span class="text-gray-700 font-medium">
+              {{ marca.label }}
+            </span>
+
           </label>
+
         </div>
+
       </div>
+
     </div>
+
   </div>
+
 </app-card-form>
 
 <app-card-form title="Datos Financieros">

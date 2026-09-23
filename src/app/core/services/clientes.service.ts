@@ -102,4 +102,27 @@ obtenerMovimientosCredito(
         `${this.apiUrl}/clientes/${idCliente}/credito/movimientos`
     );
 }
+actualizarCodigoCliente(
+  idCliente: number,
+  codigoCliente: string
+): Observable<{ mensaje: string; codigo_cliente: string }> {
+  return this.http.put<{ mensaje: string; codigo_cliente: string }>(
+    `${this.apiUrl}/clientes/${idCliente}/codigo`,
+    {
+      codigo_cliente: codigoCliente
+    }
+  );
+}
+
+actualizarVigenciaCredito(
+  idCliente: number,
+  fechaVencimiento: string
+): Observable<{ mensaje: string; fecha_vencimiento_credito: string }> {
+  return this.http.put<{ mensaje: string; fecha_vencimiento_credito: string }>(
+    `${this.apiUrl}/clientes/${idCliente}/credito/vigencia`,
+    {
+      fecha_vencimiento_credito: fechaVencimiento
+    }
+  );
+}
 }

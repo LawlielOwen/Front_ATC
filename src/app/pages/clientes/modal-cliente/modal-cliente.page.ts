@@ -40,17 +40,27 @@ mostrarMovimientosCredito: boolean = false;
   constructor(private service: AsesoresService, private clienteService: ClientesService,
     private dialogRef: MatDialogRef<ModalClientePage>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any, private marcaService: MarcaService) { }
-  clienteNuevo: any = {
+ clienteNuevo: any = {
   id: 0,
+  codigo_cliente: '',
+
   Nombre: '',
   RFC: '',
   Razon_social: '',
   Regimen_fiscal: '',
   Direccion: '',
+
   contacto_principal: '',
   nombre_contacto: '',
   correo_contacto: '',
   CP: '',
+
+  nombre_constancia: '',
+  ruta_constancia: '',
+  fecha_constancia: null,
+
+  contactos: [],
+  constancias: [],
 
   tiene_credito: false,
   limite_credito: null,
@@ -59,7 +69,12 @@ mostrarMovimientosCredito: boolean = false;
   fecha_vencimiento_credito: '',
 
   asesoresAsignados: [
-    { id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' }
+    {
+      id_asesor: '',
+      asesor_tipo: '',
+      marcasArray: [],
+      marcas_asignadas: ''
+    }
   ]
 };
 pagoCredito = {
@@ -87,7 +102,19 @@ get creditoDisponible(): number {
       this.clienteNuevo.asesoresAsignados.splice(index, 1);
     }
   }
+agregarContacto() {
+  this.clienteNuevo.contactos.push({
+    nombre: '',
+    telefono: '',
+    correo: '',
+    puesto: '',
+    es_principal: 0
+  });
+}
 
+removerContacto(index: number) {
+  this.clienteNuevo.contactos.splice(index, 1);
+}
   toggleMarca(event: any, marcaLabel: string, indexAsesor: number) {
     const asesor = this.clienteNuevo.asesoresAsignados[indexAsesor];
     const yaEsta = asesor.marcasArray.includes(marcaLabel);
@@ -106,6 +133,17 @@ ngOnInit() {
   this.isEditMode = true;
   this.uploadMode = false;
   this.clienteNuevo = { ...this.data };
+  this.clienteNuevo.contactos =
+  Array.isArray(this.data.contactos)
+    ? this.data.contactos.filter(
+        (c: any) => Number(c.es_principal) !== 1
+      )
+    : [];
+
+this.clienteNuevo.constancias =
+  Array.isArray(this.data.constancias)
+    ? this.data.constancias
+    : [];
 
   this.clienteNuevo.tiene_credito =
     Number(this.clienteNuevo.tiene_credito) === 1;
@@ -176,87 +214,196 @@ ngOnInit() {
     this.archivoActual = archivo;
   }
 
- agregarCliente() {
-    const formData = new FormData();
+agregarCliente() {
+  const formData = new FormData();
 
-    formData.append('Nombre', this.clienteNuevo.Nombre);
-    formData.append('RFC', this.clienteNuevo.RFC);
-    formData.append('Razon_social', this.clienteNuevo.Razon_social);
-    formData.append('Regimen_fiscal', this.clienteNuevo.Regimen_fiscal);
-    formData.append('Direccion', this.clienteNuevo.Direccion);
-    formData.append('contacto_principal', this.clienteNuevo.contacto_principal);
-    formData.append('nombre_contacto', this.clienteNuevo.nombre_contacto || ''); 
-    formData.append('correo_contacto', this.clienteNuevo.correo_contacto);
-    formData.append('CP', this.clienteNuevo.CP);
+  formData.append(
+    'codigo_cliente',
+    this.clienteNuevo.codigo_cliente || ''
+  );
 
-    formData.append('asesores_json', JSON.stringify(this.clienteNuevo.asesoresAsignados));
-    formData.append('marcas_asignadas', this.clienteNuevo.marcas_asignadas || '');
+  formData.append('Nombre', this.clienteNuevo.Nombre);
+  formData.append('RFC', this.clienteNuevo.RFC);
+  formData.append('Razon_social', this.clienteNuevo.Razon_social);
+  formData.append('Regimen_fiscal', this.clienteNuevo.Regimen_fiscal);
+  formData.append('Direccion', this.clienteNuevo.Direccion);
 
-    formData.append('tiene_credito', this.clienteNuevo.tiene_credito ? '1' : '0');
+  formData.append(
+    'contacto_principal',
+    this.clienteNuevo.contacto_principal || ''
+  );
 
-    const limiteGuardar = this.clienteNuevo.tiene_credito ? this.clienteNuevo.limite_credito : 0;
-    formData.append('limite_credito', limiteGuardar.toString());
-    
-    const fechaVencimiento = this.clienteNuevo.tiene_credito && this.clienteNuevo.fecha_vencimiento_credito ? this.clienteNuevo.fecha_vencimiento_credito : '';
-    formData.append('fecha_vencimiento_credito', fechaVencimiento);
+  formData.append(
+    'nombre_contacto',
+    this.clienteNuevo.nombre_contacto || ''
+  );
 
-    if (this.archivoActual) {
-      formData.append('archivo', this.archivoActual);
-    }
+  formData.append(
+    'correo_contacto',
+    this.clienteNuevo.correo_contacto || ''
+  );
 
-    this.clienteService.addCliente(formData).subscribe({
-      next: (response: any) => {
-        toast.success('Cliente agregado correctamente');
-        this.dialogRef.close(response.id);
-      },
-      error: (err) => {
-        toast.error('Error al guardar el cliente');
-      }
-    });
+  formData.append('CP', this.clienteNuevo.CP);
+
+  formData.append(
+    'contactos',
+    JSON.stringify(this.clienteNuevo.contactos || [])
+  );
+
+  formData.append(
+    'asesores_json',
+    JSON.stringify(this.clienteNuevo.asesoresAsignados)
+  );
+
+  formData.append(
+    'marcas_asignadas',
+    this.clienteNuevo.marcas_asignadas || ''
+  );
+
+  formData.append(
+    'tiene_credito',
+    this.clienteNuevo.tiene_credito ? '1' : '0'
+  );
+
+  const limiteGuardar =
+    this.clienteNuevo.tiene_credito
+      ? this.clienteNuevo.limite_credito
+      : 0;
+
+  formData.append(
+    'limite_credito',
+    limiteGuardar.toString()
+  );
+
+  const fechaVencimiento =
+    this.clienteNuevo.tiene_credito &&
+    this.clienteNuevo.fecha_vencimiento_credito
+      ? this.clienteNuevo.fecha_vencimiento_credito
+      : '';
+
+  formData.append(
+    'fecha_vencimiento_credito',
+    fechaVencimiento
+  );
+
+  if (this.archivoActual) {
+    formData.append('archivo', this.archivoActual);
   }
 
-  actualizarClienteExistente() {
-    const idCliente = this.clienteNuevo.id;
-    const formData = new FormData();
-
-    formData.append('Nombre', this.clienteNuevo.Nombre);
-    formData.append('RFC', this.clienteNuevo.RFC);
-    formData.append('Razon_social', this.clienteNuevo.Razon_social);
-    formData.append('Regimen_fiscal', this.clienteNuevo.Regimen_fiscal);
-    formData.append('Direccion', this.clienteNuevo.Direccion);
-    formData.append('contacto_principal', this.clienteNuevo.contacto_principal);
-    formData.append('nombre_contacto', this.clienteNuevo.nombre_contacto || ''); 
-    formData.append('correo_contacto', this.clienteNuevo.correo_contacto);
-    formData.append('CP', this.clienteNuevo.CP);
-
-    formData.append('asesores_json', JSON.stringify(this.clienteNuevo.asesoresAsignados));
-
-    formData.append('tiene_credito', this.clienteNuevo.tiene_credito ? '1' : '0');
-    
-    const limiteGuardar = this.clienteNuevo.tiene_credito ? this.clienteNuevo.limite_credito : 0;
-    formData.append('limite_credito', limiteGuardar.toString());
-
-    const fechaVencimiento = this.clienteNuevo.tiene_credito && this.clienteNuevo.fecha_vencimiento_credito ? this.clienteNuevo.fecha_vencimiento_credito : '';
-    formData.append('fecha_vencimiento_credito', fechaVencimiento);
-
-    formData.append('nombre_constancia', this.clienteNuevo.nombre_constancia || '');
-    formData.append('ruta_constancia', this.clienteNuevo.ruta_constancia || '');
-
-    if (this.archivoActual) {
-      formData.append('archivo', this.archivoActual);
+  this.clienteService.addCliente(formData).subscribe({
+    next: (response: any) => {
+      toast.success('Cliente agregado correctamente');
+      this.dialogRef.close(response.id);
+    },
+    error: (err) => {
+      toast.error(
+        err.error?.error ||
+        'Error al guardar el cliente'
+      );
     }
+  });
+}
 
-    this.clienteService.updateCliente(idCliente, formData).subscribe({
-      next: (response) => {
-        toast.success('Cliente actualizado correctamente');
-        this.dialogRef.close(true);
-      },
-      error: (err) => {
-        console.error(err);
-        toast.error('Error al actualizar el cliente');
-      }
-    });
+ actualizarClienteExistente() {
+  const idCliente = this.clienteNuevo.id;
+  const formData = new FormData();
+
+  formData.append(
+    'codigo_cliente',
+    this.clienteNuevo.codigo_cliente || ''
+  );
+
+  formData.append('Nombre', this.clienteNuevo.Nombre);
+  formData.append('RFC', this.clienteNuevo.RFC);
+  formData.append('Razon_social', this.clienteNuevo.Razon_social);
+  formData.append('Regimen_fiscal', this.clienteNuevo.Regimen_fiscal);
+  formData.append('Direccion', this.clienteNuevo.Direccion);
+
+  formData.append(
+    'contacto_principal',
+    this.clienteNuevo.contacto_principal || ''
+  );
+
+  formData.append(
+    'nombre_contacto',
+    this.clienteNuevo.nombre_contacto || ''
+  );
+
+  formData.append(
+    'correo_contacto',
+    this.clienteNuevo.correo_contacto || ''
+  );
+
+  formData.append('CP', this.clienteNuevo.CP);
+
+  formData.append(
+    'contactos',
+    JSON.stringify(this.clienteNuevo.contactos || [])
+  );
+
+  formData.append(
+    'asesores_json',
+    JSON.stringify(this.clienteNuevo.asesoresAsignados)
+  );
+
+  formData.append(
+    'tiene_credito',
+    this.clienteNuevo.tiene_credito ? '1' : '0'
+  );
+
+  const limiteGuardar =
+    this.clienteNuevo.tiene_credito
+      ? this.clienteNuevo.limite_credito
+      : 0;
+
+  formData.append(
+    'limite_credito',
+    limiteGuardar.toString()
+  );
+
+  const fechaVencimiento =
+    this.clienteNuevo.tiene_credito &&
+    this.clienteNuevo.fecha_vencimiento_credito
+      ? this.clienteNuevo.fecha_vencimiento_credito
+      : '';
+
+  formData.append(
+    'fecha_vencimiento_credito',
+    fechaVencimiento
+  );
+
+  formData.append(
+    'nombre_constancia',
+    this.clienteNuevo.nombre_constancia || ''
+  );
+
+  formData.append(
+    'ruta_constancia',
+    this.clienteNuevo.ruta_constancia || ''
+  );
+
+  if (this.archivoActual) {
+    formData.append('archivo', this.archivoActual);
   }
+
+  this.clienteService.updateCliente(
+    idCliente,
+    formData
+  ).subscribe({
+    next: () => {
+      toast.success('Cliente actualizado correctamente');
+      this.dialogRef.close(true);
+    },
+    error: (err) => {
+      console.error(err);
+
+      toast.error(
+        err.error?.error ||
+        'Error al actualizar el cliente'
+      );
+    }
+  });
+}
   procesarPDF() {
     if (this.uploadMode) {
       if (!this.archivoActual) {
@@ -361,7 +508,9 @@ ngOnInit() {
     this.clienteNuevo.contacto_principal = (this.clienteNuevo.contacto_principal || '').trim();
     this.clienteNuevo.correo_contacto = (this.clienteNuevo.correo_contacto || '').trim();
     this.clienteNuevo.nombre_contacto = (this.clienteNuevo.nombre_contacto || '').trim();
-    
+    this.clienteNuevo.codigo_cliente =
+  (this.clienteNuevo.codigo_cliente || '')
+    .trim();
     if (!this.clienteNuevo.Nombre || !this.clienteNuevo.RFC ||
       !this.clienteNuevo.Razon_social || !this.clienteNuevo.Regimen_fiscal ||
       !this.clienteNuevo.Direccion || !this.clienteNuevo.CP) {
@@ -432,7 +581,37 @@ ngOnInit() {
         return false;
       }
     }
+    for (const [index, contacto] of this.clienteNuevo.contactos.entries()) {
+  contacto.nombre = (contacto.nombre || '').trim();
+  contacto.telefono = (contacto.telefono || '').trim();
+  contacto.correo = (contacto.correo || '').trim();
+  contacto.puesto = (contacto.puesto || '').trim();
 
+  if (
+    !contacto.nombre &&
+    !contacto.telefono &&
+    !contacto.correo
+  ) {
+    toast.error(
+      `El contacto adicional ${index + 1} no contiene información.`
+    );
+
+    return false;
+  }
+
+  if (contacto.correo) {
+    const regexEmail =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+
+    if (!regexEmail.test(contacto.correo)) {
+      toast.error(
+        `El correo del contacto adicional ${index + 1} no es válido.`
+      );
+
+      return false;
+    }
+  }
+}
     return true;
   }
   actualizarSoloCsf() {

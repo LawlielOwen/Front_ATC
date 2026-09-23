@@ -2,7 +2,7 @@ import { Component, OnInit, Inject} from '@angular/core';
 import {EstatusComponent} from '../../../shared/components/UI/estatus/estatus.component';
 import {IonicModule} from "@ionic/angular";
 import { CommonModule } from '@angular/common';
-import { Cliente, MovimientoCredito } from '../../../shared/model/clientes.model';
+import { Cliente, MovimientoCredito, ClienteConstancia, ClienteContacto } from '../../../shared/model/clientes.model';
 import { ClientesService } from "../../../core/services/clientes.service";
 import { toast, NgxSonnerToaster  } from 'ngx-sonner';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -13,7 +13,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { ModalClientePage } from "../modal-cliente/modal-cliente.page";
 import {CardDetailsComponent} from "../../../shared/components/UI/modal/card-details/card-details.component";
 import { AuthService } from '../../../core/services/auth.service';
-import { mostrarAsignarCredito, mostrarExitoCredito } from '../../../shared/utils/cliente-alerts.util';
+import { mostrarAsignarCredito, mostrarExitoCredito, mostrarActualizarCodigo, mostrarActualizarVigencia } from '../../../shared/utils/cliente-alerts.util';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -27,11 +27,13 @@ import Swal from 'sweetalert2';
 
 })
 export class DetallesClientePage implements OnInit {
-
+Number = Number;
   private necesitaRecargarLista = false;
 movimientosCredito: MovimientoCredito[] = [];
 mostrarMovimientosCredito: boolean = false;
 cargandoMovimientosCredito: boolean = false;
+copiado: 'codigo' | 'rfc' | null = null;
+
 constructor(
     private dialogRef: MatDialogRef<DetallesClientePage>,
     
@@ -44,6 +46,12 @@ constructor(
 cerrarDetalle() {
     this.dialogRef.close(this.necesitaRecargarLista);
   }
+  copiar(valor: string, tipo: 'codigo' | 'rfc') {
+  navigator.clipboard.writeText(valor).then(() => {
+    this.copiado = tipo;
+    setTimeout(() => (this.copiado = null), 1500);
+  });
+}
 eliminarCliente(id: number) {
     this.clientesService.deleteCliente(id).subscribe({
       next: (response: any) => {
@@ -107,21 +115,87 @@ asignarCredito(cliente: Cliente) {
   });
 }
 
-descargarPDF() {
-    if (!this.cliente.ruta_constancia) {
-      console.error('No hay un archivo válido para descargar');
-      return;
-    }
-    const url = this.clientesService.obtenerUrlArchivo(this.cliente.ruta_constancia);
-    const link = document.createElement('a');
-    link.href = url;
-    link.target = '_blank';
-    link.download = this.cliente.nombre_constancia || 'constancia.pdf'; 
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+get contactosCliente(): ClienteContacto[] {
+  if (Array.isArray(this.cliente.contactos) && this.cliente.contactos.length > 0) {
+    return this.cliente.contactos;
   }
+
+  if (
+    this.cliente.nombre_contacto ||
+    this.cliente.contacto_principal ||
+    this.cliente.correo_contacto
+  ) {
+    return [{
+      nombre: this.cliente.nombre_contacto || null,
+      telefono: this.cliente.contacto_principal || null,
+      correo: this.cliente.correo_contacto || null,
+      puesto: null,
+      es_principal: 1
+    }];
+  }
+
+  return [];
+}
+
+get constanciasCliente(): ClienteConstancia[] {
+  if (Array.isArray(this.cliente.constancias) && this.cliente.constancias.length > 0) {
+    return this.cliente.constancias;
+  }
+
+  if (this.cliente.ruta_constancia) {
+    return [{
+      nombre: this.cliente.nombre_constancia || 'Constancia de Situación Fiscal',
+      ruta: this.cliente.ruta_constancia,
+      fecha: this.cliente.fecha_constancia || null,
+      es_principal: 1
+    }];
+  }
+
+  return [];
+}
+
+inicialesContacto(nombre?: string | null): string {
+  if (!nombre || nombre.trim() === '') return '??';
+
+  const partes = nombre.trim().split(/\s+/);
+
+  if (partes.length === 1) {
+    return partes[0].substring(0, 2).toUpperCase();
+  }
+
+  return (
+    partes[0].charAt(0) +
+    partes[1].charAt(0)
+  ).toUpperCase();
+}
+
+descargarConstancia(constancia: ClienteConstancia) {
+  if (!constancia.ruta) {
+    toast.error('No se encontró la ruta de la constancia.');
+    return;
+  }
+
+  const url = this.clientesService.obtenerUrlArchivo(constancia.ruta);
+  const link = document.createElement('a');
+
+  link.href = url;
+  link.target = '_blank';
+  link.download = constancia.nombre || 'constancia.pdf';
+
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
+descargarPDF() {
+  const principal =
+    this.constanciasCliente.find(c => Number(c.es_principal) === 1) ||
+    this.constanciasCliente[0];
+
+  if (principal) {
+    this.descargarConstancia(principal);
+  }
+}
   truncarNombre(nombre: string, maxChars: number = 30): string {
     if (!nombre || nombre.length <= maxChars) return nombre;
     const ext = nombre.lastIndexOf('.');
@@ -394,5 +468,94 @@ nivelUso(cliente: any): 'ok' | 'medio' | 'alto' {
   if (pct >= 90) return 'alto';
   if (pct >= 60) return 'medio';
   return 'ok';
+}
+actualizarCodigoCliente() {
+
+  mostrarActualizarCodigo(
+    this.cliente
+  ).then((datos) => {
+
+    if (!datos) return;
+
+    this.clientesService.actualizarCodigoCliente(
+      this.cliente.id,
+      datos.codigo_cliente
+    ).subscribe({
+
+      next: (res) => {
+
+        toast.success(
+          res.mensaje ||
+          'Código actualizado correctamente'
+        );
+
+        this.recargarCliente();
+      },
+
+      error: (err) => {
+
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo actualizar',
+          text:
+            err.error?.error ||
+            'No se pudo actualizar el código del cliente.',
+          confirmButtonColor: '#003B8A',
+          heightAuto: false
+        });
+      }
+    });
+  });
+}
+actualizarVigenciaCredito() {
+
+  if (this.cliente.tiene_credito !== 1) {
+
+    Swal.fire({
+      icon: 'info',
+      title: 'Sin línea de crédito',
+      text: 'Este cliente todavía no tiene una línea de crédito activa. Primero debes asignarle crédito.',
+      confirmButtonColor: '#003B8A',
+      heightAuto: false
+    });
+
+    return;
+  }
+
+  mostrarActualizarVigencia(
+    this.cliente
+  ).then((datos) => {
+
+    if (!datos) return;
+
+    this.clientesService.actualizarVigenciaCredito(
+      this.cliente.id,
+      datos.fecha_vencimiento_credito
+    ).subscribe({
+
+      next: (res) => {
+
+        toast.success(
+          res.mensaje ||
+          'Vigencia actualizada correctamente'
+        );
+
+        this.recargarCliente();
+      },
+
+      error: (err) => {
+
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo actualizar',
+          text:
+            err.error?.error ||
+            'No se pudo actualizar la vigencia del crédito.',
+          confirmButtonColor: '#003B8A',
+          heightAuto: false
+        });
+      }
+    });
+  });
 }
 }

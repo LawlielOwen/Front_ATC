@@ -71,7 +71,8 @@ export class HistorialESPage implements OnInit {
     { label: 'Almacen', value: 'Almacen' },
     { label: 'Pedido', value: 'Pedido' },
     {label:'Demostracion', value:'Demostracion'},
-    {label:'Entregado en mostrador', value:'Entrega Mostrador'}
+    {label:'Entregado en mostrador', value:'Entrega Mostrador'},
+    {label:'Salida Administrativa', value:'Salida Administrativa'},
   ]
   mostrarSidebarMobile() {
     if (this.sidebar) {

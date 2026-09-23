@@ -110,7 +110,11 @@
 
     </div>
     <div class="grid grid-cols-1 gap-4 mt-4" 
-         [ngClass]="{'md:grid-cols-2': m.tipo_movimiento === 'Salida' && m.nombre_cliente}">
+         [ngClass]="{
+    'md:grid-cols-2':
+      (m.tipo_movimiento === 'Salida' && m.nombre_cliente) ||
+      m.destino === 'Salida Administrativa'
+  }">
       
       <app-card-details titulo="Responsable del Movimiento">
         <svg icono class="w-3.5 h-3.5 text-[#003B8A]" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -143,7 +147,60 @@
           </div>
         </div>
       </app-card-details>
+        <app-card-details
+  *ngIf="m.destino === 'Salida Administrativa'"
+  titulo="Motivo de la Salida">
 
+  <svg icono
+    class="w-3.5 h-3.5 text-[#b91c1c]"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor">
+
+    <path
+      stroke-linecap="round"
+      stroke-linejoin="round"
+      stroke-width="2"
+      d="M11 5h2m-1 0v14m-7-7h14" />
+  </svg>
+
+  <div
+    class="bg-red-50 border border-red-200 rounded-xl p-3.5 mt-2 flex items-start w-full">
+
+    <div
+      class="w-10 h-10 rounded-full bg-red-100 border border-red-200 flex items-center justify-center flex-shrink-0 shadow-sm mr-4">
+
+      <svg
+        class="w-5 h-5 text-red-700"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor">
+
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+      </svg>
+    </div>
+
+    <div class="flex flex-col min-w-0 flex-1">
+      <span
+        class="text-[10px] font-bold text-red-500 uppercase tracking-wider mb-1">
+
+        Motivo registrado
+      </span>
+
+      <span
+        class="text-[13px] font-semibold text-[#0d1f38] leading-snug break-words whitespace-normal">
+
+        {{ m.motivo_salida || 'Sin motivo registrado' }}
+      </span>
+    </div>
+
+  </div>
+
+</app-card-details>
     </div>
   </div>
 

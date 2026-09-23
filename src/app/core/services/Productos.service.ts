@@ -55,16 +55,26 @@ export class ProductoService {
     buscarProductoCodigo(codigo: string) {
   return this.http.get<any>(`${this.apiUrl}/productos/codigo?termino=${codigo}`);
 }
-    entradaProducto(codigo: string, cantidad: number, destino: string, id_asesor: number) {
-        const payload = {
-            codigo: codigo,
-            cantidad: cantidad,
-            destino: destino,
-            id_asesor: id_asesor
-        };
-        
-        return this.http.post(`${this.apiUrl}/productos/entrada`, payload);
-    }
+ entradaProducto(
+  codigo: string,
+  cantidad: number,
+  destino: string,
+  id_asesor: number,
+  requestId: string
+) {
+  const payload = {
+    codigo,
+    cantidad,
+    destino,
+    id_asesor,
+    requestId
+  };
+
+  return this.http.post(
+    `${this.apiUrl}/productos/entrada`,
+    payload
+  );
+}
     cantidadProductosStock() {
         return this.http.get(`${this.apiUrl}/productos/count`);
     }

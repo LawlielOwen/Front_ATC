@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Cliente } from "../../shared/model/clientes.model";
+import { Cliente,  MovimientoCredito, PagoCredito } from "../../shared/model/clientes.model";
 import { Observable } from 'rxjs';
 export interface RespuestaPaginada {
   clientes: Cliente[];
@@ -86,5 +86,20 @@ updateCliente(id: number, cliente: FormData): Observable<any> {
     }
    asignarCredito(id: number, tiene_credito: boolean, limite_credito: number, fecha_vencimiento: string | null): Observable<any> {
   return this.http.put(`${this.apiUrl}/clientes/${id}/credito`, { tiene_credito, limite_credito, fecha_vencimiento });
+}
+registrarPagoCredito(idCliente: number,monto: number, referencia: string | null = null,observaciones: string | null = null): 
+Observable<{ mensaje: string }> { const body: PagoCredito = { monto,referencia,observaciones };return this.http.post<{ mensaje: string }>(
+        `${this.apiUrl}/clientes/${idCliente}/credito/pago`,
+        body
+    );
+}
+obtenerMovimientosCredito(
+    idCliente: number): Observable<{ movimientos: MovimientoCredito[] }> {
+
+    return this.http.get<{
+        movimientos: MovimientoCredito[]
+    }>(
+        `${this.apiUrl}/clientes/${idCliente}/credito/movimientos`
+    );
 }
 }

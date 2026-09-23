@@ -13,7 +13,7 @@ import { CardFormComponent } from "../../../shared/components/UI/form/card-form/
 import { AsesoresService } from "../../../core/services/Asesores.service";
 import { Asesor } from "../../../shared/model/asesor.model"
 import { ClientesService } from "../../../core/services/clientes.service"
-import { Cliente } from '../../../shared/model/clientes.model';
+import { Cliente, MovimientoCredito } from '../../../shared/model/clientes.model';
 import { NgxSonnerToaster } from 'ngx-sonner';
 import { FormsModule } from '@angular/forms';
 import { MarcaService } from '../../../core/services/Marcas.service';
@@ -35,29 +35,47 @@ export class ModalClientePage implements OnInit {
   archivoGuardado: File | null = null;
   isEditMode: boolean = false;
   isUpdateCsfMode: boolean = false;
+  movimientosCredito: MovimientoCredito[] = [];
+mostrarMovimientosCredito: boolean = false;
   constructor(private service: AsesoresService, private clienteService: ClientesService,
     private dialogRef: MatDialogRef<ModalClientePage>,
     @Optional() @Inject(MAT_DIALOG_DATA) public data: any, private marcaService: MarcaService) { }
   clienteNuevo: any = {
-    id: 0,
-    Nombre: '',
-    RFC: '',
-    Razon_social: '',
-    Regimen_fiscal: '',
-    Direccion: '',
-    contacto_principal: '',      
-    nombre_contacto: '',         
-    correo_contacto: '',
-    CP: '',
-    tiene_credito: false,
-    limite_credito: null,
-    fecha_vencimiento_credito: '',
-    asesoresAsignados: [
-      { id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' }
-    ]
-  };
-  opcionesMarcas: { label: string, value: number }[] = [];
+  id: 0,
+  Nombre: '',
+  RFC: '',
+  Razon_social: '',
+  Regimen_fiscal: '',
+  Direccion: '',
+  contacto_principal: '',
+  nombre_contacto: '',
+  correo_contacto: '',
+  CP: '',
 
+  tiene_credito: false,
+  limite_credito: null,
+  credito_utilizado: 0,
+  credito_disponible: 0,
+  fecha_vencimiento_credito: '',
+
+  asesoresAsignados: [
+    { id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' }
+  ]
+};
+pagoCredito = {
+    monto: undefined as number | undefined,
+  referencia: '',
+  observaciones: ''
+};
+  opcionesMarcas: { label: string, value: number }[] = [];
+get creditoUtilizado(): number {
+  return Number(this.clienteNuevo.credito_utilizado || 0);
+}
+
+get creditoDisponible(): number {
+  const limite = Number(this.clienteNuevo.limite_credito || 0);
+  return Math.max(limite - this.creditoUtilizado, 0);
+}
   agregarAsesor() {
     this.clienteNuevo.asesoresAsignados.push({
       id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: ''
@@ -85,20 +103,35 @@ ngOnInit() {
     this.cargarAsesores(() => {
 
       if (this.data && this.data.id) {
-        this.isEditMode = true;
-        this.uploadMode = false;
-        this.clienteNuevo = { ...this.data };
+  this.isEditMode = true;
+  this.uploadMode = false;
+  this.clienteNuevo = { ...this.data };
 
-        if (this.clienteNuevo.fecha_vencimiento_credito) {
-          this.clienteNuevo.fecha_vencimiento_credito = this.clienteNuevo.fecha_vencimiento_credito.toString().split('T')[0];
-        }
+  this.clienteNuevo.tiene_credito =
+    Number(this.clienteNuevo.tiene_credito) === 1;
 
-        if (!Array.isArray(this.clienteNuevo.asesoresAsignados) || this.clienteNuevo.asesoresAsignados.length === 0) {
-          this.clienteNuevo.asesoresAsignados = [
-            { id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' }
-          ];
-        }
-      }
+  this.clienteNuevo.limite_credito =
+    Number(this.clienteNuevo.limite_credito || 0);
+
+  this.clienteNuevo.credito_utilizado =
+    Number(this.clienteNuevo.credito_utilizado || 0);
+
+  this.clienteNuevo.credito_disponible =
+    Number(this.clienteNuevo.credito_disponible || 0);
+
+  if (this.clienteNuevo.fecha_vencimiento_credito) {
+    this.clienteNuevo.fecha_vencimiento_credito =
+      this.clienteNuevo.fecha_vencimiento_credito.toString().split('T')[0];
+  }
+
+  if (!Array.isArray(this.clienteNuevo.asesoresAsignados) ||
+      this.clienteNuevo.asesoresAsignados.length === 0) {
+
+    this.clienteNuevo.asesoresAsignados = [
+      { id_asesor: '', asesor_tipo: '', marcasArray: [], marcas_asignadas: '' }
+    ];
+  }
+}
 
       if (this.data && this.data.modo === 'updateCsf') {
         this.isUpdateCsfMode = true;
@@ -355,25 +388,27 @@ ngOnInit() {
       toast.error('El RFC debe tener entre 12 y 13 caracteres válidos.');
       return false;
     }
-
-    // --- NUEVA VALIDACIÓN COMPLETA PARA EL CRÉDITO ---
     if (this.clienteNuevo.tiene_credito) {
       const limite = Number(this.clienteNuevo.limite_credito);
       if (isNaN(limite) || limite <= 0) {
         toast.error('Si el cliente tiene crédito, debes asignar un límite mayor a $0.00.');
         return false;
       }
+      if (this.isEditMode && limite < this.creditoUtilizado) {
+  toast.error(
+    `El límite no puede ser menor al crédito utilizado ($${this.creditoUtilizado.toFixed(2)}).`
+  );
+  return false;
+      }
 
-      // 1. Que no esté vacía
       if (!this.clienteNuevo.fecha_vencimiento_credito || this.clienteNuevo.fecha_vencimiento_credito.trim() === '') {
         toast.error('Debes asignar una fecha de vencimiento para el crédito.');
         return false;
       }
 
-      // Desarmamos la fecha 'YYYY-MM-DD' para evitar desfases de zona horaria
       const partesFecha = this.clienteNuevo.fecha_vencimiento_credito.split('-');
       const anioIngresado = Number(partesFecha[0]);
-      const mesIngresado = Number(partesFecha[1]) - 1; // Los meses en JS empiezan en 0
+      const mesIngresado = Number(partesFecha[1]) - 1; 
       const diaIngresado = Number(partesFecha[2]);
 
       const fechaVencimiento = new Date(anioIngresado, mesIngresado, diaIngresado);
@@ -386,8 +421,8 @@ ngOnInit() {
         return false;
       }
 
-      if (fechaVencimiento < hoy) {
-        toast.error('La fecha de vencimiento no puede ser anterior al día de hoy.');
+      if (fechaVencimiento <= hoy) {
+        toast.error('La fecha de vencimiento debe ser posterior al día de hoy.');
         return false;
       }
 
@@ -416,6 +451,11 @@ ngOnInit() {
       }
     });
   }
+  porcentajeUsoForm(): number {
+  const limite = this.clienteNuevo.limite_credito || 0;
+  if (limite === 0) return 0;
+  return Math.min(100, Math.round((this.creditoUtilizado / limite) * 100));
+}
     cargarMarcas() {
     this.marcaService.getMarcasActivas().subscribe({
       next: (marcas: Marcas[]) => {
@@ -424,4 +464,63 @@ ngOnInit() {
       error: (err) => console.error('Error al cargar marcas', err)
     });
   }
+  registrarPagoCredito() {
+  const monto = Number(this.pagoCredito.monto);
+
+  if (isNaN(monto) || monto <= 0) {
+    toast.error('Ingresa un monto de pago válido.');
+    return;
+  }
+
+  if (monto > this.creditoUtilizado) {
+    toast.error(`El pago no puede ser mayor al saldo pendiente de $${this.creditoUtilizado.toFixed(2)}.`);
+    return;
+  }
+
+  this.clienteService.registrarPagoCredito(
+    this.clienteNuevo.id,
+    monto,
+    this.pagoCredito.referencia?.trim() || null,
+    this.pagoCredito.observaciones?.trim() || null
+  ).subscribe({
+    next: (res) => {
+      this.clienteNuevo.credito_utilizado = this.creditoUtilizado - monto;
+      this.clienteNuevo.credito_disponible = this.creditoDisponible;
+
+      this.pagoCredito = {
+        monto: undefined,
+        referencia: '',
+        observaciones: ''
+      };
+
+      toast.success(res.mensaje || 'Pago registrado correctamente');
+
+      if (this.mostrarMovimientosCredito) {
+        this.cargarMovimientosCredito();
+      }
+    },
+    error: (err) => {
+      toast.error(err.error?.error || 'No se pudo registrar el pago.');
+    }
+  });
+}
+
+toggleMovimientosCredito() {
+  this.mostrarMovimientosCredito = !this.mostrarMovimientosCredito;
+
+  if (this.mostrarMovimientosCredito) {
+    this.cargarMovimientosCredito();
+  }
+}
+
+cargarMovimientosCredito() {
+  this.clienteService.obtenerMovimientosCredito(this.clienteNuevo.id).subscribe({
+    next: (res) => {
+      this.movimientosCredito = res.movimientos;
+    },
+    error: () => {
+      toast.error('No se pudo cargar el historial de crédito.');
+    }
+  });
+}
 }

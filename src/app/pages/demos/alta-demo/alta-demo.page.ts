@@ -40,7 +40,7 @@ export class AltaDemoPage implements OnInit {
   paso: number = 1;
   cantidad: number = 0;
   guardando: boolean = false;
-  
+  requestIdDemo: string | null = null;
   demoControl = new FormControl<any>('');
   demosFiltrados: any[] = [];
 
@@ -109,50 +109,71 @@ export class AltaDemoPage implements OnInit {
   }
 
   confirmarMovimiento() {
-    const cantidadNumerica = Number(this.cantidad);
+  if (this.guardando) return;
 
-    if (isNaN(cantidadNumerica) || !Number.isInteger(cantidadNumerica) || cantidadNumerica <= 0) {
-      toast.error('La cantidad debe ser un número entero mayor a 0.');
-      return;
-    }
+  const cantidadNumerica = Number(this.cantidad);
 
-    this.cantidad = cantidadNumerica;
-
-    const codigo = this.demoEncontrado.numero_serie || this.demoEncontrado.nombre_modelo;
-
-    let idAsesor = null;
-    const token = localStorage.getItem('token');
-
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        idAsesor = payload.id;
-      } catch (error) {
-        console.error('Error al decodificar el token:', error);
-      }
-    }
-
-    if (!idAsesor) {
-      toast.error('Error de sesión: Es obligatorio registrar un responsable.');
-      return;
-    }
-
-    this.guardando = true;
-
-    this.demoService.registrarEntradaDemo(codigo, this.cantidad, idAsesor).subscribe({
-      next: () => {
-        this.paso = 3;
-        toast.success('¡Entrada de Demo registrada correctamente!');
-        this.guardando = false;
-      },
-      error: (err) => { 
-        console.error(err); 
-        toast.error(err.error?.error || 'Error al registrar la entrada del equipo demo');
-        this.guardando = false;
-      }
-    });
+  if (isNaN(cantidadNumerica) || !Number.isInteger(cantidadNumerica) || cantidadNumerica <= 0) {
+    toast.error('La cantidad debe ser un número entero mayor a 0.');
+    return;
   }
 
+  this.cantidad = cantidadNumerica;
+
+  if (!this.demoEncontrado) {
+    toast.error('Selecciona un equipo demo.');
+    return;
+  }
+
+  const codigo = this.demoEncontrado.numero_serie || this.demoEncontrado.nombre_modelo;
+
+  if (!codigo) {
+    toast.error('El equipo demo no tiene un código válido.');
+    return;
+  }
+
+  let idAsesor = null;
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      idAsesor = payload.id;
+    } catch (error) {
+      console.error('Error al decodificar el token:', error);
+    }
+  }
+
+  if (!idAsesor) {
+    toast.error('Error de sesión: Es obligatorio registrar un responsable.');
+    return;
+  }
+
+  if (!this.requestIdDemo) {
+    this.requestIdDemo = crypto.randomUUID();
+  }
+
+  this.guardando = true;
+
+  this.demoService.registrarEntradaDemo(
+    codigo,
+    this.cantidad,
+    idAsesor,
+    this.requestIdDemo
+  ).subscribe({
+    next: () => {
+      this.paso = 3;
+      this.requestIdDemo = null;
+      toast.success('¡Entrada de Demo registrada correctamente!');
+      this.guardando = false;
+    },
+    error: (err) => {
+      console.error(err);
+      toast.error(err.error?.error || 'Error al registrar la entrada del equipo demo');
+      this.guardando = false;
+    }
+  });
+}
   finalizar() {
     this.dialogRef.close(true);
   }

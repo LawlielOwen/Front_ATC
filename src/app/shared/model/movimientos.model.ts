@@ -1,17 +1,38 @@
 export interface Movimientos {
-  id: number;
-  tipo_movimiento: 'Entrada' | 'Salida'; 
-  destino: 'Almacen' | 'Pedido' | string;
+  id_movimiento: number;
+
+  tipo_movimiento: 'Entrada' | 'Salida' | 'Ajuste';
+
+  destino:
+    'Almacen' |
+    'Pedido' |
+    'Demostracion' |
+    'Entrega Mostrador' |
+    'Cotizacion' |
+    'Salida Administrativa';
+
   cantidad: number;
-  fecha: Date | string; 
-  id_producto: number;
-  nombre_producto: string;
-  Codigo_japon: string;
-  Codigo_numeral: string;
-  modelo_producto: string;
-  marca_producto: string;
-  id_asesor: number;
-  nombre_asesor: string;
-  id_cliente: number;
-  nombre_cliente: string;
+  fecha: Date | string;
+
+  motivo_salida?: string | null;
+
+  id_producto?: number | null;
+  id_demo?: number | null;
+
+  nombre_producto?: string | null;
+
+  Codigo_japon?: string | null;
+  Codigo_numeral?: string | null;
+
+  codigo_manual?: string | null;
+  descripcion_manual?: string | null;
+  extra_descripcion_manual?: string | null;
+
+  marca_producto?: string | null;
+
+  id_asesor?: number | null;
+  nombre_asesor?: string | null;
+
+  id_cliente?: number | null;
+  nombre_cliente?: string | null;
 }

@@ -54,12 +54,22 @@ export class DemoService {
 
     return this.http.get<StockDemo[]>(`${this.apiUrl}/demos/buscar`, { params });
   }
-  registrarEntradaDemo(codigo: string, cantidad: number, id_asesor: number): Observable<any> {
-    const payload = {
-      codigo,
-      cantidad,
-      id_asesor
-    };
-        return this.http.post(`${this.apiUrl}/demos/entrada`, payload);
-  }
+registrarEntradaDemo(
+  codigo: string,
+  cantidad: number,
+  id_asesor: number,
+  requestId: string
+): Observable<any> {
+  const payload = {
+    codigo,
+    cantidad,
+    id_asesor,
+    requestId
+  };
+
+  return this.http.post(
+    `${this.apiUrl}/demos/entrada`,
+    payload
+  );
+}
 }

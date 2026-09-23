@@ -23,7 +23,7 @@ export function mostrarAsignarCredito(cliente: Cliente): Promise<DatosCredito | 
     title: 'Línea de Crédito',
     html: `
       <div style="text-align:left; font-size:13px; color:#475569;">
-        <p style="margin-bottom: 12px;">Cliente: <strong>${cliente.Razon_social || cliente.Nombre}</strong></p>
+        <p style="margin-bottom: 12px;">Cliente: <strong>${cliente.Nombre || cliente.Razon_social}</strong></p>
 
         <label style="display:flex; align-items:center; gap:8px; margin-bottom:14px; cursor:pointer;">
           <input type="checkbox" id="swal-tiene-credito" ${tieneCreditoActual ? 'checked' : ''} style="width:16px; height:16px;">

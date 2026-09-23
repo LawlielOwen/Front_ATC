@@ -104,9 +104,20 @@ export class PedidoService {
         return this.http.get<{ pendientes: number, cancelados: number, pagados: number, total_mes: number }>(`${this.apiUrl}/pedido/estadisticas`);
     }
 
-    crearPedidoDirecto(pedido: NuevoPedidoInput): Observable<RespuestaPedidoCreado> {
-        return this.http.post<RespuestaPedidoCreado>(`${this.apiUrl}/pedido`, pedido);
-    }
+   crearPedidoDirecto(
+  pedido: NuevoPedidoInput,
+  requestId: string
+): Observable<RespuestaPedidoCreado> {
+  const payload = {
+    ...pedido,
+    requestId
+  };
+
+  return this.http.post<RespuestaPedidoCreado>(
+    `${this.apiUrl}/pedido`,
+    payload
+  );
+}
 
 obtenerUrlFactura(rutaRelativa: string): string {
     if (!rutaRelativa) return '';

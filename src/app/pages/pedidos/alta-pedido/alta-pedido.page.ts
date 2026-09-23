@@ -44,7 +44,7 @@ interface PartidaPedido extends DetallePedidoInput {
 })
 export class AltaPedidoPage implements OnInit, OnDestroy {
   private readonly destruir$ = new Subject<void>();
-  
+  requestIdPedido: string | null = null;
   clienteControl = new FormControl<any>('');
   productoControl = new FormControl<any>('');
   clientes: any[] = [];
@@ -295,105 +295,133 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
     this.total_final = this.redondear(this.subtotal_final + this.iva_final);
   }
 
-  guardarPedido(): void {
-    if (this.guardando) return;
-    const idCliente = Number(this.pedido.id_cliente);
-    const idAsesor = Number(this.pedido.id_asesor);
-    const tc = this.pedido.moneda === 'USD' ? Number(this.pedido.tipo_cambio) : 1;
-    const fallar = (mensaje: string) => toast.warning(mensaje);
-    
-    // Validaciones base
-    if (!this.esEdicion && (!Number.isInteger(idCliente) || idCliente <= 0)) {
-      fallar('Selecciona un cliente registrado de la lista.'); return;
-    }
-    if (!this.esEdicion && (!Number.isInteger(idAsesor) || idAsesor <= 0)) {
-      fallar('Selecciona un asesor válido.'); return;
-    }
-    if (!Number.isFinite(tc) || tc <= 0 || tc > 999999.9999) {
-      fallar('Captura un tipo de cambio válido, mayor que cero.'); return;
-    }
-    if ((this.pedido.orden_compra || '').trim().length > 100) {
-      fallar('La orden de compra admite hasta 100 caracteres.'); return;
-    }
-    if (!this.detalles.length) { fallar('Agrega al menos un producto.'); return; }
+ guardarPedido(): void {
+  if (this.guardando) return;
 
-    // Validar partidas
-    for (const [index, item] of this.detalles.entries()) {
-      const cantidad = Number(item.cantidad);
-      const precio = Number(item.precio_unitario);
-      const flete = Number(item.costo_flete);
-      const prefijo = `Partida ${index + 1}: `;
-      if (!Number.isInteger(cantidad) || cantidad <= 0 || cantidad > 2147483647) {
-        fallar(prefijo + 'la cantidad debe ser un entero positivo válido.'); return;
-      }
-      if (!Number.isFinite(precio) || this.redondear(precio) <= 0 || precio > 99999999.99) {
-        fallar(prefijo + 'captura un precio mayor que cero y dentro del límite permitido.'); return;
-      }
-      if (!Number.isFinite(flete) || flete < 0 || flete > 99999999.99) {
-        fallar(prefijo + 'captura un flete válido; puede ser cero.'); return;
-      }
-      if (item.id_producto === null && !item.descripcion_manual?.trim()) {
-        fallar(prefijo + 'escribe la descripción del producto manual.'); return;
-      }
+  const idCliente = Number(this.pedido.id_cliente);
+  const idAsesor = Number(this.pedido.id_asesor);
+  const tc = this.pedido.moneda === 'USD' ? Number(this.pedido.tipo_cambio) : 1;
+  const fallar = (mensaje: string) => toast.warning(mensaje);
+
+  if (!this.esEdicion && (!Number.isInteger(idCliente) || idCliente <= 0)) {
+    fallar('Selecciona un cliente registrado de la lista.'); return;
+  }
+
+  if (!this.esEdicion && (!Number.isInteger(idAsesor) || idAsesor <= 0)) {
+    fallar('Selecciona un asesor válido.'); return;
+  }
+
+  if (!Number.isFinite(tc) || tc <= 0 || tc > 999999.9999) {
+    fallar('Captura un tipo de cambio válido, mayor que cero.'); return;
+  }
+
+  if ((this.pedido.orden_compra || '').trim().length > 100) {
+    fallar('La orden de compra admite hasta 100 caracteres.'); return;
+  }
+
+  if (!this.detalles.length) {
+    fallar('Agrega al menos un producto.'); return;
+  }
+
+  for (const [index, item] of this.detalles.entries()) {
+    const cantidad = Number(item.cantidad);
+    const precio = Number(item.precio_unitario);
+    const flete = Number(item.costo_flete);
+    const prefijo = `Partida ${index + 1}: `;
+
+    if (!Number.isInteger(cantidad) || cantidad <= 0 || cantidad > 2147483647) {
+      fallar(prefijo + 'la cantidad debe ser un entero positivo válido.'); return;
     }
 
-    // Armado del arreglo de detalles que comparten ambas peticiones
-    const payloadDetalles = this.detalles.map(item => ({
-      id_producto: item.id_producto,
-      codigo_manual: item.id_producto === null ? item.codigo_manual?.trim() || null : null,
-      descripcion_manual: item.id_producto === null ? item.descripcion_manual!.trim() : null,
-      extra_descripcion_manual: item.id_producto === null ? item.extra_descripcion_manual?.trim() || null : null,
-      cantidad: Number(item.cantidad),
-      precio_unitario: this.redondear(Number(item.precio_unitario)),
-      costo_flete: this.redondear(Number(item.costo_flete))
-    }));
+    if (!Number.isFinite(precio) || this.redondear(precio) <= 0 || precio > 99999999.99) {
+      fallar(prefijo + 'captura un precio mayor que cero y dentro del límite permitido.'); return;
+    }
 
-    this.guardando = true;
+    if (!Number.isFinite(flete) || flete < 0 || flete > 99999999.99) {
+      fallar(prefijo + 'captura un flete válido; puede ser cero.'); return;
+    }
 
-    // BIFURCACIÓN: ¿Editar o Crear?
-    if (this.esEdicion) {
-      const payloadEdit = {
-        orden_compra: this.pedido.orden_compra?.trim() || null,
-        detalles: payloadDetalles
-      };
-      
-      // Llamada al endpoint de modificación
-      this.pedidosService.modificarPedido(this.idPedidoEdit, payloadEdit).pipe(
-        takeUntil(this.destruir$), finalize(() => this.guardando = false)
-      ).subscribe({
-        next: (respuesta: any) => {
-          toast.success(respuesta?.message || respuesta?.mensaje || 'Pedido actualizado correctamente.');
-          if (this.dialogRef) this.dialogRef.close(true);
-        },
-        error: error => toast.error(error?.error?.error || error?.error?.mensaje || 'No se pudo modificar el pedido.')
-      });
-
-    } else {
-      const payloadNuevo: NuevoPedidoInput = {
-        id_cliente: idCliente, id_asesor: idAsesor,
-        orden_compra: this.pedido.orden_compra?.trim() || null,
-        moneda: this.pedido.moneda, 
-        tipo_cambio: Number(tc.toFixed(4)), 
-        vigencia_dias: Number(this.pedido.vigencia_dias),
-        detalles: payloadDetalles
-      };
-      
-      // Llamada al endpoint original
-      this.pedidosService.crearPedidoDirecto(payloadNuevo).pipe(
-        takeUntil(this.destruir$), finalize(() => this.guardando = false)
-      ).subscribe({
-        next: respuesta => {
-          if (!Number.isInteger(Number(respuesta?.id_pedido)) || Number(respuesta.id_pedido) <= 0) {
-            toast.error(respuesta?.mensaje || 'No se pudo crear el pedido.'); return;
-          }
-          toast.success(respuesta.mensaje || 'Pedido creado correctamente.');
-          if (this.dialogRef) this.dialogRef.close(respuesta);
-          else void this.router.navigate(['/pedidos']);
-        },
-        error: error => toast.error(error?.error?.mensaje || error?.error?.message || 'No se pudo crear el pedido.')
-      });
+    if (item.id_producto === null && !item.descripcion_manual?.trim()) {
+      fallar(prefijo + 'escribe la descripción del producto manual.'); return;
     }
   }
+
+  const payloadDetalles = this.detalles.map(item => ({
+    id_producto: item.id_producto,
+    codigo_manual: item.id_producto === null ? item.codigo_manual?.trim() || null : null,
+    descripcion_manual: item.id_producto === null ? item.descripcion_manual!.trim() : null,
+    extra_descripcion_manual: item.id_producto === null ? item.extra_descripcion_manual?.trim() || null : null,
+    cantidad: Number(item.cantidad),
+    precio_unitario: this.redondear(Number(item.precio_unitario)),
+    costo_flete: this.redondear(Number(item.costo_flete))
+  }));
+
+  this.guardando = true;
+
+  if (this.esEdicion) {
+    const payloadEdit = {
+      orden_compra: this.pedido.orden_compra?.trim() || null,
+      detalles: payloadDetalles
+    };
+
+    this.pedidosService.modificarPedido(this.idPedidoEdit, payloadEdit).pipe(
+      takeUntil(this.destruir$),
+      finalize(() => this.guardando = false)
+    ).subscribe({
+      next: (respuesta: any) => {
+        toast.success(respuesta?.message || respuesta?.mensaje || 'Pedido actualizado correctamente.');
+        if (this.dialogRef) this.dialogRef.close(true);
+      },
+      error: error => toast.error(
+        error?.error?.error ||
+        error?.error?.mensaje ||
+        'No se pudo modificar el pedido.'
+      )
+    });
+
+  } else {
+    if (!this.requestIdPedido) {
+      this.requestIdPedido = crypto.randomUUID();
+    }
+
+    const payloadNuevo: NuevoPedidoInput = {
+      id_cliente: idCliente,
+      id_asesor: idAsesor,
+      orden_compra: this.pedido.orden_compra?.trim() || null,
+      moneda: this.pedido.moneda,
+      tipo_cambio: Number(tc.toFixed(4)),
+      vigencia_dias: Number(this.pedido.vigencia_dias),
+      detalles: payloadDetalles
+    };
+
+    this.pedidosService.crearPedidoDirecto(
+      payloadNuevo,
+      this.requestIdPedido
+    ).pipe(
+      takeUntil(this.destruir$),
+      finalize(() => this.guardando = false)
+    ).subscribe({
+      next: respuesta => {
+        if (!Number.isInteger(Number(respuesta?.id_pedido)) || Number(respuesta.id_pedido) <= 0) {
+          toast.error(respuesta?.mensaje || 'No se pudo crear el pedido.');
+          return;
+        }
+
+        toast.success(respuesta.mensaje || 'Pedido creado correctamente.');
+        this.requestIdPedido = null;
+
+        if (this.dialogRef) this.dialogRef.close(respuesta);
+        else void this.router.navigate(['/pedidos']);
+      },
+      error: error => toast.error(
+        error?.error?.error ||
+        error?.error?.mensaje ||
+        error?.error?.message ||
+        'No se pudo crear el pedido.'
+      )
+    });
+  }
+}
 
   cerrar(): void {
     if (this.guardando) return;

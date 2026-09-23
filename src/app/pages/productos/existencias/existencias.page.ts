@@ -17,6 +17,7 @@ import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatOptionModule } from '@angular/material/core';
 import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
+import { AuthService } from '../../../core/services/auth.service';
 @Component({
   selector: 'app-existencias',
   templateUrl: './existencias.page.html',
@@ -38,19 +39,21 @@ import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
   ]
 })
 export class ExistenciasPage implements OnInit {
-
+motivoSalida: string = '';
+procesandoMovimiento: boolean = false;
   productoEncontrado: any = null;
   paso: number = 1;
   cantidad: number = 0;
-destino: 'almacen' | 'pedido' | 'Entrega Mostrador' = 'almacen';
+destino: 'almacen' | 'pedido' | 'Entrega Mostrador' | 'Salida Administrativa' = 'almacen';
   tipoMovimiento: 'Entrada' | 'Salida' = 'Entrada';
   clientes: any[] = [];
+  requestIdMovimiento: string | null = null;
   clientesFiltrados: any[] = [];
   clienteControl = new FormControl<any>('');
   productoControl = new FormControl<any>('');
   productosFiltrados: any[] = [];
   constructor(private dialogRef: MatDialogRef<ExistenciasPage>,
-    @Inject(MAT_DIALOG_DATA) public data: any, private ps: ProductoService, private ms: MovimientoService, private cs: ClientesService) {
+    @Inject(MAT_DIALOG_DATA) public data: any, private ps: ProductoService, public authService: AuthService,private ms: MovimientoService, private cs: ClientesService) {
     if (this.data && this.data.tipo) {
       this.tipoMovimiento = this.data.tipo;
       if (this.tipoMovimiento === 'Salida') {
@@ -126,95 +129,184 @@ onEnterProducto(event: any) {
     this.dialogRef.close();
   }
 
-  confirmarMovimiento() {
-    const cantidadNumerica = Number(this.cantidad);
+confirmarMovimiento() {
+  if (this.procesandoMovimiento) return;
 
-    if (isNaN(cantidadNumerica) || !Number.isInteger(cantidadNumerica) || cantidadNumerica <= 0) {
-      toast.error('La cantidad debe ser un número entero mayor a 0.');
+  const cantidadNumerica = Number(this.cantidad);
+
+  if (isNaN(cantidadNumerica) || !Number.isInteger(cantidadNumerica) || cantidadNumerica <= 0) {
+    toast.error('La cantidad debe ser un número entero mayor a 0.');
+    return;
+  }
+
+  this.cantidad = cantidadNumerica;
+
+  if (!this.productoEncontrado) {
+    toast.error('Selecciona un producto.');
+    return;
+  }
+
+  const codigoP = this.productoEncontrado.Codigo_japon || this.productoEncontrado.Codigo_numeral;
+
+  if (!codigoP) {
+    toast.error('El producto seleccionado no tiene un código válido.');
+    return;
+  }
+
+  let idAsesor = null;
+  const token = localStorage.getItem('token');
+
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      idAsesor = payload.id;
+    } catch (error) {
+      console.error('Error al decodificar el token:', error);
+    }
+  }
+
+  if (!idAsesor) {
+    toast.error('Es obligatorio registrar un responsable.');
+    return;
+  }
+
+  if (!this.esEntrada) {
+    if (this.cantidad > this.stockActualVisible) {
+      const tipoStock = this.destino === 'pedido' ? 'apartado' : 'stock general';
+      toast.error(`No hay suficiente ${tipoStock}. Máximo disponible: ${this.stockActualVisible}`);
       return;
     }
+  }
 
-    this.cantidad = cantidadNumerica;
-
-    const codigoP = this.productoEncontrado.Codigo_japon || this.productoEncontrado.Codigo_numeral;
-
-    let idAsesor = null;
-    const token = localStorage.getItem('token');
-
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        idAsesor = payload.id;
-      } catch (error) {
-        console.error('Error al decodificar el token para el movimiento:', error);
-      }
-    }
-
-    if (!this.esEntrada) {
-     if (this.cantidad > this.stockActualVisible) {
-        const tipoStock = this.destino === 'almacen' ? 'stock general' : 'apartado';
-        toast.error(`No hay suficiente ${tipoStock} para esta salida. Máximo disponible: ${this.stockActualVisible}`);
-        return;
-      }
-
-      if (!idAsesor) {
-        toast.error('Error de sesión: Es obligatorio registrar un asesor responsable para la salida.');
-        return;
-      }
-    }
-
-    if (this.esEntrada) {
-
-      this.ps.entradaProducto(codigoP, this.cantidad, this.destino, idAsesor).subscribe({
-        next: () => {
-          this.paso = 3;
-          toast.success('Entrada registrada correctamente');
-        },
-        error: (err) => { console.error(err); toast.error('Error al registrar la entrada'); }
-      });
-
-    } else {
-  
   let idCliente = null;
   let clienteNoRegistrado = null;
-  const clienteSeleccionado = this.clienteControl.value;
+  let motivoSalida = null;
 
-  if (clienteSeleccionado && typeof clienteSeleccionado === 'object') {
-    idCliente = clienteSeleccionado.id || clienteSeleccionado.Id;
-  } 
-  else if (typeof clienteSeleccionado === 'string' && clienteSeleccionado.trim() !== '') {
-    clienteNoRegistrado = clienteSeleccionado.trim();
+  if (!this.esEntrada) {
+    if (this.destino === 'Salida Administrativa') {
+      if (!this.authService.tieneAcceso(['Administrador'])) {
+        toast.error('Solo un administrador puede registrar una salida administrativa.');
+        return;
+      }
+
+      if (!this.motivoSalida || this.motivoSalida.trim() === '') {
+        toast.error('Debes indicar el motivo de la salida administrativa.');
+        return;
+      }
+
+      motivoSalida = this.motivoSalida.trim();
+
+    } else {
+      const clienteSeleccionado = this.clienteControl.value;
+
+      if (clienteSeleccionado && typeof clienteSeleccionado === 'object') {
+        idCliente = clienteSeleccionado.id || clienteSeleccionado.Id;
+      } else if (typeof clienteSeleccionado === 'string' && clienteSeleccionado.trim() !== '') {
+        clienteNoRegistrado = clienteSeleccionado.trim();
+      }
+    }
   }
 
-  this.ms.salidaProducto(codigoP, this.cantidad, this.destino, idAsesor, idCliente, clienteNoRegistrado).subscribe({
+  if (!this.requestIdMovimiento) {
+    this.requestIdMovimiento = crypto.randomUUID();
+  }
+
+  this.procesandoMovimiento = true;
+
+  if (this.esEntrada) {
+    this.ps.entradaProducto(
+      codigoP,
+      this.cantidad,
+      this.destino,
+      idAsesor,
+      this.requestIdMovimiento
+    ).subscribe({
+      next: () => {
+        this.paso = 3;
+        this.requestIdMovimiento = null;
+        toast.success('Entrada registrada correctamente');
+      },
+      error: (err) => {
+        console.error(err);
+        toast.error(err.error?.error || 'Error al registrar la entrada');
+        this.procesandoMovimiento = false;
+      }
+    });
+
+    return;
+  }
+
+  this.ms.salidaProducto(
+    codigoP,
+    this.cantidad,
+    this.destino,
+    idAsesor,
+    idCliente,
+    this.requestIdMovimiento,
+    clienteNoRegistrado,
+    motivoSalida
+  ).subscribe({
     next: () => {
       this.paso = 3;
-      toast.success('Salida registrada correctamente');
+      this.requestIdMovimiento = null;
+
+      toast.success(
+        this.destino === 'Salida Administrativa'
+          ? 'Salida administrativa registrada correctamente'
+          : 'Salida registrada correctamente'
+      );
     },
-    error: (err) => { 
-      console.error(err); 
-      toast.error('Error al registrar la salida'); 
+    error: (err) => {
+      console.error(err);
+      toast.error(err.error?.error || 'Error al registrar la salida');
+      this.procesandoMovimiento = false;
     }
   });
-    }
-  }
+}
   finalizar() {
     this.dialogRef.close(true);
   }
-
 get opcionesDestino(): CardOption[] {
-    if (this.esEntrada) {
-      return [
-        { value: 'almacen', titulo: 'Para almacén', descripcion: 'Se suma al Stock Libre' },
-        { value: 'pedido', titulo: 'Para pedidos', descripcion: 'Se suma a la Bolsa General de apartados' }
-      ];
-    } else {
-      return [
-        { value: 'pedido', titulo: 'Surtir pedido', descripcion: 'Descuenta de las reservas del cliente' },
-        { value: 'Entrega Mostrador', titulo: 'Entregar en mostrador', descripcion: 'Descuenta del Stock Libre' }
-      ];
-    }
+
+  if (this.esEntrada) {
+
+    return [
+      {
+        value: 'almacen',
+        titulo: 'Para almacén',
+        descripcion: 'Se suma al Stock Libre'
+      },
+      {
+        value: 'pedido',
+        titulo: 'Para pedidos',
+        descripcion: 'Se suma a la Bolsa General de apartados'
+      }
+    ];
   }
+  const opciones: CardOption[] = [
+    {
+      value: 'pedido',
+      titulo: 'Surtir pedido',
+      descripcion: 'Descuenta de las reservas del cliente'
+    },
+
+    {
+      value: 'Entrega Mostrador',
+      titulo: 'Entregar en mostrador',
+      descripcion: 'Descuenta del Stock Libre'
+    }
+
+  ];
+  if (this.authService.tieneAcceso(['Administrador'])) {
+    opciones.push({
+      value: 'Salida Administrativa',
+      titulo: 'Salida administrativa',
+      descripcion: 'Retirar producto del stock indicando el motivo'
+    });
+
+  }
+  return opciones;
+}
   cargarClientes() {
     this.cs.getClientes(1, 1000).subscribe({
       next: (response: any) => {
@@ -243,13 +335,24 @@ get opcionesDestino(): CardOption[] {
     return cliente ? (cliente.nombre || cliente.Nombre || '') : '';
   }
 get stockActualVisible() {
-    if (!this.productoEncontrado) return 0;
-    
-    if (this.destino === 'almacen' || this.destino === 'Entrega Mostrador') {
-      return Number(this.productoEncontrado.Stock) || 0; 
-    } 
-    return Number(this.productoEncontrado.Apartado) || 0; 
+
+  if (!this.productoEncontrado) return 0;
+
+  if (
+    this.destino === 'almacen' ||
+    this.destino === 'Entrega Mostrador' ||
+    this.destino === 'Salida Administrativa'
+  ) {
+
+    return Number(
+      this.productoEncontrado.Stock
+    ) || 0;
+
   }
+  return Number(
+    this.productoEncontrado.Apartado
+  ) || 0;
+}
 
   get nuevoStock() {
     if (!this.productoEncontrado) return 0;

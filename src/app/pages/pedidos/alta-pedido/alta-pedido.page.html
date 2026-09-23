@@ -218,7 +218,6 @@
   <app-footer-modal class="shrink-0 border-t border-gray-100" [paddingClass]="'p-3 px-5'">
     <app-button-action [label]="'Cancelar'" [claseCss]="'btn-cerrar'" [disabled]="guardando" (click)="cerrar()"></app-button-action>
     
-    <!-- Botón condicional según el modo -->
     <app-button-action [label]="guardando ? 'Guardando...' : (esEdicion ? 'Guardar Cambios' : 'Guardar Pedido')" [claseCss]="'btn-agregar'"
       [disabled]="guardando || (!esEdicion && cargandoClientes) || (!esEdicion && cargandoAsesores) || detalles.length === 0 || (pedido.moneda === 'USD' && !(pedido.tipo_cambio >= 0.0001 && pedido.tipo_cambio <= 999999.9999))"
       (click)="guardarPedido()"></app-button-action>

@@ -102,7 +102,7 @@ filtroAsesor(idAsesorSeleccionado: number | null) {
     this.clientesService.getCliente(id).subscribe({
       next: (response: any) => {
         const dialogRef = this.dialog.open(DetallesClientePage, {
-          width: '750px',
+          width: '900px',
           maxWidth: '95vw', 
           panelClass: ['p-0', 'bg-transparent', 'shadow-none'],
           backdropClass: ['bg-black/40', 'backdrop-blur-sm'],

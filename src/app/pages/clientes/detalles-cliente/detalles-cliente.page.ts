@@ -2,9 +2,9 @@ import { Component, OnInit, Inject} from '@angular/core';
 import {EstatusComponent} from '../../../shared/components/UI/estatus/estatus.component';
 import {IonicModule} from "@ionic/angular";
 import { CommonModule } from '@angular/common';
-import { Cliente } from '../../../shared/model/clientes.model';
+import { Cliente, MovimientoCredito } from '../../../shared/model/clientes.model';
 import { ClientesService } from "../../../core/services/clientes.service";
-import { toast } from 'ngx-sonner';
+import { toast, NgxSonnerToaster  } from 'ngx-sonner';
 import { MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import {FooterModalComponent} from "../../../shared/components/UI/modal/footer-modal/footer-modal.component";
 import {ButtonActionComponent} from "../../../shared/components/UI/buttons/button-action/button-action.component";
@@ -23,15 +23,18 @@ import Swal from 'sweetalert2';
   standalone: true,
   imports: [EstatusComponent, IonicModule, CommonModule,
      FooterModalComponent, ButtonActionComponent,RegimenFiscalPipe,
-    CardDetailsComponent]
+    CardDetailsComponent,NgxSonnerToaster]
 
 })
 export class DetallesClientePage implements OnInit {
 
   private necesitaRecargarLista = false;
-
+movimientosCredito: MovimientoCredito[] = [];
+mostrarMovimientosCredito: boolean = false;
+cargandoMovimientosCredito: boolean = false;
 constructor(
     private dialogRef: MatDialogRef<DetallesClientePage>,
+    
     @Inject(MAT_DIALOG_DATA) public cliente: Cliente,
     private clientesService: ClientesService, public dialog: MatDialog,public authService: AuthService
   ) { }
@@ -69,35 +72,39 @@ esVencido(fecha: string | null): boolean {
   return new Date(fecha) < new Date(new Date().toDateString()); 
 }
 asignarCredito(cliente: Cliente) {
-    mostrarAsignarCredito(cliente).then((datos) => {
-      if (!datos) return;
+  mostrarAsignarCredito(cliente).then((datos) => {
+    if (!datos) return;
 
-      this.clientesService.asignarCredito(
-        cliente.id,
-        datos.tiene_credito,
-        datos.limite_credito,
-        datos.fecha_vencimiento
-      ).subscribe({
-        next: (res: any) => {
-          this.cliente.tiene_credito = datos.tiene_credito ? 1 : 0;
-          this.cliente.limite_credito = datos.limite_credito;
-          (this.cliente as any).fecha_vencimiento_credito = datos.fecha_vencimiento;
-          this.necesitaRecargarLista = true;
+    this.clientesService.asignarCredito(
+      cliente.id,
+      datos.tiene_credito,
+      datos.limite_credito,
+      datos.fecha_vencimiento
+    ).subscribe({
+      next: (res: any) => {
+        this.recargarCliente();
 
-          mostrarExitoCredito(res.mensaje || 'La línea de crédito se actualizó correctamente.');
-        },
-        error: (err) => {
-          const mensajeError = err.error?.error || 'No se pudo actualizar la línea de crédito.';
-          Swal.fire({
-            icon: 'error',
-            title: 'Error',
-            text: mensajeError,
-            confirmButtonColor: '#003B8A',
-            heightAuto: false
-          });
-        }
-      });
+        mostrarExitoCredito(
+          res.mensaje ||
+          'La línea de crédito se actualizó correctamente.'
+        );
+      },
+
+      error: (err) => {
+        const mensajeError =
+          err.error?.error ||
+          'No se pudo actualizar la línea de crédito.';
+
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: mensajeError,
+          confirmButtonColor: '#003B8A',
+          heightAuto: false
+        });
+      }
     });
+  });
 }
 
 descargarPDF() {
@@ -109,7 +116,7 @@ descargarPDF() {
     const link = document.createElement('a');
     link.href = url;
     link.target = '_blank';
-    link.download = this.cliente.nombre_constancia; 
+    link.download = this.cliente.nombre_constancia || 'constancia.pdf'; 
     
     document.body.appendChild(link);
     link.click();
@@ -197,5 +204,195 @@ private formatearDias(totalDias: number): string {
     }
 
     return `${meses} mes${meses !== 1 ? 'es' : ''} con ${dias} día${dias !== 1 ? 's' : ''}`;
+}
+recargarCliente() {
+  this.clientesService.getCliente(this.cliente.id).subscribe({
+    next: (clienteActualizado: Cliente) => {
+      this.cliente = clienteActualizado;
+      this.necesitaRecargarLista = true;
+    },
+    error: (err) => {
+      console.error('Error al actualizar datos del cliente', err);
+    }
+  });
+}
+
+toggleMovimientosCredito() {
+  this.mostrarMovimientosCredito = !this.mostrarMovimientosCredito;
+
+  if (this.mostrarMovimientosCredito) {
+    this.cargarMovimientosCredito();
+  }
+}
+
+cargarMovimientosCredito() {
+  this.cargandoMovimientosCredito = true;
+
+  this.clientesService.obtenerMovimientosCredito(this.cliente.id).subscribe({
+    next: (res) => {
+      this.movimientosCredito = res.movimientos || [];
+      this.cargandoMovimientosCredito = false;
+    },
+    error: (err) => {
+      console.error(err);
+      this.cargandoMovimientosCredito = false;
+      toast.error('No se pudo cargar el historial de crédito');
+    }
+  });
+}
+registrarPagoCredito() {
+  const utilizado = Number(this.cliente.credito_utilizado || 0);
+
+  if (utilizado <= 0) {
+    toast.info('El cliente no tiene crédito pendiente por pagar');
+    return;
+  }
+
+  Swal.fire({
+    title: 'Registrar pago',
+    html: `
+      <div style="text-align:left;">
+        <p style="font-size:13px; color:#64748b; margin-bottom:14px;">
+          Saldo pendiente:
+          <strong style="color:#0d1f38;">
+            $${utilizado.toLocaleString('es-MX', {
+              minimumFractionDigits: 2,
+              maximumFractionDigits: 2
+            })}
+          </strong>
+        </p>
+
+        <label style="font-size:12px; font-weight:600;">
+          Monto pagado *
+        </label>
+
+        <input
+          id="pago-monto"
+          type="number"
+          min="0.01"
+          step="0.01"
+          class="swal2-input"
+          placeholder="Ej. 3000.00"
+          style="width:100%; margin:6px 0 14px 0;"
+        >
+
+        <label style="font-size:12px; font-weight:600;">
+          Referencia
+        </label>
+
+        <input
+          id="pago-referencia"
+          type="text"
+          class="swal2-input"
+          placeholder="Ej. Transferencia 45872"
+          style="width:100%; margin:6px 0 14px 0;"
+        >
+
+        <label style="font-size:12px; font-weight:600;">
+          Observaciones
+        </label>
+
+        <textarea
+          id="pago-observaciones"
+          class="swal2-textarea"
+          placeholder="Observaciones del pago"
+          style="width:100%; margin:6px 0 0 0;"
+        ></textarea>
+      </div>
+    `,
+
+    showCancelButton: true,
+    confirmButtonText: 'Registrar pago',
+    cancelButtonText: 'Cancelar',
+
+    confirmButtonColor: '#003B8A',
+    cancelButtonColor: '#64748b',
+
+    heightAuto: false,
+
+    preConfirm: () => {
+      const montoInput =
+        document.getElementById('pago-monto') as HTMLInputElement;
+
+      const referenciaInput =
+        document.getElementById('pago-referencia') as HTMLInputElement;
+
+      const observacionesInput =
+        document.getElementById('pago-observaciones') as HTMLTextAreaElement;
+
+      const monto = Number(montoInput.value);
+
+      if (isNaN(monto) || monto <= 0) {
+        Swal.showValidationMessage(
+          'Ingresa un monto mayor a $0'
+        );
+        return false;
+      }
+
+      if (monto > utilizado) {
+        Swal.showValidationMessage(
+          `El pago no puede ser mayor al saldo pendiente de $${utilizado.toFixed(2)}`
+        );
+        return false;
+      }
+
+      return {
+        monto,
+        referencia: referenciaInput.value.trim(),
+        observaciones: observacionesInput.value.trim()
+      };
+    }
+  }).then((resultado) => {
+
+    if (!resultado.isConfirmed || !resultado.value) {
+      return;
+    }
+
+    const pago = resultado.value;
+
+    this.clientesService.registrarPagoCredito(
+      this.cliente.id,
+      pago.monto,
+      pago.referencia || null,
+      pago.observaciones || null
+    ).subscribe({
+
+      next: (res) => {
+        toast.success(
+          res.mensaje || 'Pago registrado correctamente'
+        );
+
+        this.recargarCliente();
+
+        if (this.mostrarMovimientosCredito) {
+          this.cargarMovimientosCredito();
+        }
+      },
+
+      error: (err) => {
+        Swal.fire({
+          icon: 'error',
+          title: 'No se pudo registrar',
+          text:
+            err.error?.error ||
+            'No se pudo registrar el pago.',
+          confirmButtonColor: '#003B8A',
+          heightAuto: false
+        });
+      }
+    });
+  });
+}
+porcentajeUso(cliente: any): number {
+  if (!cliente.limite_credito || cliente.limite_credito === 0) return 0;
+  const usado = cliente.credito_utilizado || 0;
+  return Math.min(100, Math.round((usado / cliente.limite_credito) * 100));
+}
+
+nivelUso(cliente: any): 'ok' | 'medio' | 'alto' {
+  const pct = this.porcentajeUso(cliente);
+  if (pct >= 90) return 'alto';
+  if (pct >= 60) return 'medio';
+  return 'ok';
 }
 }

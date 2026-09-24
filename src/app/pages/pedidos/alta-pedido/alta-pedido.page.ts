@@ -9,7 +9,8 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { NgxSonnerToaster, toast } from 'ngx-sonner';
 import { Subject, of, timer } from 'rxjs';
-import { catchError, finalize, switchMap, takeUntil } from 'rxjs/operators';
+import { catchError, finalize, switchMap, takeUntil, timeout} from 'rxjs/operators';
+import { TimeoutError } from 'rxjs';
 
 import { PedidoService, NuevoPedidoInput, DetallePedidoInput } from '../../../core/services/Pedidos.service';
 import { CotizacionService } from '../../../core/services/Cotizaciones.service';
@@ -295,7 +296,9 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
     this.total_final = this.redondear(this.subtotal_final + this.iva_final);
   }
 
- guardarPedido(): void {
+ private readonly TIMEOUT_GUARDADO_MS = 30000;
+
+guardarPedido(): void {
   if (this.guardando) return;
 
   const idCliente = Number(this.pedido.id_cliente);
@@ -365,6 +368,7 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
     };
 
     this.pedidosService.modificarPedido(this.idPedidoEdit, payloadEdit).pipe(
+      timeout(this.TIMEOUT_GUARDADO_MS),
       takeUntil(this.destruir$),
       finalize(() => this.guardando = false)
     ).subscribe({
@@ -372,11 +376,17 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
         toast.success(respuesta?.message || respuesta?.mensaje || 'Pedido actualizado correctamente.');
         if (this.dialogRef) this.dialogRef.close(true);
       },
-      error: error => toast.error(
-        error?.error?.error ||
-        error?.error?.mensaje ||
-        'No se pudo modificar el pedido.'
-      )
+      error: error => {
+        if (error instanceof TimeoutError) {
+          toast.warning('El servidor está tardando más de lo normal. Revisa el pedido antes de volver a guardar.');
+          return;
+        }
+        toast.error(
+          error?.error?.error ||
+          error?.error?.mensaje ||
+          'No se pudo modificar el pedido.'
+        );
+      }
     });
 
   } else {
@@ -398,6 +408,7 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
       payloadNuevo,
       this.requestIdPedido
     ).pipe(
+      timeout(this.TIMEOUT_GUARDADO_MS),
       takeUntil(this.destruir$),
       finalize(() => this.guardando = false)
     ).subscribe({
@@ -413,12 +424,18 @@ export class AltaPedidoPage implements OnInit, OnDestroy {
         if (this.dialogRef) this.dialogRef.close(respuesta);
         else void this.router.navigate(['/pedidos']);
       },
-      error: error => toast.error(
-        error?.error?.error ||
-        error?.error?.mensaje ||
-        error?.error?.message ||
-        'No se pudo crear el pedido.'
-      )
+      error: error => {
+        if (error instanceof TimeoutError) {
+          toast.warning('El servidor está tardando más de lo normal. Revisa la lista de pedidos o vuelve a presionar Guardar; no se duplicará.');
+          return;
+        }
+        toast.error(
+          error?.error?.error ||
+          error?.error?.mensaje ||
+          error?.error?.message ||
+          'No se pudo crear el pedido.'
+        );
+      }
     });
   }
 }

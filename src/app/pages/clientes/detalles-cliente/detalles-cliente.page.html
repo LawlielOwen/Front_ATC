@@ -641,21 +641,21 @@
 
   <app-footer-modal [paddingClass]="'p-3 px-5 rounded-b-2xl'">
 
+  
     <app-button-action
+        [label]="'Cerrar'"
+        [claseCss]="'btn-cerrar'"
+        (click)="cerrarDetalle()">
+      </app-button-action>
+
+    <div class="flex gap-2.5 ml-auto">
+       <app-button-action
       (click)="procesarFuncion()"
       [label]="'Eliminar'"
       [esEliminar]="true"
       *ngIf="authService.tieneAcceso(['Administrador'])"
       [estatus]="cliente.Estatus">
     </app-button-action>
-
-    <!-- Derecha: cerrar + única acción principal -->
-    <div class="flex gap-2.5 ml-auto">
-      <app-button-action
-        [label]="'Cerrar'"
-        [claseCss]="'btn-cerrar'"
-        (click)="cerrarDetalle()">
-      </app-button-action>
 
       <app-button-action
         [label]="'Editar cliente'"

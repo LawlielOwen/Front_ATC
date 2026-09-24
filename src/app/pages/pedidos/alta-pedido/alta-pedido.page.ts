@@ -11,7 +11,7 @@ import { NgxSonnerToaster, toast } from 'ngx-sonner';
 import { Subject, of, timer } from 'rxjs';
 import { catchError, finalize, switchMap, takeUntil, timeout} from 'rxjs/operators';
 import { TimeoutError } from 'rxjs';
-
+import { generarUUID } from '../../../shared/utils/uuid';
 import { PedidoService, NuevoPedidoInput, DetallePedidoInput } from '../../../core/services/Pedidos.service';
 import { CotizacionService } from '../../../core/services/Cotizaciones.service';
 import { ClientesService } from '../../../core/services/clientes.service';
@@ -391,7 +391,8 @@ guardarPedido(): void {
 
   } else {
     if (!this.requestIdPedido) {
-      this.requestIdPedido = crypto.randomUUID();
+       this.requestIdPedido = generarUUID();
+
     }
 
     const payloadNuevo: NuevoPedidoInput = {

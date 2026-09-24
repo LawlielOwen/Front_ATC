@@ -18,6 +18,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatOptionModule } from '@angular/material/core';
 import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { AuthService } from '../../../core/services/auth.service';
+import { generarUUID } from '../../../shared/utils/uuid';
 @Component({
   selector: 'app-existencias',
   templateUrl: './existencias.page.html',
@@ -207,11 +208,12 @@ confirmarMovimiento() {
     }
   }
 
-  if (!this.requestIdMovimiento) {
-    this.requestIdMovimiento = crypto.randomUUID();
-  }
+ if (!this.requestIdMovimiento) {
+  this.requestIdMovimiento = generarUUID();
+}
 
-  this.procesandoMovimiento = true;
+this.procesandoMovimiento = true;
+
 
   if (this.esEntrada) {
     this.ps.entradaProducto(

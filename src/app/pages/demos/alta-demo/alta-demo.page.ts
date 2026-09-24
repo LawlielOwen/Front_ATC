@@ -7,7 +7,7 @@ import { MatAutocompleteModule } from '@angular/material/autocomplete';
 import { MatOptionModule } from '@angular/material/core';
 import { debounceTime, distinctUntilChanged, switchMap, of } from 'rxjs';
 import { toast, NgxSonnerToaster } from 'ngx-sonner';
-
+import { generarUUID } from '../../../shared/utils/uuid';
 import { HeaderModalComponent } from "../../../shared/components/UI/modal/header-modal/header-modal.component";
 import { FooterModalComponent } from "../../../shared/components/UI/modal/footer-modal/footer-modal.component";
 import { StepItemComponent } from "../../../shared/components/UI/modal/step-item/step-item.component";
@@ -149,11 +149,11 @@ export class AltaDemoPage implements OnInit {
     return;
   }
 
-  if (!this.requestIdDemo) {
-    this.requestIdDemo = crypto.randomUUID();
-  }
+ if (!this.requestIdDemo) {
+  this.requestIdDemo = generarUUID();
+}
 
-  this.guardando = true;
+this.guardando = true;
 
   this.demoService.registrarEntradaDemo(
     codigo,

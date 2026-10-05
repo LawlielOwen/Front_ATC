@@ -152,4 +152,13 @@ consultarUbicaciones(
     { params }
   );
 }
-} 
+descargarReporteInventario(): Observable<Blob> {
+  return this.http.get(
+    `${this.apiUrl}/productos/reportes/inventario`,
+    {
+      responseType: 'blob'
+    }
+  );
+
+
+}} 

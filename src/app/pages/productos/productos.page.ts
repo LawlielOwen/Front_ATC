@@ -26,6 +26,8 @@ import { DeleteComponent } from '../../shared/components/UI/modal/delete/delete.
 import { toast } from 'ngx-sonner';
 import { MarcaService } from '../../core/services/Marcas.service';
 import { Marcas } from '../../shared/model/marcas.model';
+import { finalize, Observable } from 'rxjs';
+import {mostrarGenerandoExcel,cerrarGenerandoExcel,mostrarErrorExcel} from '../../shared/utils/excel-alerts.util';
 @Component({
   selector: 'app-productos',
   templateUrl: './productos.page.html',
@@ -45,6 +47,7 @@ columnasProductos: TableColumn[] = [];
   currentPage: number = 1;
   totalPages: number = 1;
   totalRecords: number = 0;
+  generandoReporte: boolean = false;
   limit: number = 7;
   p: Productos[] = [];
   terminoActual: string = '';
@@ -316,4 +319,43 @@ timeoutBusqueda: any;
     this.definirColumnasPorRol();
     this.cargarMarcas();
   }
+descargarReporte() {
+  if (this.generandoReporte) return;
+
+  this.generandoReporte = true;
+  mostrarGenerandoExcel();
+
+  this.ps.descargarReporteInventario().subscribe({
+    next: (archivo: Blob) => {
+      const url = window.URL.createObjectURL(archivo);
+      const link = document.createElement('a');
+      const fecha = new Date().toISOString().substring(0, 10);
+
+      link.href = url;
+      link.download = `Reporte_Inventario_${fecha}.xlsx`;
+
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+
+      window.URL.revokeObjectURL(url);
+
+      this.generandoReporte = false;
+      cerrarGenerandoExcel();
+
+      toast.success('Reporte de inventario generado correctamente');
+    },
+
+    error: (err) => {
+      console.error('Error al generar reporte', err);
+
+      this.generandoReporte = false;
+      cerrarGenerandoExcel();
+
+      mostrarErrorExcel(
+        'No se pudo generar el reporte de inventario.'
+      );
+    }
+  });
+}
 }

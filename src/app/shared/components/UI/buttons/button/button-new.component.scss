@@ -7,6 +7,9 @@ $text-white: #ffffff;
 $background-hover-blue: #1d4ed8; 
 $border-blue: #1d4ed8;
 $text-blue: #1d4ed8;
+$background-hover-yellow: #f59e0b;
+$border-yellow: #f59e0b;
+$text-yellow: #b45309;
 .btn-verde {
   --background: #{$background-white}; 
   --color: #{$text-green}; 
@@ -66,6 +69,43 @@ $text-blue: #1d4ed8;
   }
 
   // Mejora de interacción: Efecto de "presionado" al hacer clic
+  &:active {
+    transform: scale(0.97);
+  }
+}
+.btn-amarillo {
+  --background: #ffffff;
+  --color: #{$text-yellow};
+  --border-color: #{$border-yellow};
+  --border-width: 2px;
+  --border-style: solid;
+  --box-shadow: none;
+  --border-radius: 10px;
+
+  width: 180px;
+  height: 40px;
+
+  font-size: 14px;
+  text-transform: none;
+  font-weight: 500;
+  transition: all 0.6s ease-in-out;
+  letter-spacing: 0.1px;
+
+  &::part(native) {
+    transition: color 0.3s ease-in-out;
+  }
+
+  &:hover {
+    --background: #{$background-hover-yellow};
+    --color: #ffffff;
+    --border-color: #{$background-hover-yellow};
+    --box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25);
+
+    &::part(native) {
+      color: #ffffff;
+    }
+  }
+
   &:active {
     transform: scale(0.97);
   }

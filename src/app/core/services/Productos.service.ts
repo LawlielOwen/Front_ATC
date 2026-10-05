@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { environment } from '../../../environments/environment';
-import { Productos } from "../../shared/model/productos.model";
+import { Productos, Caja, Estanteria,   RespuestaUbicaciones } from "../../shared/model/productos.model";
 import { Observable } from 'rxjs';
 export interface RespuestaPaginada {
     p: Productos[];
@@ -78,4 +78,78 @@ export class ProductoService {
     cantidadProductosStock() {
         return this.http.get(`${this.apiUrl}/productos/count`);
     }
+    obtenerEstanterias(): Observable<{ estanterias: Estanteria[] }> {
+    return this.http.get<{ estanterias: Estanteria[] }>(
+        `${this.apiUrl}/productos/ubicaciones/estanterias`
+    );
+}
+
+obtenerCajas(): Observable<{ cajas: Caja[] }> {
+    return this.http.get<{ cajas: Caja[] }>(
+        `${this.apiUrl}/productos/ubicaciones/cajas`
+    );
+}
+agregarEstanteria(
+  codigo: string,
+  descripcion: string | null = null
+): Observable<{ mensaje: string }> {
+
+  return this.http.post<{ mensaje: string }>(
+    `${this.apiUrl}/productos/ubicaciones/estanterias`,
+    {
+      codigo,
+      descripcion
+    }
+  );
+}
+
+desactivarEstanteria(
+  id: number
+): Observable<{ mensaje: string }> {
+
+  return this.http.delete<{ mensaje: string }>(
+    `${this.apiUrl}/productos/ubicaciones/estanterias/${id}`
+  );
+}
+
+agregarCaja(
+  codigo: string,
+  descripcion: string | null = null
+): Observable<{ mensaje: string }> {
+
+  return this.http.post<{ mensaje: string }>(
+    `${this.apiUrl}/productos/ubicaciones/cajas`,
+    {
+      codigo,
+      descripcion
+    }
+  );
+}
+
+desactivarCaja(
+  id: number
+): Observable<{ mensaje: string }> {
+
+  return this.http.delete<{ mensaje: string }>(
+    `${this.apiUrl}/productos/ubicaciones/cajas/${id}`
+  );
+}
+consultarUbicaciones(
+  tipo: 'estanteria' | 'caja',
+  estatus: 'todos' | 'activos' | 'inactivos',
+  pagina: number = 1,
+  limite: number = 9
+): Observable<RespuestaUbicaciones> {
+
+  const params = new HttpParams()
+    .set('tipo', tipo)
+    .set('estatus', estatus)
+    .set('pagina', pagina.toString())
+    .set('limite', limite.toString());
+
+  return this.http.get<RespuestaUbicaciones>(
+    `${this.apiUrl}/productos/ubicaciones/admin`,
+    { params }
+  );
+}
 } 

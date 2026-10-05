@@ -42,6 +42,11 @@
         <ion-icon name="walk-outline"></ion-icon>
         <ion-label>Visitas</ion-label>
       </ion-tab-button>
+      <ion-tab-button class="submenu-item" layout="icon-start" routerLink="/ubicaciones" routerLinkActive="tab-selected"
+        *ngIf="authService.tieneAcceso(['Administrador', 'Almacen'])">
+        <ion-icon name="location-outline"></ion-icon>
+        <ion-label>Ubicaciones</ion-label>
+      </ion-tab-button>
     </ng-container>
 
     <ion-tab-button layout="icon-start" routerLink="/clientes" routerLinkActive="tab-selected"

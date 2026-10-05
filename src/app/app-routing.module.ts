@@ -90,7 +90,11 @@ const routes: Routes = [
   {
     path: 'proyectos',
     loadChildren: () => import('./pages/proyectos/proyectos.module').then( m => m.ProyectosPageModule)
+  },  {
+    path: 'ubicaciones',
+    loadChildren: () => import('./pages/ubicaciones/ubicaciones.module').then( m => m.UbicacionesPageModule)
   },
+
  
 
 

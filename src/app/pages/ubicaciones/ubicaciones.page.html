@@ -1,0 +1,211 @@
+<div class="container-sidebar">
+  <div class="sidebar-wrapper">
+    <app-siderbar></app-siderbar>
+  </div>
+
+  <div class="container-header">
+    <app-header (toggleMenu)="mostrarSidebarMobile()"></app-header>
+
+    <ion-content style="--background: #e2e8f0;">
+
+      <app-button-layout>
+        <app-count
+          [label]="tab === 'estanteria' ? 'Estanterías activas' : 'Cajas activas'"
+          [count]="totalActivas"
+          [accentColor]="tab === 'estanteria' ? '#1d4ed8' : '#1D9E75'"
+          [iconBg]="tab === 'estanteria' ? '#dbeafe' : '#E1F5EE'"
+          *ngIf="authService.tieneAcceso(['Administrador', 'Cotizador', 'Almacen'])">
+
+          <svg
+            icono
+            class="w-4 h-4"
+            [style.color]="tab === 'estanteria' ? '#1d4ed8' : '#1D9E75'"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor">
+
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4">
+            </path>
+
+          </svg>
+        </app-count>
+
+        <div class="flex gap-3">
+          <app-button-new
+            label="Agregar Caja"
+            variante="btn-verde"
+            (click)="agregar('caja')"
+            *ngIf="authService.tieneAcceso(['Administrador', 'Almacen'])">
+          </app-button-new>
+
+          <app-button-new
+            label="Agregar Estanteria"
+            variante="btn-azul"
+            (click)="agregar('estanteria')"
+            *ngIf="authService.tieneAcceso(['Administrador', 'Almacen'])">
+          </app-button-new>
+        </div>
+      </app-button-layout>
+
+      <div class="px-6 sm:px-8 pt-5 pb-10">
+
+        <div class="flex flex-wrap items-center justify-between gap-3 mb-5">
+
+          <div class="inline-flex gap-0.5 bg-white rounded-xl p-1 border border-slate-200 shadow-sm">
+
+            <button
+              type="button"
+              (click)="cambiarTab('estanteria')"
+              class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              [ngClass]="tab === 'estanteria'
+                ? 'bg-blue-700 text-white shadow-sm'
+                : 'bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700'">
+
+              Estanterías
+
+              <span
+                class="px-1.5 py-px rounded-full text-[10px] font-bold"
+                [ngClass]="tab === 'estanteria'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-slate-100 text-slate-500'">
+
+                {{ totalEstanterias }}
+
+              </span>
+            </button>
+
+            <button
+              type="button"
+              (click)="cambiarTab('caja')"
+              class="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-semibold transition-all"
+              [ngClass]="tab === 'caja'
+                ? 'bg-[#1D9E75] text-white shadow-sm'
+                : 'bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700'">
+
+              Cajas
+
+              <span
+                class="px-1.5 py-px rounded-full text-[10px] font-bold"
+                [ngClass]="tab === 'caja'
+                  ? 'bg-white/20 text-white'
+                  : 'bg-slate-100 text-slate-500'">
+
+                {{ totalCajas }}
+
+              </span>
+            </button>
+
+          </div>
+
+          <div class="inline-flex gap-0.5 bg-white rounded-xl p-1 border border-slate-200 shadow-sm">
+
+            <button
+              *ngFor="let f of filtros"
+              type="button"
+              (click)="cambiarFiltro(f.valor)"
+              class="px-3 py-1 rounded-lg text-[11px] font-semibold transition-all"
+              [ngClass]="filtro === f.valor
+                ? (tab === 'estanteria'
+                    ? 'bg-blue-50 text-blue-700 ring-1 ring-blue-200'
+                    : 'bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200')
+                : 'bg-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-700'">
+
+              {{ f.label }}
+
+            </button>
+
+          </div>
+
+        </div>
+
+        <div
+          *ngIf="cargando"
+          class="bg-white/70 border border-slate-200 rounded-xl py-10 text-center text-sm font-semibold text-slate-500">
+
+          Cargando ubicaciones...
+
+        </div>
+
+        <div
+          *ngIf="!cargando && ubicaciones.length > 0"
+          class="grid gap-5"
+          style="grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));">
+
+          <app-ubicacion-card
+            *ngFor="let u of ubicaciones; trackBy: trackById"
+            [ubicacion]="u"
+            [tipo]="tab"
+            (cambiarEstatus)="confirmarCambioEstatus($event)">
+          </app-ubicacion-card>
+
+          <button
+            *ngIf="authService.tieneAcceso(['Administrador', 'Almacen'])"
+            type="button"
+            (click)="agregar(tab)"
+            class="min-h-[120px] rounded-xl border-2 border-dashed bg-white/50
+                   flex flex-col items-center justify-center gap-1.5 transition-all group"
+            [ngClass]="tab === 'estanteria'
+              ? 'border-blue-200 text-blue-400 hover:border-blue-400 hover:text-blue-700 hover:bg-white'
+              : 'border-emerald-200 text-emerald-500 hover:border-emerald-400 hover:text-emerald-700 hover:bg-white'">
+
+            <span
+              class="w-8 h-8 rounded-full flex items-center justify-center transition-colors"
+              [ngClass]="tab === 'estanteria'
+                ? 'bg-blue-50 group-hover:bg-blue-100'
+                : 'bg-emerald-50 group-hover:bg-emerald-100'">
+
+              <svg
+                class="w-4 h-4"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor">
+
+                <path
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  d="M12 5v14M5 12h14">
+                </path>
+
+              </svg>
+            </span>
+
+            <span class="text-xs font-semibold">
+              Agregar {{ tab === 'estanteria' ? 'estantería' : 'caja' }}
+            </span>
+
+          </button>
+
+        </div>
+
+        <div
+          *ngIf="!cargando && ubicaciones.length === 0"
+          class="mt-6 text-center text-slate-500 text-sm py-8 bg-white/60 rounded-xl border border-slate-200">
+
+          No hay
+          {{ tab === 'estanteria' ? 'estanterías' : 'cajas' }}
+          con este filtro.
+
+        </div>
+
+        <div
+          class="mt-6"
+          *ngIf="!cargando && totalPages > 1">
+
+          <app-pagination
+            [paginaActual]="currentPage"
+            [totalPaginas]="totalPages"
+            (onPageChange)="cambiarPaginaPadre($event)">
+          </app-pagination>
+
+        </div>
+
+      </div>
+
+    </ion-content>
+  </div>
+</div>

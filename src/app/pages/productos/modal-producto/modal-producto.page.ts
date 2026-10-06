@@ -68,27 +68,41 @@ export class ModalProductoPage implements OnInit {
       this.isEditMode = true;
     }
   }
+cargarProductoEdicion() {
+  const id = Number(this.data.producto.id);
 
-  ngOnInit() {
-    if (this.isEditMode) {
+  this.ps.getProducto(id).subscribe({
+    next: (producto: Productos) => {
+
       this.productoNuevo = {
         ...this.productoNuevo,
-        ...this.data.producto,
-        id_estanteria: this.data.producto.id_estanteria
-          ? Number(this.data.producto.id_estanteria)
-          : null,
-        id_caja: this.data.producto.id_caja
-          ? Number(this.data.producto.id_caja)
-          : null,
-        id_marca: this.data.producto.id_marca
-          ? Number(this.data.producto.id_marca)
-          : null
+        ...producto,
+        id_marca: producto.id_marca
+          ? String(producto.id_marca)
+          : '',
+        id_estanteria: producto.id_estanteria
+          ? String(producto.id_estanteria)
+          : '',
+        id_caja: producto.id_caja
+          ? String(producto.id_caja)
+          : ''
       };
-    }
+    },
 
-    this.cargarMarcas();
-    this.cargarUbicaciones();
+    error: (err) => {
+      console.error('Error al cargar producto', err);
+      toast.error('No se pudo cargar la información completa del producto');
+    }
+  });
+}
+ngOnInit() {
+  this.cargarMarcas();
+  this.cargarUbicaciones();
+
+  if (this.isEditMode) {
+    this.cargarProductoEdicion();
   }
+}
 
   cerrar() {
     this.dialogRef.close(false);

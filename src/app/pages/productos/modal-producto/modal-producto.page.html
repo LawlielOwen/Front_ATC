@@ -74,27 +74,45 @@
 
   </div>
 
-  <div class="w-1/2 flex flex-col gap-y-1">
+<div class="w-1/2 flex flex-col gap-y-1">
 
-    <app-select
-      label="Estantería *"
-      [(value)]="productoNuevo.id_estanteria">
+  <app-select
+    *ngIf="!restringirEdicionAlmacen"
+    label="Estantería *"
+    [(value)]="productoNuevo.id_estanteria">
 
-      <option value="">
-        Seleccione estantería...
-      </option>
+    <option value="">Seleccione estantería...</option>
 
-      <option
-        *ngFor="let estanteria of estanterias"
-        [value]="estanteria.id">
+    <option *ngFor="let estanteria of estanterias" [value]="estanteria.id">
+      Estantería {{ estanteria.codigo }}
+    </option>
 
-        Estantería {{ estanteria.codigo }}
+  </app-select>
 
-      </option>
+  <div *ngIf="restringirEdicionAlmacen" class="flex flex-col gap-1.5">
+    <label class="text-[11px] font-bold text-slate-500 uppercase">
+      Estantería
+    </label>
 
-    </app-select>
+    <div class="h-[46px] px-4 flex items-center justify-between
+                rounded-lg bg-slate-100 border border-slate-300
+                text-sm text-slate-600">
 
+      <span>
+        Estantería {{ productoNuevo.Estanteria || 'Sin asignar' }}
+      </span>
+
+      <svg class="w-4 h-4 text-slate-400" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-8a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2zm3-12V6a3 3 0 016 0v3"/>
+      </svg>
+
+    </div>
   </div>
+
+</div>
 
 </div>
 
@@ -124,14 +142,38 @@
 
   <div class="w-1/2 flex flex-col gap-1.5">
 
-    <app-input
-      tipo="number"
-      placeholder="0"
-      label="Stock Libre *"
-      [(value)]="productoNuevo.Stock">
-    </app-input>
+  <app-input
+    *ngIf="!restringirEdicionAlmacen"
+    tipo="number"
+    placeholder="0"
+    label="Stock Libre *"
+    [(value)]="productoNuevo.Stock">
+  </app-input>
 
+  <div *ngIf="restringirEdicionAlmacen" class="flex flex-col gap-1.5">
+    <label class="text-[11px] font-bold text-slate-500 uppercase">
+      Stock Libre
+    </label>
+
+    <div class="h-[46px] px-4 flex items-center justify-between
+                rounded-lg bg-slate-100 border border-slate-300
+                text-sm text-slate-600">
+
+      <span class="font-bold">
+        {{ productoNuevo.Stock ?? 0 }} pz
+      </span>
+
+      <svg class="w-4 h-4 text-slate-400" fill="none"
+           viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round"
+              stroke-width="2"
+              d="M12 15v2m-6 4h12a2 2 0 002-2v-8a2 2 0 00-2-2H4a2 2 0 00-2 2v8a2 2 0 002 2zm3-12V6a3 3 0 016 0v3"/>
+      </svg>
+
+    </div>
   </div>
+
+</div>
 
 </div>
 

@@ -95,6 +95,11 @@ cargarProductoEdicion() {
     }
   });
 }
+get restringirEdicionAlmacen(): boolean {
+  return this.isEditMode &&
+    this.authService.tieneAcceso(['Almacen']) &&
+    !this.authService.tieneAcceso(['Administrador']);
+}
 ngOnInit() {
   this.cargarMarcas();
   this.cargarUbicaciones();

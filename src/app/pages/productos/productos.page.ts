@@ -72,7 +72,7 @@ timeoutBusqueda: any;
     const columnasBase: TableColumn[] = [
       { header: 'Producto', key: 'Nombre', subKey: 'MarcaModelo', type: 'text' },
       { header: 'Códigos', key: 'CodigoPrincipal', subKey: 'CodigoSecundario', type: 'text' },
-      { header: 'Estanteria', key: 'Estanteria', type: 'text', align: 'center' },
+      { header: 'Estanteria', key: 'Estanteria', subKey:'Caja' ,type: 'text', align: 'center' },
       { header: 'Precio', key: 'Precio', type: 'currency', align: 'right' },
       { header: 'Stock', key: 'Stock', type: 'stock', align: 'center' },
       { header: 'Estatus', key: 'EstatusTexto', type: 'status', align: 'center' }
@@ -143,6 +143,7 @@ timeoutBusqueda: any;
           return {
             ...pr,
             Estanteria: `${pr.Estanteria}`,
+            Caja: `CAJON ${pr.Caja}`,
             Nombre: `${pr.Nombre}`,
             MarcaModelo: `${pr.Marca}`,
             Modelo: `${pr.Modelo}`,

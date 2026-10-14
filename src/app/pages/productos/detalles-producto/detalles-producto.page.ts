@@ -4,7 +4,7 @@ import { IonicModule } from "@ionic/angular";
 import { MatDialogRef, MAT_DIALOG_DATA, MatDialog } from '@angular/material/dialog';
 import { ProductoService } from '../../../core/services/Productos.service'
 import { ModalProductoPage } from "../modal-producto/modal-producto.page";
-
+import {confirmarEliminarProducto,confirmarActivarProducto} from '../../../shared/utils/producto-alerts.util';
 import { HeaderModalComponent } from "../../../shared/components/UI/modal/header-modal/header-modal.component";
 import { FooterModalComponent } from "../../../shared/components/UI/modal/footer-modal/footer-modal.component";
 import { CardDetailsComponent } from "../../../shared/components/UI/modal/card-details/card-details.component";
@@ -70,20 +70,34 @@ abrirModalEdicion(productoAEditar: any) {
       }
     });
   }
-  eliminarProducto(id: number) {
-    this.pr.deleteProducto(id).subscribe({
-      next: (response: any) => {
-        this.dialogRef.close(true);
-        toast.success('Producto eliminado correctamente');
-      }
-    });
-  }
-  activarProducto(id: number) {
-    this.pr.activateProducto(id).subscribe({
-      next: (response: any) => {
-        this.dialogRef.close(true);
-        toast.success('Producto activado correctamente');
-      }
-    });
-  }
+  async eliminarProducto(id: number) {
+  const confirmado = await confirmarEliminarProducto();
+  if (!confirmado) return;
+
+  this.pr.deleteProducto(id).subscribe({
+    next: (response: any) => {
+      this.dialogRef.close(true);
+      toast.success(response?.mensaje || 'Producto dado de baja correctamente');
+    },
+    error: (err) => {
+      console.error('Error al dar de baja producto:', err);
+      toast.error(err.error?.error || 'No se pudo dar de baja el producto');
+    }
+  });
+}
+ async activarProducto(id: number) {
+  const confirmado = await confirmarActivarProducto();
+  if (!confirmado) return;
+
+  this.pr.activateProducto(id).subscribe({
+    next: (response: any) => {
+      this.dialogRef.close(true);
+      toast.success(response?.mensaje || 'Producto activado correctamente');
+    },
+    error: (err) => {
+      console.error('Error al activar producto:', err);
+      toast.error(err.error?.error || 'No se pudo activar el producto');
+    }
+  });
+}
 }
